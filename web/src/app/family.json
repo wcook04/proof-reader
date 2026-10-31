@@ -4,9 +4,9 @@
   "sites": [
     { "id": "maths", "name": "Plectis Mathematics", "url": "https://wcook04.github.io/practical-formal-verification/map/" },
     { "id": "lean-exposition", "name": "Lean Exposition", "url": "https://wcook04.github.io/lean-exposition-site/" },
+    { "id": "proof-reader", "name": "Proof Reader", "url": "https://wcook04.github.io/proof-reader/" },
     { "id": "atlas", "name": "Plectis Atlas", "url": "https://wcook04.github.io/plectis-atlas/" },
     { "id": "formal-verification", "name": "Practical Formal Verification", "url": "https://wcook04.github.io/practical-formal-verification/explorer/" },
-    { "id": "zenith", "name": "Zenith", "url": "https://wcook04.github.io/plectis-zenith/" },
-    { "id": "proof-reader", "name": "Proof Reader", "url": "https://wcook04.github.io/proof-reader/" }
+    { "id": "zenith", "name": "Zenith", "url": "https://wcook04.github.io/plectis-zenith/" }
   ]
 }
