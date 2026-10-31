@@ -59,7 +59,7 @@ function Shelf() {
       <div className="shelf__in">
         <div>
           <h1>Proof Reader</h1>
-          <p className="shelf__lede">Read a paper beside its Lean proof. Scroll the paper and the graph of the proof and the authors’ Lean follow. Click any marked statement to open its exact lines, and go back to where you were.</p>
+          <p className="shelf__lede">Read a paper beside its Lean proof. Scroll the paper and the graph of the proof and the authors’ Lean follow. Click a statement to open its exact lines, and go back to where you were.</p>
           <ul>
             {papers.map((p) => (
               <li key={p.slug}>
