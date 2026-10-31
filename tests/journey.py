@@ -78,7 +78,20 @@ def entries(page: Page) -> int:
 
 
 def camera(page: Page) -> str:
-    return page.evaluate("document.querySelector('.tree__world')?.style.transform ?? ''")
+    """Where the graph stands in its canvas: the main result's card and the scale.
+
+    Not the world transform: a layout rebuilt from scratch can sit a pixel or so from one
+    grown step by step, and the map restores what is on screen by an anchored card.
+    """
+    return page.evaluate("""() => {
+      const world = document.querySelector('.tree__world');
+      const card = document.querySelector('.card--root');
+      if (!world || !card) return '';
+      const scale = /scale\\(([^)]+)\\)/.exec(world.style.transform)?.[1] ?? '';
+      const box = card.getBoundingClientRect();
+      const canvas = document.querySelector('.graph__canvas').getBoundingClientRect();
+      return `${(box.left - canvas.left).toFixed(1)} ${(box.top - canvas.top).toFixed(1)} ${scale}`;
+    }""")
 
 
 def lean_head(page: Page) -> str:
@@ -122,7 +135,10 @@ def same(page: Page, want: dict, label: str) -> None:
     have = snapshot(page)
     check(matches(), f"{label}: back at {want['hash'] or 'the start'}, paper at {want['top']:.0f} (have {have['top']:.0f}, {have['hash']}, {have['lean']}, {have['tab']})")
     check(have["caption"] == want["caption"], f"{label}: says the same thing on the right ({have['caption']!r})")
-    wait_until(page, lambda: camera(page) == want["camera"], f"{label}: the graph's camera is where it was")
+    end = time.time() + 3
+    while time.time() < end and camera(page) != want["camera"]:
+        page.wait_for_timeout(40)
+    check(camera(page) == want["camera"], f"{label}: the graph's camera is where it was (want {want['camera']}, have {camera(page)})")
 
 
 def wheel_to(page: Page, wanted: float) -> None:
@@ -238,10 +254,10 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check(foot.count() == 1 and "All websites and films" in foot.text_content() and "Plectis Atlas" in foot.text_content(), "the end of the paper lists the sister sites")
     check(foreign == [], f"nothing is asked of another host: {foreign[:2]}")
     page.goto(url, wait_until="load")
-    page.wait_for_selector(".shelf li a")
+    page.wait_for_selector(".shelf li a[href*='contextual-embeddings']")
     check(page.locator(".fam-lockup__home").get_attribute("href") == "https://wcook04.github.io/", "the front page has the lockup too")
     check(page.locator(".shelf__foot .fam-sites__list li").count() == 7, "and the sister sites")
-    page.locator(".shelf li a").first.click()
+    page.locator(".shelf li a[href*='contextual-embeddings']").first.click()
     page.wait_for_selector(".sheet__text .q", state="attached")
     page.wait_for_selector(".card")
     page.wait_for_timeout(700)

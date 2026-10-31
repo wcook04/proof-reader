@@ -331,7 +331,8 @@ a.source__ref:hover { color: var(--lit); text-decoration: underline solid; }
 .shelf__in { box-sizing: border-box; max-width: 1400px; min-height: calc(100vh - 110px); margin: 0 auto; padding: 48px 40px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 8fr); gap: 56px; align-items: center; }
 .shelf h1 { margin: 0 0 12px; font-family: var(--font-serif); font-size: var(--fs-display); font-weight: 400; letter-spacing: -0.015em; line-height: var(--lh-tight); }
 .shelf__lede { margin: 0 0 36px; font-family: var(--font-serif); font-size: var(--fs-read); line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
-.shelf ul { list-style: none; margin: 0; padding: 0; }
+/* Room for one paper before the list arrives, so that nothing below it moves. */
+.shelf ul { list-style: none; margin: 0; padding: 0; min-height: 142px; }
 .shelf li + li { margin-top: 20px; }
 .shelf li a { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 18px; align-items: center; color: inherit; text-decoration: none; }
 .shelf li a img { display: block; width: 96px; height: auto; background: var(--paper-white); box-shadow: var(--sheet-shadow); }
