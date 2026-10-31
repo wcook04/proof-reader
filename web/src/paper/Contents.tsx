@@ -1,5 +1,5 @@
 // The paper's sections down the left of the desk, with the one being read marked
-// and each section's count of statements tied to the Lean. Above them, a search of
+// and each section's count of statements with Lean. Above them, a search of
 // the paper's text and the Lean's names. The rail stays for the PDF as well, so
 // the two views of the paper share one frame. Every result is a jump with a Back.
 
@@ -214,7 +214,7 @@ export function Contents({ outline, current, open, declarations, files, html, co
               <button type="button" className="rail__item" aria-current={entry.id === current ? "location" : undefined} onClick={() => onJump(entry.id)}>
                 {entry.number && <span className="rail__no">{entry.number}</span>}
                 <span className="rail__title">{entry.title}</span>
-                {entry.ties > 0 && <span className="rail__ties" title={`${entry.ties} statements tied to the Lean`}>{entry.ties}</span>}
+                {entry.ties > 0 && <span className="rail__ties" title={`${entry.ties} statements with Lean`}>{entry.ties}</span>}
               </button>
             </li>
           ))}

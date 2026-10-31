@@ -14,8 +14,8 @@ Lean, so nobody has to hunt through an artifact to find what a paper proved.
 - Click a statement or a highlighted card and it opens into the raw Lean at the exact lines,
   under a band of graph. "isoR's CLam case" lands on `CLam`'s five lines, not on the top of
   `isoR`. Escape or Back gives you the graph exactly as it was.
-- Leave the Lean open and it follows too, level with the sentence you are reading. A short line
-  crosses the gutter between them.
+- Choose "Keep the Lean open" and it follows too, level with the sentence you are reading. A
+  short line crosses the gutter between them.
 - Citations and figures open under the paragraph that mentions them, so you keep your place.
 - Back works from anything, and returns the same pixel of the paper, the same pin and the same
   graph, after a reload as well. Every sentence and declaration has an address to send someone.

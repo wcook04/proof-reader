@@ -114,8 +114,10 @@ a map, so use the paper's own words for its title and name the theorems that sta
 
 - `quote` is copied exactly from the PDF, and short enough to read at a glance: one
   sentence is usually right.
-- `role` says what the passage does to the declaration: `states`, `defines`, `proves`,
-  `explains` or `uses`.
+- `role` says what the passage does to the declaration, and must say no more than the two
+  say: `states`, `defines`, `proves`, `explains`, `uses`, `mentions` (it names the thing and
+  claims nothing about the Lean) or `mirrors` (a line of the paper's other language that
+  corresponds to the Lean). The page says "this line" for code by itself.
 - `lines` names the exact Lean lines, when the passage is about less than the whole
   declaration. They must lie inside the first declaration in `lean`. This is the point
   of the page: "isoR's CLam case" should land on `CLam`'s lines, not on the top of `isoR`.
@@ -133,7 +135,7 @@ ordinary word, list it under `"unlinked_names"`.
 
 **Plain titles.** Nobody knows what a declaration does from its name. After reading both
 sides, give every declaration in the proof a short title under `"plain"`, in the paper's own
-terms: at most 40 characters, words a newcomer can read, never the name again. These are what
+words where it has them ("Reflexive case", not a phrase of yours): at most 40 characters, words a newcomer can read, never the name again. These are what
 a reader sees on cards, in Back labels and in headings, with the raw name small beside them.
 The check stops if one is missing, and the title is yours to keep honest: it must say what the
 Lean does and no more.

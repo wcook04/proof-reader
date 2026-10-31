@@ -20,8 +20,10 @@ Keep these true:
   click or by hand, and the list of declarations is an index at the back.
 - Plain words first wherever a person reads. A raw Lean name is small, beside its plain title,
   and in the code.
-- Opening something pushes one history entry that holds the paper's pixel, the pin, the tab
-  and the map's camera. Following and pointing never push.
+- Opening something, a reference in place included, pushes one history entry that holds the
+  paper's pixel, the pin, the tab and the map's camera. Following and pointing never push.
+- A pin lasts until Unpin, Escape, Back or a new click. Scrolling never releases it.
+- The address names the statement carrying the highlighter, and the counter reads the same.
 - Failing to find a quote or a name stops the build.
 - `web/src/map/` is copied from lean-exposition. Keep it close to that source so fixes
   can move between them. Its few local changes are marked "Proof Reader".
