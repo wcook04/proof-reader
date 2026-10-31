@@ -11,11 +11,11 @@ Lean, so nobody has to hunt through an artifact to find what a paper proved.
 
 - Read the paper. The statement under the reading line takes the highlighter and its card
   lights on the graph, named in plain words.
-- Click a statement or a highlighted card and it opens into the raw Lean at the exact lines,
-  under a band of graph. "isoR's CLam case" lands on `CLam`'s five lines, not on the top of
-  `isoR`. Escape or Back gives you the graph exactly as it was.
-- Choose "Keep the Lean open" and it follows too, level with the sentence you are reading. A
-  short line crosses the gutter between them.
+- The right pane has two modes, Graph and Lean, with a toggle at its top. Click a statement or
+  a card and the pane goes to Lean at the exact lines: "isoR's CLam case" lands on `CLam`'s five
+  lines, not on the top of `isoR`. Any Back returns to the graph and your place.
+- Choose Lean yourself and the Lean follows the text, level with the sentence you are reading.
+  A short line crosses the gutter between them. Pull the handle to have the graph as well.
 - Citations and figures open under the paragraph that mentions them, so you keep your place.
 - Back works from anything, and returns the same pixel of the paper, the same pin and the same
   graph, after a reload as well. Every sentence and declaration has an address to send someone.
@@ -75,6 +75,8 @@ journey. It needs Playwright for Python, and takes `--browser firefox` or `webki
 cd web && VITE_BASE_PATH=/proof-reader/ npm run build && cd ..
 python tests/journey.py --shots /tmp/journey
 ```
+
+`tests/speed.py` measures a paper's first screen on a home connection.
 
 `tools/capture_images.py` retakes the social card and the picture above from a running site.
 

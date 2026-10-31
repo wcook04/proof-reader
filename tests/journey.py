@@ -17,9 +17,10 @@ from __future__ import annotations
 import argparse
 import http.server
 import re
+import socket
 import socketserver
+import subprocess
 import sys
-import threading
 import time
 from functools import partial
 from pathlib import Path
@@ -88,6 +89,10 @@ def lean_head(page: Page) -> str:
 
 def lean_open(page: Page) -> bool:
     return page.locator(".proof__lean").is_visible()
+
+
+def active(page: Page) -> str:
+    return page.evaluate("document.querySelector('[data-paper-pane] .q.is-active')?.dataset.p ?? ''")
 
 
 def lean_quote(page: Page) -> str:
@@ -268,8 +273,8 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     page.mouse.move(box["x"] + 6, 20)
     wait_until(page, lambda: "It has Lean" not in page.locator(".proof__reading").inner_text(), "leaving restores")
 
-    print("The Lean one click away, left open")
-    page.locator(".proof__show button", has_text="Lean").click()
+    print("Lean mode, chosen on the toggle")
+    page.locator(".mode-toggle button", has_text="Lean").click()
     wait_until(page, lambda: lean_open(page) and lean_head(page), "one click opens the Lean")
     first_lean = lean_quote(page)
     page.mouse.move(box["x"] + 8, box["y"] + 6)
@@ -279,13 +284,12 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     wait_until(page, lambda: "Previewing" not in caption(page), "and leaving restores it")
     check(lean_quote(page) == first_lean, "the same Lean as before")
     wheel_to(page, top(page) + 500)
-    wait_until(page, lambda: lean_quote(page) != first_lean, "left open, the Lean keeps following")
+    wait_until(page, lambda: lean_quote(page) != first_lean, "the Lean follows the text")
     wait_until(page, lambda: page.evaluate("""() => { const row = document.querySelector('.proof__lean .source__line.is-exact') ?? document.querySelector('.proof__lean .source__line'); const body = document.querySelector('.leaf__body').getBoundingClientRect(); const b = row.getBoundingClientRect(); return b.top >= body.top && b.bottom <= body.bottom; }"""), "and comes into view")
     shot(page, shots, "03-following-lean")
-    page.locator(".proof__show button", has_text="Lean").click()
-    wait_until(page, lambda: not lean_open(page), "one click closes it")
-    wheel_to(page, top(page) - 500)
-    wait_until(page, lambda: visible_mark(page), "back at a tied statement")
+    page.locator(".mode-toggle button", has_text="Graph").click()
+    wait_until(page, lambda: not lean_open(page), "the Graph side of the toggle goes back to the graph")
+    wait_until(page, lambda: visible_mark(page), "back at a statement")
     other = visible_mark(page)
     target = page.locator('[data-journey="mark"]')
     box = target.evaluate("(el) => { const b = el.getClientRects()[0]; return { x: b.left, y: b.top, width: b.width, height: b.height }; }")
@@ -298,10 +302,10 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     wait_until(page, lambda: address(page).endswith(f"@{other}"), f"the sentence has an address: {other}")
     check("Pinned" in caption(page), "the caption says it is pinned")
     check(lean_open(page) and lean_head(page), "the click expands it into the raw Lean")
-    check(page.locator(".proof__graph").is_visible(), "a band of graph stays above it")
+    check(page.locator(".proof__graph").bounding_box()["height"] < 2, "the Lean has the whole pane")
+    check(page.locator('.mode-toggle button[aria-pressed="true"]').inner_text() == "Lean", "and the toggle says Lean")
     check(page.locator(".crumbs a").count() > 0, "breadcrumbs say where the paper has it")
     check(abs(top(page) - was_top) <= 2, "the paper does not move")
-    check(entries(page) == was_entries + 1, "one history entry")
     check(page.locator(".bar .back").is_visible(), "a named Back appears")
     print("    back says:", page.locator(".bar .back").inner_text())
     page.wait_for_timeout(250)
@@ -333,10 +337,16 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
         check(fold.get_attribute("aria-expanded") != open_before, "Proof folds and opens")
         fold.click()
 
-    print("Click a card")
-    page.keyboard.press("Escape")
-    wait_until(page, lambda: not lean_open(page), "Escape puts the graph back")
+    print("Pull the graph down")
+    handle = page.locator(".proof__handle").bounding_box()
+    page.mouse.move(handle["x"] + handle["width"] / 2, handle["y"] + 5)
+    page.mouse.down()
+    page.mouse.move(handle["x"] + handle["width"] / 2, handle["y"] + 240, steps=6)
+    page.mouse.up()
+    wait_until(page, lambda: page.locator(".proof__graph").bounding_box()["height"] > 150, "the handle draws the graph down above the Lean")
     page.wait_for_timeout(350)
+
+    print("Click a card")
     stack[-1] = (stack[-1][0], snapshot(page))
     cards = page.locator('.card[data-record="isoR"]')
     check(cards.count() > 0, "the graph holds isoR")
@@ -363,28 +373,9 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     page.locator(".graph__paused button").click()
     wait_until(page, lambda: page.locator(".graph__paused").count() == 0, "one click resumes it")
 
-    print("Escape returns the graph exactly")
-    page.keyboard.press("Escape")
-    wait_until(page, lambda: not lean_open(page), "Escape closes the Lean and following resumes")
-    page.wait_for_timeout(500)
-    rest_camera = camera(page)
-    target_card = page.locator('.card[data-record="closedWorld"]')
-    target_card.click()
-    wait_until(page, lambda: lean_head(page) == "closedWorld", "a card lower in the graph opens too")
-    page.wait_for_timeout(1300)
-    in_band = page.evaluate("""() => { const canvas = document.querySelector('.graph__canvas').getBoundingClientRect(); const b = document.querySelector('.card[data-record="closedWorld"]').getBoundingClientRect(); return b.top >= canvas.top && b.bottom <= canvas.bottom; }""")
-    check(in_band, "and its card stays in the band above the Lean")
-    shot(page, shots, "04-band")
-    page.keyboard.press("Escape")
-    wait_until(page, lambda: not lean_open(page), "Escape again")
-    wait_until(page, lambda: camera(page) == rest_camera, "the graph is exactly as it was")
-    page.go_back()
-    wait_until(page, lambda: lean_head(page) == "isoR" or not lean_open(page), "Back undoes that open")
-    page.wait_for_timeout(400)
-    if lean_open(page):
-        page.keyboard.press("Escape")
-        wait_until(page, lambda: not lean_open(page), "and Escape closes the one before")
-    stack[-1] = ("card isoR, unpinned", snapshot(page))
+    page.locator(".proof__handle").click()
+    wait_until(page, lambda: page.locator(".proof__graph").bounding_box()["height"] < 2, "a click on the handle gives the Lean the pane again")
+    stack[-1] = ("card isoR", snapshot(page))
 
     print("References")
     wheel_to(page, 3000)
@@ -476,11 +467,12 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check("is in this Lean" in caption(page), f"the caption says the Lean stops: {caption(page)}")
     check("After the last statement" in page.locator(".stepper").inner_text(), "the counter says so too")
     check("section 6.3" in page.locator(".proof__reading").inner_text(), "and what is and is not covered, in the paper's own scope")
-    page.locator(".proof__show button", has_text="Lean").click()
+    page.locator(".mode-toggle button", has_text="Lean").click()
     wait_until(page, lambda: page.locator(".untied").count() > 0, "the open Lean says plainly that nothing here is in it")
     check("66 statements" in page.locator(".untied").inner_text(), "and where the statements are")
-    page.locator(".proof__show button", has_text="Lean").click()
-    wait_until(page, lambda: not lean_open(page), "and closes again")
+    page.locator(".mode-toggle button", has_text="Graph").click()
+    wait_until(page, lambda: not lean_open(page), "and the graph comes back")
+    page.wait_for_timeout(300)
     stack[-1] = ("jumped to 3.6", snapshot(page))
     shot(page, shots, "06-past-the-ties")
 
@@ -713,32 +705,130 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check("closedWorld" in page.locator(".index").inner_text() and "sorry" in page.locator(".index").inner_text(), "and sums up the axioms")
     shot(page, shots, "09-index")
 
+    print("Every way back lands in the same place")
+    def at_rest(place: str) -> dict:
+        page.goto("about:blank")
+        page.goto(f"{url}#/{SLUG}/{place}", wait_until="load")
+        page.wait_for_selector(".card")
+        page.wait_for_timeout(600)
+        page.keyboard.press("Escape")
+        wait_until(page, lambda: not lean_open(page), "at rest in Graph mode")
+        page.wait_for_timeout(500)
+        return {"top": top(page), "camera": camera(page), "active": active(page)}
+
+    def plain_statement() -> str:
+        passage = visible_mark(page)
+        check(passage, f"a statement to click: {passage}")
+        spot = page.locator('[data-journey="mark"]').evaluate("(el) => { const b = el.getClientRects()[0]; return [b.left + Math.min(10, b.width / 2), b.top + b.height / 2]; }")
+        page.mouse.click(spot[0], spot[1])
+        wait_until(page, lambda: lean_open(page), "clicking a statement goes to Lean mode")
+        return passage
+
+    def rested(want: dict, how: str) -> None:
+        wait_until(page, lambda: not lean_open(page), f"{how} returns to Graph mode")
+        wait_until(page, lambda: abs(top(page) - want["top"]) <= 1, f"{how}: the same paper position")
+        wait_until(page, lambda: camera(page) == want["camera"], f"{how}: the same camera")
+        check(active(page) == want["active"], f"{how}: the same highlight")
+        check(page.locator('.mode-toggle button[aria-pressed="true"]').inner_text() == "Graph", f"{how}: the toggle says Graph")
+
+    ways = {
+        "browser Back": lambda: page.go_back(),
+        "the bar's Back": lambda: page.locator(".bar .back").click(),
+        "[": lambda: page.keyboard.press("["),
+        "Esc": lambda: page.keyboard.press("Escape"),
+        "Unpin": lambda: page.locator(".proof__unpin").click(),
+        "the Graph side of the toggle": lambda: page.locator(".mode-toggle button", has_text="Graph").click(),
+    }
+    for how, go in ways.items():
+        want = at_rest("@s-3.3")
+        before_entries = entries(page)
+        plain_statement()
+        check(entries(page) == before_entries + 1, "as one history entry")
+        page.wait_for_timeout(300)
+        go()
+        rested(want, how)
+
+    print("A wrong turn does the obvious thing")
+    want = at_rest("@s-3.3")
+    before_entries = entries(page)
+    page.locator(".mode-toggle button", has_text="Graph").click()
+    page.wait_for_timeout(250)
+    check(entries(page) == before_entries and not lean_open(page), "clicking Graph in Graph mode does nothing")
+    plain_statement()
+    wait_entries = entries(page)
+    page.locator(".mode-toggle button", has_text="Lean").click()
+    page.wait_for_timeout(250)
+    check(entries(page) == wait_entries and "Pinned" in caption(page), "clicking Lean in Lean mode does nothing")
+    first = address(page)
+    second = page.evaluate("""() => { const pane = document.querySelector('[data-paper-pane]').getBoundingClientRect(); const here = document.querySelector('.q.is-pinned'); const q = [...document.querySelectorAll('.sheet__text .q')].find((el) => { const b = el.getClientRects()[0]; return b && b.top > pane.top + 20 && b.bottom < pane.bottom - 20 && !el.closest('pre') && !el.querySelector('a') && !el.closest('a') && el.dataset.p !== here?.dataset.p; }); if (!q) return null; q.setAttribute('data-journey', 'second'); const b = q.getClientRects()[0]; return [b.left + Math.min(10, b.width / 2), b.top + b.height / 2]; }""")
+    check(second, "a second statement on screen")
+    page.mouse.click(second[0], second[1])
+    wait_until(page, lambda: address(page) != first, "opening a statement in Lean mode moves to it")
+    check(entries(page) == wait_entries + 1 and lean_open(page), "as one more entry")
+    page.go_back()
+    wait_until(page, lambda: address(page) == first and lean_open(page), "Back returns to the first statement")
+    page.go_back()
+    rested(want, "Back twice")
+    page.go_forward()
+    wait_until(page, lambda: lean_open(page), "Forward goes to the statement again")
+    page.go_forward()
+    wait_until(page, lambda: "Pinned" in caption(page) and address(page) != first, "and to the second")
+    page.locator(".mode-toggle button", has_text="Graph").click()
+    rested(want, "Graph after two opens")
+    page.locator(".rail__item", has_text="Background").click()
+    page.wait_for_timeout(1500)
+    wheel_to(page, 5200)
+    jumped = top(page)
+    check(abs(jumped - want["top"]) > 100, "a jump to another section")
+    plain_statement()
+    page.locator(".mode-toggle button", has_text="Graph").click()
+    wait_until(page, lambda: not lean_open(page) and abs(top(page) - jumped) <= 1, "Graph with a pin goes back to where the click was")
+    page.go_back()
+    wait_until(page, lambda: SLUG in page.url and abs(top(page) - jumped) > 100, "and Back goes on to the place before, not out of the site")
+
+    print("Lean mode with nothing opened")
+    want = at_rest("@s-3.3")
+    page.locator(".mode-toggle button", has_text="Lean").click()
+    wait_until(page, lambda: lean_open(page) and "Following" in caption(page), "Lean with nothing opened follows the text")
+    box = page.locator(".proof__lean").bounding_box()
+    reload(page)
+    page.wait_for_selector(".sheet__text .q", state="attached")
+    wait_until(page, lambda: lean_open(page), "the mode survives a reload")
+    held = lean_quote(page)
+    wheel_to(page, top(page) + 700)
+    wait_until(page, lambda: lean_quote(page) != held, "and keeps following")
+    page.locator(".rail__item", has_text="Performance of Contextual").click()
+    wait_until(page, lambda: page.locator(".untied").count() > 0, "a stretch with no Lean says so in the pane")
+    now = page.locator(".proof__lean").bounding_box()
+    check(lean_open(page) and abs(now["height"] - box["height"]) <= 1, "with no collapse")
+    page.keyboard.press("g")
+    wait_until(page, lambda: not lean_open(page), "g switches to the graph")
+
     print("The handle and the choices")
     page.goto("about:blank")
     page.goto(f"{url}#/{SLUG}", wait_until="load")
     page.wait_for_selector(".card")
     page.wait_for_timeout(500)
-    check(not lean_open(page), "the page starts at rest")
+    check(not lean_open(page), "the page starts in Graph mode")
     handle = page.locator(".proof__handle")
     handle.click()
     wait_until(page, lambda: lean_open(page), "a click on the handle brings up the Lean")
     if not page.locator(".proof[data-side]").count():
         box = handle.bounding_box()
-        was = page.locator(".proof__graph").bounding_box()["height"]
         page.mouse.move(box["x"] + box["width"] / 2, box["y"] + 5)
         page.mouse.down()
-        page.mouse.move(box["x"] + box["width"] / 2, box["y"] + 60, steps=5)
+        page.mouse.move(box["x"] + box["width"] / 2, box["y"] + 240, steps=5)
         page.mouse.up()
         page.wait_for_timeout(200)
         now = page.locator(".proof__graph").bounding_box()["height"]
-        check(now > was + 40, f"dragging the handle gives the graph more room: {was:.0f} to {now:.0f}")
+        check(now > 150, f"dragging the handle gives the graph room: {now:.0f}")
     reload(page)
-    page.wait_for_selector(".card")
+    page.wait_for_selector(".card", state="attached")
     page.wait_for_timeout(400)
-    check(lean_open(page), "the choice to leave the Lean open is remembered")
-    page.locator(".proof__show button", has_text="Lean").click()
-    wait_until(page, lambda: not lean_open(page), "and closes")
-    page.locator(".proof__show button", has_text="Graph").click()
+    check(lean_open(page), "the choice is remembered")
+    page.locator(".mode-toggle button", has_text="Graph").click()
+    wait_until(page, lambda: not lean_open(page), "and Graph goes back")
+    page.locator(".proof__close").click()
     wait_until(page, lambda: page.locator(".proof").count() == 0, "the graph can be closed, and the paper has the desk")
     reload(page)
     page.wait_for_selector(".sheet__text .q", state="attached")
@@ -830,11 +920,22 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
         return super().translate_path(path)
 
 
-def serve(dist: Path) -> tuple[str, socketserver.TCPServer]:
-    handler = partial(Quiet, directory=str(dist))
-    server = Server(("127.0.0.1", 0), handler)
-    threading.Thread(target=server.serve_forever, daemon=True).start()
-    return f"http://127.0.0.1:{server.server_address[1]}/proof-reader/", server
+def serve_forever(dist: Path, port: int) -> None:
+    Server(("127.0.0.1", port), partial(Quiet, directory=str(dist))).serve_forever()
+
+
+def serve(dist: Path) -> tuple[str, subprocess.Popen]:
+    """The site from a process of its own: one inside Playwright's Python can stall."""
+    with socket.socket() as probe:
+        probe.bind(("127.0.0.1", 0))
+        port = probe.getsockname()[1]
+    server = subprocess.Popen([sys.executable, __file__, "--serve", str(dist), "--port", str(port)])
+    for _ in range(100):
+        with socket.socket() as probe:
+            if probe.connect_ex(("127.0.0.1", port)) == 0:
+                break
+        time.sleep(0.05)
+    return f"http://127.0.0.1:{port}/proof-reader/", server
 
 
 def static_files(page: Page, url: str) -> None:
@@ -856,7 +957,12 @@ def main() -> int:
     parser.add_argument("--shots", type=Path)
     parser.add_argument("--only", choices=("journey", "sizes"))
     parser.add_argument("--browser", choices=("chromium", "firefox", "webkit"), default="chromium")
+    parser.add_argument("--serve", type=Path, help=argparse.SUPPRESS)
+    parser.add_argument("--port", type=int, help=argparse.SUPPRESS)
     args = parser.parse_args()
+    if args.serve:
+        serve_forever(args.serve, args.port)
+        return 0
     if args.shots:
         args.shots.mkdir(parents=True, exist_ok=True)
     server = None
@@ -893,7 +999,7 @@ def main() -> int:
         return 1
     finally:
         if server:
-            server.shutdown()
+            server.terminate()
     print(f"\nJourney complete: {checks} checks passed in {time.time() - started:.0f}s.")
     return 0
 

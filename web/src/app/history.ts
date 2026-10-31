@@ -25,8 +25,12 @@ export interface Entry {
   copy: Copy;
   tab: Tab;
   pin: Pin | null;
-  /** The Lean is open on the right page. A click opens it; left open, it follows. */
+  /** Lean mode. A click goes to it; chosen on the toggle, the Lean follows the text. */
   lean: boolean;
+  /** How this entry was opened, so every way back lands where Back lands. */
+  opened: { steps: number; fromGraph: boolean } | null;
+  /** The toggle chose Lean here, so Back is the way out. */
+  wentToLean: boolean;
   /** The paper's exact position and the width it was measured at. */
   top: number | null;
   width: number;
@@ -53,6 +57,8 @@ export const blankEntry = (paper: string, copy: Copy): Entry => ({
   tab: "step",
   pin: null,
   lean: false,
+  opened: null,
+  wentToLean: false,
   top: null,
   width: 0,
   leanTop: 0,

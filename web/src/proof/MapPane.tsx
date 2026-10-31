@@ -1,9 +1,9 @@
-// The graph of the proof, adapted from Lean Exposition's map beside the paper. It
-// comes along with the reading: every branch drawn, the statement under the reading
-// line in amber, what lies ahead quieter. A soft green says what Lean holds. The camera moves only if a card has left
-// the view, and when the Lean rises it pans only as far as keeps the card in the band
-// left above it; closing the Lean puts the camera back exactly. The reader stays in
-// charge: moving the map pauses following.
+// The graph of the proof, adapted from Lean Exposition's map beside the paper. It comes
+// along with the reading: every branch drawn, the statement under the reading line in
+// amber, what lies ahead quieter. A soft green says what Lean holds. The camera moves only
+// if a card has left the view. In Lean mode the graph is out of sight, or a band pulled
+// down above the Lean with the card in the middle of it, and leaving Lean mode gives the
+// camera back exactly. The reader stays in charge: moving the map pauses following.
 
 import { memo, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type Ref } from "react";
 import type { Edition } from "../app/edition";
@@ -69,6 +69,8 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
   const stayRef = useRef(stay);
   stayRef.current = stay;
   const leanRef = useRef(leanOpen);
+  const before = useRef<MapScene | null>(null);
+  const missed = useRef(false);
 
   // Scrolling must stay smooth, so the trail is written straight onto the tiles.
   const writeTrail = useCallback(() => {
@@ -95,6 +97,11 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
 
   useEffect(() => {
     if (pausedRef.current || stayRef.current || !lit.length) return;
+    // Out of sight in Lean mode: catch up on the way back.
+    if (!body.current?.clientHeight) {
+      missed.current = true;
+      return;
+    }
     const drawn = lit.filter((id) => graph.nodes.has(id));
     if (drawn.length && leanRef.current && (body.current?.clientHeight ?? 0) < BAND) tree.current?.panTo(drawn, { centre: true });
     else if (drawn.length && !inView(drawn)) tree.current?.panTo(drawn);
@@ -152,12 +159,26 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
   }, [goal, inView]);
 
   // The Lean rises: remember the camera, to give it back exactly when the Lean goes.
-  const before = useRef<MapScene | null>(null);
   useLayoutEffect(() => {
     if (leanRef.current === leanOpen) return;
     leanRef.current = leanOpen;
-    if (leanOpen) before.current = tree.current?.getScene() ?? null;
+    if (leanOpen) {
+      before.current = tree.current?.getScene() ?? null;
+      missed.current = false;
+    }
   }, [leanOpen]);
+
+  // Back in Graph mode. A resize has given the camera back; if the Lean followed the text
+  // while the graph was out of sight, the graph catches up.
+  useEffect(() => {
+    if (leanOpen) return;
+    const timer = window.setTimeout(() => {
+      before.current = null;
+      if (missed.current && !pausedRef.current && !restoring.current && litRef.current.length && !inView(litRef.current)) tree.current?.panTo(litRef.current);
+      missed.current = false;
+    }, 240);
+    return () => window.clearTimeout(timer);
+  }, [inView, leanOpen]);
 
   // The room changed: the Lean rose or went, the handle was dragged, the window changed.
   useEffect(() => {

@@ -159,18 +159,20 @@ button:disabled { cursor: default; }
 .proof__says p { min-width: 0; margin: 0; font-size: var(--fs-sm); line-height: 1.35; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .proof__says b { font-weight: 600; color: var(--ink); }
 .proof__unpin { min-height: 24px; margin-left: 8px; color: var(--lit); text-decoration: underline; text-underline-offset: 3px; }
-.proof__show { flex: none; display: flex; font-size: var(--fs-sm); }
-.proof__show button { min-height: 28px; padding: 0 8px; white-space: nowrap; color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 4px; }
-.proof__show button[aria-pressed="true"] { color: var(--ink); text-decoration-color: var(--thread); text-decoration-thickness: 2px; }
-.proof__show button:hover { color: var(--ink); }
+/* The same toggle as Lean Exposition's. */
+.mode-toggle { flex: none; display: inline-flex; border: 1px solid var(--rule-control); border-radius: var(--radius-s); }
+.mode-toggle button { min-width: 52px; min-height: 28px; padding: 0 8px; color: var(--ink-2); font-size: var(--fs-sm); }
+.mode-toggle button + button { border-left: 1px solid var(--rule-control); }
+.mode-toggle button:hover { color: var(--ink); }
+.mode-toggle button[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
 .proof__close { flex: none; min-height: 28px; padding: 0 6px; font-size: var(--fs-sm); color: var(--lit); text-decoration: underline; text-underline-offset: 3px; }
 .proof__panes { --share: 0.46; position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .proof[data-side] .proof__panes { flex-direction: row; }
-.proof__panes:not(.is-both) > .proof__graph, .proof__panes:not(.is-both) > .proof__lean { flex: 1 1 0; }
+.proof__panes:not(.is-both, .is-shut) > .proof__graph { flex: 1 1 0; }
 .proof__graph { flex: var(--share) 1 0; min-width: 0; min-height: 0; display: flex; }
 .proof__lean { flex: calc(1 - var(--share)) 1 0; min-width: 0; min-height: 0; display: flex; }
 .proof__panes.is-dragging { user-select: none; }
-.proof__handle { flex: none; display: grid; place-items: center; height: 12px; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); background: var(--sheet); cursor: ns-resize; touch-action: none; }
+.proof__handle { flex: none; display: grid; place-items: center; height: 11px; border-top: 1px solid var(--rule); background: var(--sheet); cursor: ns-resize; touch-action: none; }
 .proof__handle span { width: 40px; height: 3px; border-radius: 2px; background: var(--rule-strong); transition: background-color var(--t-hover) var(--ease-out); }
 .proof__handle:hover span, .is-dragging .proof__handle span { background: var(--ink-3); }
 .proof[data-side] .proof__handle { width: 12px; height: auto; border: 0; border-left: 1px solid var(--rule); border-right: 1px solid var(--rule); cursor: ew-resize; }
@@ -190,11 +192,11 @@ button:disabled { cursor: default; }
 .graph__canvas { position: relative; flex: 1; min-height: 0; overflow: hidden; }
 .graph__canvas .tree { background: var(--sheet); }
 .graph .card__src, .graph .card__inputs, .graph .src-sq { display: none; }
-.proof:not([data-side]) .proof__panes.is-both:not(.is-fold) .vocab { display: none; }
-.proof__panes.is-fold .proof__graph { flex: none; }
-.proof__panes.is-fold .graph__canvas { flex: none; height: 0; }
-.proof__panes.is-fold .proof__handle { display: none; }
-.proof__panes.is-fold .proof__lean { flex: 1 1 0; }
+.proof:not([data-side]) .proof__panes.is-both .vocab { display: none; }
+/* Lean mode: the Lean has the page until the handle is pulled. */
+.proof__panes.is-shut .proof__graph { flex: 0 0 0; height: 0; overflow: hidden; }
+.proof[data-side] .proof__panes.is-shut .proof__graph { width: 0; height: auto; }
+.proof__panes.is-shut .proof__lean { flex: 1 1 0; }
 .key-shape { display: inline-block; flex: none; width: 14px; height: 10px; margin-right: 6px; border: 1.5px solid var(--ink-3); background: var(--raised); vertical-align: -1px; }
 .key-shape--theorem { border-radius: 6px; }
 .key-shape--axiom { border: 2px solid var(--rel-assumes-lit); border-radius: 0; background: var(--lit-wash); transform: skewX(-14deg); }

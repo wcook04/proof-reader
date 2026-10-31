@@ -1,11 +1,11 @@
 // One paper, laid out as an open book: the authors' paper on the left page, read as
-// any paper is read, and the graph of its proof on the right, coming along.
+// any paper is read, and on the right a page with two modes, Graph and Lean.
 //
 // Four verbs. Follow: the reading line picks a statement and the right page answers.
-// Point: a dwell names it under the graph, and previews it if the Lean is open. Open: a
-// click expands a thing into its raw Lean, pushes one history entry and gives it an
-// address. Back: the browser's own Back, named on the page, which restores everything
-// an entry remembers. The Lean stays closed until asked for; left open, it follows.
+// Point: a dwell names it under the graph, and previews it in Lean mode. Open: a click goes
+// to Lean mode on that thing, pushes one history entry and gives it an address. Back: the
+// browser's own Back, named on the page, which restores everything an entry remembers. The
+// toggle, Escape and Unpin land where Back lands. Chosen on the toggle, the Lean follows.
 
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { blankEntry, newEntryId, pushEntry, readEntry, replaceEntry, returning, type Copy, type Entry, type Pin, type Tab } from "../app/history";
@@ -17,6 +17,7 @@ import type { LeanActions } from "../lean/code";
 import { editionGraph, sectionLabel } from "../model/fromEdition";
 import { LeanPage, type LeanPageHandle, type Step } from "../proof/LeanPage";
 import { MapPane, type MapPaneHandle } from "../proof/MapPane";
+import type { PaneMode } from "../proof/ModeToggle";
 import { ProofPage, readLayout, saveLayout, type Layout } from "../proof/ProofPage";
 import { Contents } from "./Contents";
 import { ReadingPane } from "./ReadingPane";
@@ -93,7 +94,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
       replaceEntry(saved);
       started.current = { entry: saved, target: saved.top !== null ? { top: saved.top, width: saved.width, fallback: meaning.target ?? undefined } : meaning.target, record: route.record };
     } else {
-      const entry: Entry = { ...blankEntry(slug, homeCopy), lean: readLayout(false).lean, ...meaning.entry, bad: meaning.bad };
+      const entry: Entry = { ...blankEntry(slug, homeCopy), lean: readLayout().lean, ...meaning.entry, bad: meaning.bad };
       replaceEntry(entry);
       started.current = { entry, target: meaning.target, record: route.record };
     }
@@ -113,7 +114,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const [tick, setTick] = useState(0);
 
   const wide = useMedia("(min-width: 1280px)");
-  const [layout, setLayoutState] = useState<Layout>(() => readLayout(window.matchMedia("(max-width: 767px)").matches));
+  const [layout, setLayoutState] = useState<Layout>(readLayout);
   const layoutRef = useRef(layout);
   layoutRef.current = layout;
   const onLayout = useCallback((next: Layout) => {
@@ -219,7 +220,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
 
   /** Open something: one history entry, with an address and a way back. */
   const open = useCallback(
-    (o: { record?: string; pin?: Pin | null; tab?: Tab; copy?: Copy; target?: Target | null; from?: "paper" | "right"; sheet?: boolean; stay?: boolean; lean?: boolean; after?: () => void }) => {
+    (o: { record?: string; pin?: Pin | null; tab?: Tab; copy?: Copy; target?: Target | null; from?: "paper" | "right"; sheet?: boolean; stay?: boolean; lean?: boolean; wentToLean?: boolean; after?: () => void }) => {
       saveNow();
       o.after?.();
       const cur = entryRef.current;
@@ -233,7 +234,11 @@ export function PaperPage({ edition }: { edition: Edition }) {
         tab: o.tab ?? "step",
         top: o.target ? null : cur.top,
         leanTop: 0,
-        lean: o.lean ?? (o.pin ? true : cur.lean),
+        lean: o.lean ?? (o.pin ? true : layoutRef.current.lean),
+        wentToLean: !!o.wentToLean,
+        opened: (o.pin === undefined ? cur.pin : o.pin) || (o.tab ?? "step") !== "step"
+          ? cur.opened ? { steps: cur.opened.steps + 1, fromGraph: cur.opened.fromGraph } : cur.pin || cur.tab !== "step" ? null : { steps: 1, fromGraph: !cur.lean }
+          : null,
         insets: pane()?.insets() ?? cur.insets,
         back: label,
         backSide: o.from ?? "paper",
@@ -336,30 +341,51 @@ export function PaperPage({ edition }: { edition: Edition }) {
     replaceEntry(cur, href);
   }, [hereRecord, pane, slug, snapshot]);
 
-  /** Open or close the Lean by hand. The choice is the reader's, so it is remembered. */
-  const setLean = useCallback((open: boolean) => {
-    const cur = entryRef.current;
-    const next: Entry = { ...cur, lean: open, pin: open ? cur.pin : null, tab: open ? cur.tab : "step", sheet: open || cur.sheet };
-    entryRef.current = next;
-    setEntry(next);
-    setMapStays(false);
+  /** Remember the mode the reader chose. */
+  const chooseMode = useCallback((lean: boolean) => {
     setLayoutState((was) => {
-      const stored = { ...was, lean: open };
+      const stored = { ...was, lean, graph: true };
       saveLayout(stored);
       return stored;
     });
-    settled();
-  }, [settled]);
+  }, []);
 
-  /** Escape: close what a click opened, and go back to reading. */
-  const closeLean = useCallback(() => {
-    const cur = entryRef.current;
-    const next: Entry = { ...cur, lean: layoutRef.current.lean && !cur.pin && cur.tab === "step" ? false : layoutRef.current.lean, pin: null, tab: "step" };
+  /** Let go here: an address that was opened directly has no entry to go back to. */
+  const letGo = useCallback((lean: boolean) => {
+    const next: Entry = { ...entryRef.current, pin: null, tab: "step", lean, opened: null, wentToLean: false };
     entryRef.current = next;
     setEntry(next);
     setMapStays(false);
     settled();
   }, [settled]);
+
+  /**
+   * The toggle. Choosing Lean with nothing open is one history entry, so Back undoes it.
+   * Choosing Graph lands where Back from an opened statement lands: the browser's own Back
+   * when that is where the reader came from, and in place otherwise. As Lean Exposition does.
+   */
+  const setMode = useCallback((mode: PaneMode) => {
+    const cur = entryRef.current;
+    if (mode === "lean") {
+      if (cur.lean) return;
+      chooseMode(true);
+      open({ record: readRoute().record, pin: null, lean: true, wentToLean: true, stay: true, tab: "step" });
+      return;
+    }
+    if (!cur.lean) return;
+    chooseMode(false);
+    if (cur.opened?.fromGraph) window.history.go(-cur.opened.steps);
+    else if (cur.wentToLean && !cur.pin && cur.tab === "step") window.history.back();
+    else letGo(false);
+  }, [chooseMode, letGo, open]);
+
+  /** Escape and Unpin: one level, from an opened statement to what was there, or from Lean to Graph. */
+  const closeLean = useCallback(() => {
+    const cur = entryRef.current;
+    if (!cur.pin && cur.tab === "step") setMode("graph");
+    else if (cur.opened) window.history.go(-cur.opened.steps);
+    else letGo(layoutRef.current.lean);
+  }, [letGo, setMode]);
 
   const onFollow = useCallback<Follow>((id, zone, above) => {
     setLine({ id, zone, above });
@@ -450,7 +476,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
     if (!next) return;
     stepAt.current = index;
     if (entryRef.current.pin) {
-      const unpinned = { ...entryRef.current, pin: null };
+      const unpinned = { ...entryRef.current, pin: null, lean: layoutRef.current.lean, opened: null };
       entryRef.current = unpinned;
       setEntry(unpinned);
     }
@@ -472,6 +498,8 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const onPauseChange = useCallback((paused: boolean) => {
     if (!paused) setMapStays(false);
   }, []);
+
+  const closePage = useCallback(() => onLayout({ ...layoutRef.current, graph: false }), [onLayout]);
 
   const closeSheet = useCallback(() => {
     const next = { ...entryRef.current, sheet: false, pin: null, lean: false };
@@ -504,7 +532,9 @@ export function PaperPage({ edition }: { edition: Edition }) {
         return;
       }
       if (target.closest?.(".tree, [role='separator']")) return;
-      if (event.key === "[") {
+      if (event.key === "g") {
+        setMode(entryRef.current.lean ? "graph" : "lean");
+      } else if (event.key === "[") {
         window.history.back();
       } else if (event.key === "]") {
         window.history.forward();
@@ -521,7 +551,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [closeLean, closeSheet, pane, pinPassage, rail, step, wide]);
+  }, [closeLean, closeSheet, pane, pinPassage, rail, setMode, step, wide]);
 
   // ---- What the right page shows --------------------------------------------------
 
@@ -663,7 +693,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
           <div className="bar__title">
             {copy === "reading" && edition.reading ? <p className="bar__paper">{paper.short_title}</p> : <h1 className="bar__paper">{paper.short_title}</h1>}
           </div>
-          {(wide ? !showRight : !entry.sheet) && <button type="button" className="bar__open" onClick={() => (wide ? onLayout({ ...layout, graph: true }) : open({ sheet: true, record: readRoute().record, tab: entry.tab, lean: entry.lean || !layout.graph }))}>{wide || layout.graph ? "Graph" : "Lean"}</button>}
+          {(wide ? !showRight : !entry.sheet) && <button type="button" className="bar__open" onClick={() => (wide ? onLayout({ ...layout, graph: true }) : open({ sheet: true, record: readRoute().record, tab: entry.tab, lean: entry.lean }))}>Graph</button>}
           <button type="button" className="bar__theme" aria-label={scheme === "dark" ? "Use the day theme" : "Use the night theme"} onClick={() => setScheme(scheme === "dark" ? "light" : "dark")}>{scheme === "dark" ? "Day" : "Night"}</button>
           <a className="bar__link" href={paper.url}>Published paper</a>
           <a className="bar__link" href={lean.source}>Lean artifact</a>
@@ -757,14 +787,12 @@ export function PaperPage({ edition }: { edition: Edition }) {
         {showRight && (
           <ProofPage
             leanOpen={entry.lean}
-            onLean={setLean}
+            onMode={setMode}
             layout={layout}
             onLayout={onLayout}
             caption={<p role="status">{says}</p>}
-            kept={layout.lean && entry.lean}
-            folded={entry.lean && !lit.some((id) => graph.nodes.has(id))}
             reading={readingStrip}
-            onClose={wide ? undefined : closeSheet}
+            onClose={wide ? (entry.lean ? undefined : closePage) : closeSheet}
             graph={(
               <MapPane
                 ref={map}

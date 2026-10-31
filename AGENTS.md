@@ -16,13 +16,15 @@ Keep these true:
   column of a moved block.
 - Every other word on a paper's page is a quotation, Lean's own output, a marked note, or a
   declaration's short plain title.
-- Reading the paper is the way in. At rest the right page is the graph; the Lean opens on a
-  click or by hand, and the list of declarations is an index at the back.
+- Reading the paper is the way in. The right pane has two modes, Graph and Lean, with the same
+  words and behaviour as Lean Exposition. A click goes to Lean as one history entry, and every
+  way back lands where Back lands. The list of declarations is an index at the back.
 - Plain words first wherever a person reads. A raw Lean name is small, beside its plain title,
   and in the code.
 - Opening something, a reference in place included, pushes one history entry that holds the
   paper's pixel, the pin, the tab and the map's camera. Following and pointing never push.
-- A pin lasts until Unpin, Escape, Back or a new click. Scrolling never releases it.
+- A statement opened by a click stays until Unpin, Escape, Back or a new click. Scrolling never
+  lets it go.
 - The address names the statement carrying the highlighter, and the counter reads the same.
 - Failing to find a quote or a name stops the build.
 - `web/src/map/` is copied from lean-exposition. Keep it close to that source so fixes
