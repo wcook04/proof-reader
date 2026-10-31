@@ -691,7 +691,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
             onClose={() => setRail(false)}
           />
         )}
-        <div className="left">
+        <div className="left" id="the-paper">
           {edition.reading && (html ? (
             <ReadingPane
               ref={reading}

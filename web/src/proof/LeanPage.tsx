@@ -197,6 +197,7 @@ function Untied({ edition, untied, onPassage }: { edition: Edition; untied: NonN
 function AllDeclarations({ edition, act }: { edition: Edition; act: LeanActions }) {
   const { analytics, declarations, slug } = edition;
   const standard = Object.entries(analytics.standard_axioms);
+  const plain = (names: string[]) => list(names.map((name) => declarations.find((d) => d.id === name)?.plain ?? name));
   return (
     <div className="index">
       <h3>Axioms, as Lean reports them</h3>
@@ -204,13 +205,13 @@ function AllDeclarations({ edition, act }: { edition: Edition; act: LeanActions 
       {analytics.axioms.map((name) => (
         <p key={name}>
           <DeclLink paper={slug} name={name} act={act} className="declname declname--axiom" /> is the authors’ axiom, assumed and not proved.{" "}
-          {(analytics.resting_on_axioms[name] ?? []).length > 0 ? <>{list(analytics.resting_on_axioms[name])} rest on it.</> : <>Nothing here rests on it.</>}
-          {analytics.free_of_axioms.length > 0 && <> {list(analytics.free_of_axioms)} do not.</>}
+          {(analytics.resting_on_axioms[name] ?? []).length > 0 ? <>Resting on it: {plain(analytics.resting_on_axioms[name])}.</> : <>Nothing here rests on it.</>}
+          {analytics.free_of_axioms.length > 0 && <> Free of it: {plain(analytics.free_of_axioms)}.</>}
         </p>
       ))}
       <p>
-        Lean’s own standard axioms: {list(standard.map(([name, users]) => `${name} (${users.length ? list(users) : "not used"})`))}.
-        {" "}{analytics.sorry.length ? <strong>sorry appears in {list(analytics.sorry)}.</strong> : <>No declaration here uses sorry.</>}
+        Lean’s own standard axioms: {list(standard.map(([name, users]) => `${name} (${users.length ? plain(users) : "not used"})`))}.
+        {" "}{analytics.sorry.length ? <strong>sorry appears in {plain(analytics.sorry)}.</strong> : <>No declaration here uses sorry.</>}
       </p>
       <h3>All {declarations.length} declarations</h3>
       <table>
