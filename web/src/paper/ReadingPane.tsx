@@ -9,7 +9,7 @@
 import { forwardRef, memo, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useRef, useState, type ReactNode } from "react";
 import type { Pin } from "../app/history";
 import type { Passage } from "../app/edition";
-import { DWELL_MS, FOLLOW_MS, READING_LINE, type PaperHandle, type Pointed, type Target, type Where, type Zone } from "./reading-line";
+import { DWELL_MS, FOLLOW_MS, READING_LINE, type Follow, type PaperHandle, type Pointed, type Target, type Where, type Zone } from "./reading-line";
 
 interface Props {
   html: string;
@@ -19,7 +19,7 @@ interface Props {
   /** Statements lit because something tied to them is held or pointed at. */
   lit: ReadonlySet<string>;
   /** A statement has held the reading line, or none has. */
-  onFollow(id: string | null, zone: Zone): void;
+  onFollow: Follow;
   onSection(id: string | null): void;
   /** The paper has stopped moving. */
   onSettle(): void;
@@ -28,9 +28,11 @@ interface Props {
   onPage(page: number): void;
   /** A reference to somewhere else in the paper. */
   onJump(place: string): void;
+  /** A reference opens in place: one history entry, so Back closes it. */
+  onOpenInset(open: () => void): void;
+  /** The references open in place have changed without a new entry. */
+  onInsetClosed(): void;
   onPoint(pointed: Pointed): void;
-  /** The held statement has left the view. */
-  onPinLeft(): void;
   onReady(): void;
   /** Above the sheet: what to do on this page. */
   hint?: ReactNode;
@@ -42,6 +44,8 @@ interface Bar {
   id: string;
   top: number;
   height: number;
+  /** In a code well, so it sits outside the well. */
+  code: boolean;
 }
 
 /** The blocks of the paper, in reading order: an address can name any of them. */
@@ -78,6 +82,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
   const lastScroll = useRef(0);
   const line = useRef<string | null>(null);
   const zone = useRef<Zone>("before");
+  const lineAbove = useRef<string | null>(null);
   const section = useRef<string | null | undefined>(undefined);
   const followTimer = useRef(0);
   const settleTimer = useRef(0);
@@ -102,7 +107,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
       const top = Math.min(...boxes.map((b) => b.top));
       const bottom = Math.max(...boxes.map((b) => b.bottom));
       spans.current.set(id, { top: top - origin, bottom: bottom - origin });
-      next.push({ id, top: top - sheetTop, height: bottom - top });
+      next.push({ id, top: top - sheetTop, height: bottom - top, code: !!parts[0].closest("pre") });
     }
     headings.current = [...page.querySelectorAll<HTMLElement>("h2[id], h3[id]")].map((h) => ({ id: h.id, top: h.getBoundingClientRect().top - origin }));
     pageTops.current = [...page.querySelectorAll<HTMLElement>(".sheet__text a.pg")].map((a) => ({ page: Number(a.dataset.page), top: a.getBoundingClientRect().top - origin })).sort((a, b) => a.page - b.page);
@@ -125,7 +130,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
 
   const whereNow = useCallback((): Where => {
     const el = scroller.current;
-    if (!el) return { passage: null, zone: "before", section: null, page: 1, into: 0 };
+    if (!el) return { passage: null, zone: "before", above: null, section: null, page: 1, into: 0 };
     const at = el.scrollTop + el.clientHeight * READING_LINE;
     // At the very end the last headings can never reach the reading line.
     const low = el.scrollTop + el.clientHeight * (el.scrollTop + el.clientHeight >= el.scrollHeight - 4 ? 1 : READING_LINE);
@@ -135,13 +140,20 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
     let bestGap = el.clientHeight * 0.5;
     let first = Infinity;
     let last = -Infinity;
+    let above: string | null = null;
+    let aboveTop = -Infinity;
     for (const passage of latest.current.passages) {
       const span = spans.current.get(passage.id);
       if (!span) continue;
       first = Math.min(first, span.top);
       last = Math.max(last, span.bottom);
+      if (span.top <= at && span.top >= aboveTop) {
+        above = passage.id;
+        aboveTop = span.top;
+      }
       const gap = at < span.top ? span.top - at : at > span.bottom ? at - span.bottom : 0;
-      if (gap <= bestGap) {
+      // Two statements level on the line, as in side-by-side code: the one held stays.
+      if (gap < bestGap || (gap === bestGap && (!best || passage.id === line.current))) {
         best = passage.id;
         bestGap = gap;
       }
@@ -156,12 +168,12 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
       const next = tops[i + 1]?.top ?? el.scrollHeight;
       into = (at - tops[i].top) / Math.max(1, next - tops[i].top);
     }
-    return { passage: best, zone: kind, section: current, page, into };
+    return { passage: best, zone: kind, above, section: current, page, into };
   }, []);
 
-  const followSoon = useCallback((id: string | null, kind: Zone) => {
+  const followSoon = useCallback((id: string | null, kind: Zone, above: string | null) => {
     window.clearTimeout(followTimer.current);
-    followTimer.current = window.setTimeout(() => latest.current.onFollow(id, kind), FOLLOW_MS);
+    followTimer.current = window.setTimeout(() => latest.current.onFollow(id, kind, above), FOLLOW_MS);
   }, []);
 
   /** What the reading line shows now. */
@@ -171,10 +183,11 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
       section.current = here.section;
       latest.current.onSection(here.section);
     }
-    if (here.passage !== line.current || here.zone !== zone.current) {
+    if (here.passage !== line.current || here.zone !== zone.current || here.above !== lineAbove.current) {
       paintLine(here.passage);
       zone.current = here.zone;
-      followSoon(here.passage, here.zone);
+      lineAbove.current = here.above;
+      followSoon(here.passage, here.zone, here.above);
     }
   }, [followSoon, paintLine, whereNow]);
 
@@ -245,7 +258,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
         scrollTo(target.top, true, true);
         // A return is not reading on: the right page comes back at once.
         window.clearTimeout(followTimer.current);
-        latest.current.onFollow(line.current, zone.current);
+        latest.current.onFollow(line.current, zone.current, lineAbove.current);
         return true;
       }
       if ("passage" in target) {
@@ -253,8 +266,9 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
         if (!span) return false;
         paintLine(target.passage);
         zone.current = "tied";
+        lineAbove.current = target.passage;
         scrollTo(span.top - el.clientHeight * READING_LINE, instant, false);
-        followSoon(target.passage, "tied");
+        followSoon(target.passage, "tied", target.passage);
         return true;
       }
       if ("page" in target) {
@@ -326,6 +340,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
     top: () => scroller.current?.scrollTop ?? 0,
     width: () => scroller.current?.clientWidth ?? 0,
     where: whereNow,
+    active: () => line.current,
     block: () => {
       const el = scroller.current;
       if (!el) return null;
@@ -449,18 +464,6 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
     }
   }, [bars, held]);
 
-  /** Whether a held statement has left the view. */
-  const pinLeft = useCallback(() => {
-    const el = scroller.current;
-    const current = latest.current.pin;
-    if (!el || !current) return false;
-    if (current.passage) {
-      const span = spans.current.get(current.passage);
-      return !!span && (span.bottom < el.scrollTop || span.top > el.scrollTop + el.clientHeight);
-    }
-    return current.at !== null && Math.abs(el.scrollTop - current.at) > el.clientHeight * 0.9;
-  }, []);
-
   useEffect(() => {
     const el = scroller.current;
     if (!el) return;
@@ -480,7 +483,6 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
         if (Math.abs(el.scrollTop - goal.current) <= 2) return;
         goal.current = null;
       }
-      if (pinLeft()) latest.current.onPinLeft();
       read();
     };
     const onScroll = () => {
@@ -510,7 +512,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
       if (frame) cancelAnimationFrame(frame);
       window.clearTimeout(settleTimer.current);
     };
-  }, [pinLeft, read, stopPointing, whereNow]);
+  }, [read, stopPointing, whereNow]);
 
   useEffect(() => () => {
     window.clearTimeout(arrive.current);
@@ -530,6 +532,17 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
     return !!pane && box.top >= pane.top && box.bottom <= pane.bottom;
   };
 
+  /** Bring a reference just opened fully into view, caption and all. */
+  const reveal = (id: string) => {
+    const el = scroller.current;
+    const inset = sheet.current?.querySelector<HTMLElement>(`.inset[data-for="${CSS.escape(id)}"]`);
+    if (!el || !inset) return;
+    const pane = el.getBoundingClientRect();
+    const box = inset.getBoundingClientRect();
+    const over = box.bottom + 12 - pane.bottom;
+    if (over > 0) scrollTo(el.scrollTop + Math.min(over, box.top - pane.top - 12), false, true);
+  };
+
   const onClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
     window.clearTimeout(dwell.current);
@@ -538,6 +551,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
       const inset = target.closest<HTMLElement>(".inset");
       if (inset) removeInset(inset);
       measure();
+      latest.current.onInsetClosed();
       return;
     }
     if (target.closest(".inset__go")) {
@@ -584,9 +598,17 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
       if (id.startsWith("cite-") || id.startsWith("fig-")) {
         const block = link.closest<HTMLElement>("p, li, figcaption, aside");
         const open = block?.parentElement?.querySelector<HTMLElement>(`:scope > .inset[data-for="${CSS.escape(id)}"]`);
-        if (open) removeInset(open);
-        else openInset(id, link);
-        measure();
+        if (open) {
+          removeInset(open);
+          measure();
+          latest.current.onInsetClosed();
+        } else {
+          latest.current.onOpenInset(() => {
+            openInset(id, link);
+            measure();
+            reveal(id);
+          });
+        }
       } else latest.current.onJump(id);
       return;
     }
@@ -679,7 +701,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
         <Sheet html={html} />
         <div className="sheet__ties" aria-hidden="true">
           {bars.map((bar) => (
-            <span key={bar.id} data-passage={bar.id} className="tie" style={{ top: bar.top, height: bar.height }} />
+            <span key={bar.id} data-passage={bar.id} className={bar.code ? "tie tie--code" : "tie"} style={{ top: bar.top, height: bar.height }} />
           ))}
         </div>
       </div>

@@ -47,7 +47,7 @@
   {
    "id": "stlc",
    "section": "2",
-   "role": "defines",
+   "role": "explains",
    "lean": [
     "STLC"
    ],
@@ -56,7 +56,7 @@
   {
    "id": "proxytop",
    "section": "3.1",
-   "role": "defines",
+   "role": "explains",
    "lean": [
     "ProxyTop"
    ],
@@ -87,7 +87,7 @@
   {
    "id": "instance-refl",
    "section": "3.1",
-   "role": "defines",
+   "role": "explains",
    "lean": [
     "instReifyIndexRefl"
    ],
@@ -100,7 +100,7 @@
   {
    "id": "instance-step",
    "section": "3.1",
-   "role": "defines",
+   "role": "explains",
    "lean": [
     "instReifyIndexSnoc"
    ],
@@ -126,7 +126,7 @@
   {
    "id": "defer-snoc",
    "section": "3.1",
-   "role": "explains",
+   "role": "mentions",
    "lean": [
     "instReifyIndexSnoc"
    ],
@@ -135,7 +135,7 @@
   {
    "id": "contextual-embedding",
    "section": "3.2",
-   "role": "defines",
+   "role": "explains",
    "lean": [
     "STLCCtx"
    ],
@@ -144,7 +144,7 @@
   {
    "id": "unembed",
    "section": "3.3",
-   "role": "defines",
+   "role": "mentions",
    "lean": [
     "unembed"
    ],
@@ -166,7 +166,7 @@
   {
    "id": "contextualise",
    "section": "3.3",
-   "role": "defines",
+   "role": "explains",
    "lean": [
     "contextualise"
    ],
@@ -197,7 +197,7 @@
   {
    "id": "workhorse",
    "section": "3.3",
-   "role": "defines",
+   "role": "mentions",
    "lean": [
     "fromIndex"
    ],
@@ -234,7 +234,7 @@
   {
    "id": "inject",
    "section": "3.3",
-   "role": "defines",
+   "role": "explains",
    "lean": [
     "fromVar",
     "toCVar"
@@ -316,7 +316,7 @@
   {
    "id": "indexIsoR",
    "section": "3.3",
-   "role": "states",
+   "role": "explains",
    "lean": [
     "indexIsoR"
    ],
@@ -342,7 +342,7 @@
   {
    "id": "closed-world-why",
    "section": "3.3",
-   "role": "explains",
+   "role": "mentions",
    "lean": [
     "closedWorld"
    ],
@@ -403,7 +403,7 @@
   {
    "id": "code-ty",
    "section": "2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "Ty"
    ],
@@ -418,7 +418,7 @@
   {
    "id": "code-ctx",
    "section": "2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "Ctx"
    ],
@@ -433,7 +433,7 @@
   {
    "id": "code-top",
    "section": "2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "Index"
    ],
@@ -448,7 +448,7 @@
   {
    "id": "code-pop",
    "section": "2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "Index"
    ],
@@ -463,7 +463,7 @@
   {
    "id": "code-var",
    "section": "2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "STLC"
    ],
@@ -476,7 +476,7 @@
   {
    "id": "code-lam",
    "section": "2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "STLC"
    ],
@@ -489,7 +489,7 @@
   {
    "id": "code-app",
    "section": "2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "STLC"
    ],
@@ -502,7 +502,7 @@
   {
    "id": "code-star",
    "section": "2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "STLC"
    ],
@@ -515,7 +515,7 @@
   {
    "id": "code-proxytop",
    "section": "3.1",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "ProxyTop"
    ],
@@ -528,7 +528,7 @@
   {
    "id": "code-reify-class",
    "section": "3.1",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "ReifyIndex"
    ],
@@ -541,7 +541,7 @@
   {
    "id": "code-refl",
    "section": "3.1",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "instReifyIndexRefl"
    ],
@@ -554,7 +554,7 @@
   {
    "id": "code-snoc",
    "section": "3.1",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "instReifyIndexSnoc"
    ],
@@ -567,7 +567,7 @@
   {
    "id": "code-cvar",
    "section": "3.2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "STLCCtx"
    ],
@@ -580,7 +580,7 @@
   {
    "id": "code-clam",
    "section": "3.2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "STLCCtx"
    ],
@@ -593,7 +593,7 @@
   {
    "id": "code-capp",
    "section": "3.2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "STLCCtx"
    ],
@@ -606,7 +606,7 @@
   {
    "id": "code-cstar",
    "section": "3.2",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "STLCCtx"
    ],
@@ -619,7 +619,7 @@
   {
    "id": "fig2-cvar",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "unembed"
    ],
@@ -632,7 +632,7 @@
   {
    "id": "fig2-clam",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "unembed"
    ],
@@ -645,7 +645,7 @@
   {
    "id": "fig2-capp",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "unembed"
    ],
@@ -658,7 +658,7 @@
   {
    "id": "fig2-cstar",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "unembed"
    ],
@@ -671,7 +671,7 @@
   {
    "id": "fig2-var",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "contextualise"
    ],
@@ -684,7 +684,7 @@
   {
    "id": "fig2-lam",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "contextualise"
    ],
@@ -697,7 +697,7 @@
   {
    "id": "fig2-app",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "contextualise"
    ],
@@ -710,7 +710,7 @@
   {
    "id": "fig2-star",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "contextualise"
    ],
@@ -723,7 +723,7 @@
   {
    "id": "code-proxyvar",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "ProxyVar"
    ],
@@ -736,7 +736,7 @@
   {
    "id": "code-fromindex-top",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "fromIndex"
    ],
@@ -749,7 +749,7 @@
   {
    "id": "code-vartop",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "varTop"
    ],
@@ -762,7 +762,7 @@
   {
    "id": "code-fromindex-pop",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "fromIndex"
    ],
@@ -775,7 +775,7 @@
   {
    "id": "code-weaken",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "weakenPVar"
    ],
@@ -788,7 +788,7 @@
   {
    "id": "code-fromvar",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "fromVar"
    ],
@@ -801,7 +801,7 @@
   {
    "id": "code-tocvar",
    "section": "3.3",
-   "role": "defines",
+   "role": "mirrors",
    "lean": [
     "toCVar"
    ],
@@ -830,26 +830,56 @@
     "Ctx": "Typing contexts",
     "Index": "de Bruijn indices",
     "STLC": "First-order terms",
-    "ProxyTop": "Top-only index",
-    "ReifyIndex": "Extension evidence",
-    "instReifyIndexRefl": "Evidence: same context",
-    "instReifyIndexSnoc": "Evidence: one variable more",
+    "ProxyTop": "Truncated index",
+    "ReifyIndex": "Reify type class",
+    "instReifyIndexRefl": "Reflexive case",
+    "instReifyIndexSnoc": "Step case",
     "STLCCtx": "Contextual terms",
     "unembed": "Contextual term to first-order term",
-    "ProxyVar": "Hidden variables",
-    "weakenPVar": "Weaken a hidden variable",
-    "varTop": "Top variable, hidden",
-    "fromVar": "Hidden variable to contextual term",
-    "fromIndex": "Index to hidden variable",
+    "ProxyVar": "Existential wrapper",
+    "weakenPVar": "Weaken the wrapper",
+    "varTop": "Top in the wrapper",
+    "fromVar": "Wrapper to contextual term",
+    "fromIndex": "Index to wrapper",
     "toCVar": "Index to contextual variable",
     "contextualise": "First-order term to contextual term",
     "indexIsoL": "Index round trip",
     "closedWorld": "Closed-world axiom",
-    "indexIsoR": "Hidden variable round trip",
+    "indexIsoR": "Wrapper round trip",
     "isoL": "First-order round trip",
     "isoR": "Contextual round trip"
   },
  "notes": {
+  "unembed": {
+   "text": "The paper's Lam and App are the Lean's Lambda and Apply.",
+   "because": [
+    "fig2-clam"
+   ]
+  },
+  "contextualise": {
+   "text": "The paper's Lam and App are the Lean's Lambda and Apply.",
+   "because": [
+    "fig2-lam"
+   ]
+  },
+  "varTop": {
+   "text": "The paper's MkVar and ProxyTop constructors are the Lean's PVar and PTop.",
+   "because": [
+    "code-vartop"
+   ]
+  },
+  "fromVar": {
+   "text": "The paper's MkVar is the Lean's PVar.",
+   "because": [
+    "code-fromvar"
+   ]
+  },
+  "instReifyIndexRefl": {
+   "text": "The paper's ProxyTop constructor is the Lean's PTop.",
+   "because": [
+    "code-refl"
+   ]
+  },
   "STLC": {
    "text": "The paper's Haskell calls two constructors Lam and App. The Lean calls them Lambda and Apply.",
    "because": [
@@ -863,13 +893,13 @@
    ]
   },
   "ProxyVar": {
-   "text": "This is the type the paper's Haskell calls Var.",
+   "text": "This is the type the paper's Haskell calls Var. Its constructor MkVar is the Lean PVar.",
    "because": [
     "existential"
    ]
   },
   "weakenPVar": {
-   "text": "This is the function the paper's Haskell calls weakenCVar.",
+   "text": "This is the function the paper's Haskell calls weakenCVar. Its MkVar is the Lean PVar.",
    "because": [
     "weaken"
    ]

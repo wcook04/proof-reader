@@ -20,7 +20,7 @@ import { ProofPage, readLayout, saveLayout, type Layout } from "../proof/ProofPa
 import { Contents } from "./Contents";
 import { ReadingPane } from "./ReadingPane";
 import { Threads } from "./Threads";
-import { DWELL_MS, type PaperHandle, type Pointed, type Target, type Zone } from "./reading-line";
+import { DWELL_MS, type Follow, type PaperHandle, type Pointed, type Target, type Zone } from "./reading-line";
 
 const PdfPane = lazy(() => import("./PdfPane").then((module) => ({ default: module.PdfPane })));
 
@@ -104,7 +104,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const [html, setHtml] = useState<string | null>(null);
   const [pdfSeen, setPdfSeen] = useState(entry.copy === "pdf");
   const [section, setSection] = useState<string | null>(null);
-  const [line, setLine] = useState<{ id: string | null; zone: Zone }>({ id: null, zone: "before" });
+  const [line, setLine] = useState<{ id: string | null; zone: Zone; above: string | null }>({ id: null, zone: "before", above: null });
   const [point, setPoint] = useState<Pointed>(null);
   const [cardPoint, setCardPoint] = useState<string | null>(null);
   const [rail, setRail] = useState(false);
@@ -131,6 +131,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const stepAt = useRef(-1);
   const lastPassage = useRef<string | null>(null);
   const dwell = useRef(0);
+  const cardsQuiet = useRef(0);
 
   const spread = useRef<HTMLElement>(null);
   const pane = useCallback(() => (entryRef.current.copy === "pdf" ? pdf.current : reading.current), []);
@@ -217,12 +218,12 @@ export function PaperPage({ edition }: { edition: Edition }) {
 
   /** Open something: one history entry, with an address and a way back. */
   const open = useCallback(
-    (o: { record?: string; pin?: Pin | null; tab?: Tab; copy?: Copy; target?: Target | null; from?: "paper" | "right"; sheet?: boolean; stay?: boolean; lean?: boolean }) => {
+    (o: { record?: string; pin?: Pin | null; tab?: Tab; copy?: Copy; target?: Target | null; from?: "paper" | "right"; sheet?: boolean; stay?: boolean; lean?: boolean; after?: () => void }) => {
       saveNow();
+      o.after?.();
       const cur = entryRef.current;
       const copy = o.copy ?? cur.copy;
       const label = o.from === "right" && cur.pin ? (pinLabel(cur.pin) ?? paperLabel()) : paperLabel();
-      if (copy === "reading" && cur.copy === "pdf") leftReading.current = leftReading.current;
       const next: Entry = {
         ...cur,
         id: newEntryId(),
@@ -232,6 +233,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
         top: o.target ? null : cur.top,
         leanTop: 0,
         lean: o.lean ?? (o.pin ? true : cur.lean),
+        insets: pane()?.insets() ?? cur.insets,
         back: label,
         backSide: o.from ?? "paper",
         sheet: o.sheet ?? (!wide ? true : cur.sheet),
@@ -244,6 +246,8 @@ export function PaperPage({ edition }: { edition: Edition }) {
       setPoint(null);
       setCardPoint(null);
       window.clearTimeout(dwell.current);
+      // The graph may pan under a resting pointer now: that is not pointing.
+      cardsQuiet.current = Date.now() + 1200;
       setMapStays(!!o.stay);
       if (copy === "pdf") setPdfSeen(true);
       if (o.target) {
@@ -252,7 +256,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [paperLabel, saveNow, slug, wide],
+    [pane, paperLabel, saveNow, slug, wide],
   );
 
   /** Follow the address the browser now holds: Back, Forward, or one typed in. */
@@ -315,7 +319,8 @@ export function PaperPage({ edition }: { edition: Edition }) {
     const where = handle.where();
     if (entryRef.current.copy === "pdf") return `@page-${where.page}`;
     if (handle.top() < 4) return undefined;
-    if (where.passage) return `@${where.passage}`;
+    const active = handle.active() ?? where.passage;
+    if (active) return `@${active}`;
     const block = handle.block();
     return block ? `@${block}` : where.section ? `@${where.section}` : undefined;
   }, [pane]);
@@ -329,16 +334,6 @@ export function PaperPage({ edition }: { edition: Edition }) {
     const href = !cur.pin && cur.tab === "step" ? routeHref({ paper: slug, record: hereRecord() }) : undefined;
     replaceEntry(cur, href);
   }, [hereRecord, pane, slug, snapshot]);
-
-  /** A statement scrolled away: following resumes, and an open Lean follows too. */
-  const release = useCallback(() => {
-    if (!entryRef.current.pin) return;
-    const next = { ...entryRef.current, pin: null };
-    entryRef.current = next;
-    setEntry(next);
-    setMapStays(false);
-    settled();
-  }, [settled]);
 
   /** Open or close the Lean by hand. The choice is the reader's, so it is remembered. */
   const setLean = useCallback((open: boolean) => {
@@ -365,12 +360,11 @@ export function PaperPage({ edition }: { edition: Edition }) {
     settled();
   }, [settled]);
 
-  const onFollow = useCallback((id: string | null, zone: Zone) => {
-    setLine({ id, zone });
-    if (id) {
-      lastPassage.current = id;
-      stepAt.current = edition.passages.findIndex((p) => p.id === id);
-    }
+  const onFollow = useCallback<Follow>((id, zone, above) => {
+    setLine({ id, zone, above });
+    if (above) lastPassage.current = above;
+    const at = id ?? above;
+    stepAt.current = at ? edition.passages.findIndex((p) => p.id === at) : -1;
   }, [edition]);
 
   const pinPassage = useCallback((id: string) => {
@@ -438,7 +432,11 @@ export function PaperPage({ edition }: { edition: Edition }) {
     open({ record, tab, from: "right", stay: true, lean: true });
   }, [hereRecord, open]);
 
-  const onPinLeft = release;
+  /** A reference opens in place. Back closes it, as it undoes any other open. */
+  const openInset = useCallback((show: () => void) => {
+    const cur = entryRef.current;
+    open({ record: readRoute().record, pin: cur.pin, tab: cur.tab, lean: cur.lean, after: show, stay: true });
+  }, [open]);
 
   const step = useCallback((by: number) => {
     const list = edition.passages;
@@ -466,6 +464,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const onCardHover = useCallback((id: string | null) => {
     window.clearTimeout(dwell.current);
     if (id === null) setCardPoint(null);
+    else if (Date.now() < cardsQuiet.current) return;
     else dwell.current = window.setTimeout(() => setCardPoint(id), DWELL_MS);
   }, []);
 
@@ -572,8 +571,11 @@ export function PaperPage({ edition }: { edition: Edition }) {
     return out;
   }, [cardPoint, declarations, pin, pointedClaim, pointedName]);
 
-  const order = line.id ? edition.passages.findIndex((p) => p.id === line.id) : -1;
-  const reached = line.zone === "after" ? edition.passages.length : line.zone === "before" ? 0 : order >= 0 ? order + 1 : Math.max(0, stepAt.current + 1);
+  // The bar reads the statement in hand; what has been reached is read from the page.
+  const activeId = pin?.passage ?? line.id;
+  const order = activeId ? edition.passages.findIndex((p) => p.id === activeId) : -1;
+  const aboveIndex = line.above ? edition.passages.findIndex((p) => p.id === line.above) : -1;
+  const reached = line.zone === "after" ? edition.passages.length : Math.max(aboveIndex + 1, line.id ? edition.passages.findIndex((p) => p.id === line.id) + 1 : 0);
   const passed = useMemo(() => {
     const out = new Set<string>();
     edition.passages.slice(0, Math.max(0, reached - 1)).forEach((p) => p.lean.forEach((id) => out.add(id)));
@@ -590,10 +592,10 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const says = (() => {
     if (shown.mode === "preview") return <><b>Previewing</b> {plainOf(shown.decl ?? undefined) || stepView.title}. Move away to return.</>;
     if (shown.mode === "pin") return <><b>Pinned</b> {plainOf(pin?.decl ?? undefined) || stepView.title}<button type="button" className="proof__unpin" onClick={closeLean}>Unpin</button></>;
-    if (shown.mode === "after") return <><b>No ties here.</b> They stop at the end of {sectionLabel(lastSection)}, statement {edition.coverage.ties} of {edition.coverage.ties}.</>;
-    if (shown.mode === "between") return <><b>No tie at this line.</b> Still showing the last one, {name}.</>;
-    if (shown.mode === "start") return <><b>Before the first tie,</b> which is in {sectionLabel(firstTie)}. Showing the main claim.</>;
-    return <><b>Following the paper:</b> {stepView.title}, statement {order + 1} of {edition.coverage.ties}</>;
+    if (shown.mode === "after") return <><b>{hereLabel ? `Nothing in ${hereLabel} is in this Lean.` : "Nothing here is in this Lean."}</b> It covers {sectionLabel(firstTie)} to {sectionLabel(lastSection)}.</>;
+    if (shown.mode === "between") return <><b>No statement at this line.</b> The last was {name}.</>;
+    if (shown.mode === "start") return <><b>Before the first statement,</b> in {sectionLabel(firstTie)}. Showing the main claim.</>;
+    return <><b>Following the paper:</b> {stepView.title}</>;
   })();
 
   const backButton = entry.back && <button type="button" className="back" onClick={back} title="Your browser’s Back ( [ or Alt + Left )">Back to {entry.back}</button>;
@@ -607,15 +609,15 @@ export function PaperPage({ edition }: { edition: Edition }) {
     <p><b>{point.title}.</b> {point.text}</p>
   ) : named.length ? (
     <p><b>{named.map((d) => d.plain).join(", ")}</b> <code className="proof__sig">{named.map((d) => d.id).join(", ")}</code>. It has Lean: {named.map((d) => `lines ${d.line} to ${d.end_line}`).join(", ")}. Click to read it.</p>
-  ) : line.zone === "after" ? (
-    <p>The {edition.coverage.ties} ties on this page are in {edition.coverage.sections.map(sectionLabel).join(", ")}. {lean.scope}</p>
+  ) : entry.lean ? null : line.zone === "after" ? (
+    <p>{lean.scope}</p>
   ) : (
-    <p className="proof__readinghint">Point at a statement or a card to name it here. Click to open its Lean.</p>
+    <p className="proof__key">Square cards are definitions, round cards theorems and the violet box an axiom; green means it is in Lean, and a dashed line a use in a statement.</p>
   );
 
   const act = useMemo((): LeanActions => ({ walk: (id) => walk(id), name: (id) => setPoint(id ? { kind: "name", id } : null), plain: plainOf }), [plainOf, walk]);
 
-  const tiedLine = line.zone === "after" ? "After the last tie" : line.zone === "before" ? "Before the first tie" : line.zone === "between" ? "Between ties" : `Statement ${order + 1} of ${edition.coverage.ties}`;
+  const tiedLine = order >= 0 ? `Statement ${order + 1} of ${edition.coverage.ties}` : line.zone === "after" ? "After the last statement" : line.zone === "before" ? "Before the first statement" : `After statement ${reached}`;
   const copy = entry.copy;
   const credit = (
     <p>
@@ -637,32 +639,37 @@ export function PaperPage({ edition }: { edition: Edition }) {
         event.preventDefault();
         document.querySelector<HTMLElement>("[data-paper-pane]")?.focus();
       }}>Skip to the paper</a>
-      <header className="bar">
-        <a className="bar__home" href={routeHref({})} aria-label="Proof Reader, all papers">
-          <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={22} height={22} />
-          <span className="bar__name">Proof Reader</span>
-        </a>
-        <div className="bar__title">
-          {copy === "reading" && edition.reading ? <p className="bar__paper">{paper.short_title}</p> : <h1 className="bar__paper">{paper.short_title}</h1>}
-          {hereLabel && copy === "reading" && <p className="bar__where">{hereLabel}{here?.number ? ` ${here.title}` : ""}</p>}
+      <header className={`bar${showRight && wide && edition.reading ? " bar--spread" : ""}`}>
+        <div className="bar__left">
+          <a className="bar__home" href={routeHref({})} aria-label="Proof Reader, all papers">
+            <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={22} height={22} />
+            <span className="bar__name">Proof Reader</span>
+          </a>
+          {edition.reading && !wide && <button type="button" className="bar__contents" aria-expanded={rail} onClick={() => setRail(!rail)}>Contents</button>}
         </div>
-        {edition.reading && !wide && <button type="button" className="bar__contents" aria-expanded={rail} onClick={() => setRail(!rail)}>Contents</button>}
-        {backButton}
-        <div className="stepper" role="group" aria-label="Step through the statements tied to the Lean">
-          <button type="button" title="The previous tied statement (k)" onClick={() => step(-1)} disabled={reached <= 1}>Previous</button>
-          <span>{tiedLine}</span>
-          <button type="button" title="The next tied statement (j)" onClick={() => step(1)} disabled={line.zone === "after" || reached >= edition.passages.length}>Next</button>
-        </div>
-        {edition.reading && (
-          <div className="switch" role="group" aria-label="The left-hand page">
-            <button type="button" aria-pressed={copy === "reading"} onClick={() => switchCopy("reading")}>Reading copy</button>
-            <button type="button" aria-pressed={copy === "pdf"} onClick={() => switchCopy("pdf")}>PDF</button>
+        <div className="bar__column">
+          {backButton}
+          <div className="stepper" role="group" aria-label="Step through the statements">
+            <button type="button" title="The previous statement (k)" onClick={() => step(-1)} disabled={reached === 0 || order === 0}>Previous</button>
+            <span>{tiedLine}</span>
+            <button type="button" title="The next statement (j)" onClick={() => step(1)} disabled={reached >= edition.passages.length}>Next</button>
           </div>
-        )}
-        {(wide ? !showRight : !entry.sheet) && <button type="button" className="bar__open" onClick={() => (wide ? onLayout({ ...layout, graph: true }) : open({ sheet: true, record: readRoute().record, tab: entry.tab, lean: entry.lean || !layout.graph }))}>{wide || layout.graph ? "Graph" : "Lean"}</button>}
-        <button type="button" className="bar__theme" aria-label={scheme === "dark" ? "Use the day theme" : "Use the night theme"} onClick={() => setScheme(scheme === "dark" ? "light" : "dark")}>{scheme === "dark" ? "Day" : "Night"}</button>
-        <a className="bar__link" href={paper.url}>Published paper</a>
-        <a className="bar__link" href={lean.source}>Lean artifact</a>
+          {edition.reading && (
+            <div className="switch" role="group" aria-label="The left-hand page">
+              <button type="button" aria-pressed={copy === "reading"} onClick={() => switchCopy("reading")}>Reading copy</button>
+              <button type="button" aria-pressed={copy === "pdf"} onClick={() => switchCopy("pdf")}>PDF</button>
+            </div>
+          )}
+        </div>
+        <div className="bar__right">
+          <div className="bar__title">
+            {copy === "reading" && edition.reading ? <p className="bar__paper">{paper.short_title}</p> : <h1 className="bar__paper">{paper.short_title}</h1>}
+          </div>
+          {(wide ? !showRight : !entry.sheet) && <button type="button" className="bar__open" onClick={() => (wide ? onLayout({ ...layout, graph: true }) : open({ sheet: true, record: readRoute().record, tab: entry.tab, lean: entry.lean || !layout.graph }))}>{wide || layout.graph ? "Graph" : "Lean"}</button>}
+          <button type="button" className="bar__theme" aria-label={scheme === "dark" ? "Use the day theme" : "Use the night theme"} onClick={() => setScheme(scheme === "dark" ? "light" : "dark")}>{scheme === "dark" ? "Day" : "Night"}</button>
+          <a className="bar__link" href={paper.url}>Published paper</a>
+          <a className="bar__link" href={lean.source}>Lean artifact</a>
+        </div>
       </header>
       {entry.bad !== null && (
         <p className="badline" role="alert">
@@ -707,15 +714,19 @@ export function PaperPage({ edition }: { edition: Edition }) {
               onName={(id) => walk(id, "paper")}
               onPage={(page) => switchCopy("pdf", page)}
               onJump={jumpTo}
+              onOpenInset={openInset}
+              onInsetClosed={saveNow}
               onPoint={onPoint}
-              onPinLeft={onPinLeft}
               onReady={() => setTick((t) => t + 1)}
               hint={(
+                <>
+                <p className="firstline firstline--status">The links to Lean and the notes were made with AI and have not been reviewed by the authors.</p>
                 <p className="firstline">
-                  Click any marked statement to see its Lean.
+                  Statements with a mark beside them open their Lean.
                   {firstSection && <> The first is in <button type="button" onClick={() => jumpTo(firstSection.id)}>{sectionLabel(firstSection.number)}</button></>}
                   {claimSection && <>, the main claim in <button type="button" onClick={() => jumpTo(claimSection.id)}>{sectionLabel(claimSection.number)}</button></>}.
                 </p>
+                </>
               )}
               foot={<footer className="foot">{credit}</footer>}
             />
@@ -739,7 +750,6 @@ export function PaperPage({ edition }: { edition: Edition }) {
                 onPin={pinPassage}
                 onName={(id) => walk(id, "paper")}
                 onPoint={onPoint}
-                onPinLeft={onPinLeft}
                 onReady={() => setTick((t) => t + 1)}
               />
             </Suspense>
@@ -751,7 +761,9 @@ export function PaperPage({ edition }: { edition: Edition }) {
             onLean={setLean}
             layout={layout}
             onLayout={onLayout}
-            caption={<>{entry.back && <button type="button" className="back back--right" onClick={back}>Back to {entry.back}</button>}<p role="status">{says}</p></>}
+            caption={<p role="status">{says}</p>}
+            kept={layout.lean && entry.lean}
+            folded={entry.lean && !lit.some((id) => graph.nodes.has(id))}
             reading={readingStrip}
             onClose={wide ? undefined : closeSheet}
             graph={(

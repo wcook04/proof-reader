@@ -226,7 +226,7 @@ export function Contents({ outline, current, open, declarations, files, html, co
         </ol>
       )}
       <p className="rail__key">
-        <span>Numbers count tied statements. <kbd>j</kbd> and <kbd>k</kbd> step through them, <kbd>Enter</kbd> pins, <kbd>Esc</kbd> unpins, <kbd>[</kbd> goes back.</span>
+        <span>Numbers count statements. <kbd>j</kbd> and <kbd>k</kbd> step through them, <kbd>Enter</kbd> pins, <kbd>Esc</kbd> unpins, <kbd>[</kbd> goes back.</span>
       </p>
     </nav>
   );

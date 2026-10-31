@@ -47,6 +47,8 @@ class Part:
     start: int = 0
     code: bool = False
     link: bool = False
+    # A space added here so that a block ends a word. It is not the paper's.
+    added: bool = False
 
 
 @dataclass
@@ -94,7 +96,7 @@ def parse(source: str) -> Page:
             page.parts.append(Part("tag", raw=raw))
             if BLOCK.match(raw):
                 # Blocks end words. A space here is the reader's, not the paper's.
-                page.parts.append(Part("text", text=" ", start=length))
+                page.parts.append(Part("text", text=" ", start=length, added=True))
                 length += 1
         else:
             text = html.unescape(raw)
@@ -268,7 +270,7 @@ def weave(page: Page, spans: dict[str, tuple[int, int]], names: list[tuple[int, 
             out.append(wrap(math[int(part.raw)], part.start, part.start + len(part.text)))
         else:
             stop = part.start + len(part.text)
-            if part.text == " " and not part.code and out and out[-1].startswith("<"):
+            if part.added and not part.code and out and out[-1].startswith("<"):
                 continue
             cuts = [part.start] + [e for e in edges if part.start < e < stop] + [stop]
             for a, b in zip(cuts, cuts[1:]):
@@ -344,7 +346,8 @@ def build(folder: Path, slug: str, passages: list[dict], names: list[str], pdf_w
 
     outline = [{**entry, "ties": counts.get(entry["id"], 0), "page": page_of(entry)} for entry in done["outline"]]
     order = sorted(spans, key=lambda pid: spans[pid][0])
-    return {"html": body, "outline": outline, "words": len(ours), "formulas": len(done["math"]), "pages": len(marks), "order": order}
+    code = {pid for pid, (start, _stop) in spans.items() if any(p.code and p.kind != "tag" and p.start <= start < p.start + len(p.text) for p in page.parts)}
+    return {"html": body, "outline": outline, "words": len(ours), "formulas": len(done["math"]), "pages": len(marks), "order": order, "code": code}
 
 
 def inside(box: list[float], outer: list[float]) -> bool:

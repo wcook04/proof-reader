@@ -47,9 +47,8 @@ export function Threads({ root, target }: { root: RefObject<HTMLElement | null>;
       const paths = lines.querySelectorAll("path");
       const dots = lines.querySelectorAll("circle");
       const { passage, line } = latest.current;
-      const sheetEdge = el.querySelector<HTMLElement>(".sheet");
       const paper = el.querySelector<HTMLElement>("[data-paper-pane]");
-      const tie = passage ? el.querySelector<HTMLElement>(`.tie[data-passage="${CSS.escape(passage)}"]`) : null;
+      const tie = passage && paper ? paper.querySelector<HTMLElement>(`.tie[data-passage="${CSS.escape(passage)}"]`) : null;
       let used = 0;
       let dotted = 0;
       const dot = (p: Point) => {
@@ -65,11 +64,12 @@ export function Threads({ root, target }: { root: RefObject<HTMLElement | null>;
         p.setAttribute("d", curve(a, b));
         p.style.opacity = "1";
       };
-      if (tie && paper) {
-        const t = tie.getBoundingClientRect();
-        const pane = paper.getBoundingClientRect();
+      const t = tie?.getBoundingClientRect();
+      const pane = paper?.getBoundingClientRect();
+      // Only a statement placed and on the page has a thread.
+      if (t && pane && t.height > 0 && t.bottom > pane.top && t.top < pane.bottom) {
         const start = glide("start", {
-          x: (sheetEdge ? sheetEdge.getBoundingClientRect().right : t.right) - box.left,
+          x: pane.right - box.left,
           y: Math.max(pane.top + 6, Math.min(pane.bottom - 6, t.top + t.height / 2)) - box.top,
         });
         const page = el.querySelector<HTMLElement>(".proof");
@@ -88,6 +88,7 @@ export function Threads({ root, target }: { root: RefObject<HTMLElement | null>;
           dot(end);
         }
       }
+      if (!used) held.clear();
       for (let i = used; i < paths.length; i++) paths[i].style.opacity = "0";
       for (let i = dotted; i < dots.length; i++) dots[i].style.opacity = "0";
     };

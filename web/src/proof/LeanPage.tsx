@@ -22,6 +22,8 @@ export interface Step {
   untied: { section: string | null; last: Passage | null } | null;
 }
 
+const LINK_CAVEAT = "An AI read the two and linked them. No program has checked that they say the same thing.";
+
 export interface LeanPageHandle {
   top(): number;
   setTop(top: number): void;
@@ -119,6 +121,20 @@ export const LeanPage = memo(function LeanPage({ ref, edition, step, open, tab, 
               <header className="stepline">
                 {step.title && <p className="stepline__title">{step.title}</p>}
                 <blockquote>{step.passage.quote}</blockquote>
+                <p className="stepline__caveat">{LINK_CAVEAT}</p>
+                {step.decls.length > 1 && (
+                  <nav className="crumbs" aria-label="The declarations of this statement">
+                    <span>{step.decls.length} declarations here</span>
+                    {step.decls.map((id) => (
+                      <button key={id} type="button" onClick={(event) => {
+                        const block = body.current?.querySelector<HTMLElement>(`.decl[data-decl="${CSS.escape(id)}"]`);
+                        const pane = body.current;
+                        if (block && pane) pane.scrollTop += block.getBoundingClientRect().top - pane.getBoundingClientRect().top;
+                        event.currentTarget.blur();
+                      }}>{act.plain(id)}</button>
+                    ))}
+                  </nav>
+                )}
               </header>
             )}
             {!step.untied && <Crumbs edition={edition} id={step.decls[0]} onPassage={onPassage} />}
@@ -185,10 +201,10 @@ function Untied({ edition, untied, onPassage }: { edition: Edition; untied: NonN
   const last = untied.last;
   return (
     <div className="untied">
-      <h3>{untied.section ? `Nothing in ${untied.section} is tied to the Lean.` : "Nothing here is tied to the Lean."}</h3>
-      <p>The {edition.coverage.ties} ties on this page are in {list(tied)}. {edition.lean.scope}</p>
+      <h3>{untied.section ? `Nothing in ${untied.section} is in this Lean.` : "Nothing here is in this Lean."}</h3>
+      <p>The {edition.coverage.ties} statements linked to it are in {list(tied)}. {edition.lean.scope}</p>
       <p className="untied__go">
-        {last && <button type="button" onClick={() => onPassage(last.id)}>Go to the last tie, in {sectionLabel(last.section)}</button>}
+        {last && <button type="button" onClick={() => onPassage(last.id)}>Go to the last statement, in {sectionLabel(last.section)}</button>}
       </p>
     </div>
   );
@@ -226,7 +242,7 @@ function AllDeclarations({ edition, act }: { edition: Edition; act: LeanActions 
                 <th scope="row"><DeclLink paper={slug} name={d.id} act={act} className="declname" /></th>
                 <td><i className={`key-shape key-shape--${shapeOf(d)}`} aria-hidden="true" />{KIND_WORDS[d.keyword] ?? d.keyword}</td>
                 <td>{d.line}{d.lines > 1 ? ` to ${d.end_line}` : ""}</td>
-                <td>{sections.length ? sections.map(sectionLabel).join(", ") : "Not tied"}</td>
+                <td>{sections.length ? sections.map(sectionLabel).join(", ") : "Not linked"}</td>
               </tr>
             );
           })}

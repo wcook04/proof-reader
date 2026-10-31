@@ -223,7 +223,8 @@ html = html.replace(/<div class="code-columns">([\s\S]*?)<\/div>/g, (all, body) 
 });
 
 const blockEnd = /<\/(?:p|li)>/g;
-for (const [number, body] of notes) {
+// Last first, so that two notes on one block keep their order.
+for (const [number, body] of [...notes].reverse()) {
   const at = html.indexOf(`id="noteref-${number}"`);
   if (at < 0) throw new Error(`footnote ${number} is never marked`);
   blockEnd.lastIndex = at;

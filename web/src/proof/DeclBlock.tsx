@@ -2,6 +2,7 @@
 // the rest behind Proof ▶ where that helps, what it uses and what uses it, what Lean
 // reports about its axioms, where the paper states it and the authors' source.
 
+import { useEffect, useState } from "react";
 import type { Declaration, Edition, Passage } from "../app/edition";
 import { DeclLink, LeanCode, useFileLines, type LeanActions } from "../lean/code";
 import { isType, sectionLabel, shapeOf } from "../model/fromEdition";
@@ -20,13 +21,20 @@ export const KIND_WORDS: Record<string, string> = {
   opaque: "Definition",
 };
 
-const RELATION: Record<Passage["role"], string> = {
-  states: "This sentence states it.",
-  defines: "This sentence defines it.",
-  proves: "This sentence proves part of it.",
-  explains: "This sentence explains it.",
-  uses: "This sentence uses it.",
-};
+/** How the paper's words stand to the Lean, saying no more than the two say. */
+function relation(p: Passage): string {
+  const it = p.code ? "This line" : "This sentence";
+  const words: Record<Passage["role"], string> = {
+    states: "states it",
+    defines: "defines it",
+    proves: "proves part of it",
+    explains: "explains it",
+    uses: "uses it",
+    mentions: "only mentions it",
+    mirrors: "corresponds to it",
+  };
+  return `${p.role === "mirrors" ? "This Haskell line" : it} ${words[p.role]}.`;
+}
 
 export const list = (names: string[]) => (names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`);
 
@@ -64,6 +72,21 @@ function Axioms({ edition, d, act }: { edition: Edition; d: Declaration; act: Le
   );
 }
 
+/** Adapted from Lean Exposition's CopyName. */
+function CopyName({ name }: { name: string }) {
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 1600);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
+  return (
+    <button type="button" className="decl__copy" onClick={() => void navigator.clipboard?.writeText(name).then(() => setCopied(true))}>
+      <span aria-live="polite">{copied ? "Copied" : "Copy name"}</span>
+    </button>
+  );
+}
+
 interface Props {
   edition: Edition;
   d: Declaration;
@@ -91,9 +114,10 @@ export function DeclBlock({ edition, d, passage, exact, open, onToggle, onPassag
       <header className="decl__head">
         <h3 className="decl__name"><a href={routeHref({ paper: edition.slug, record: d.id })}>{d.plain}</a></h3>
         <code className="decl__raw">{d.id}</code>
+        <CopyName name={d.id} />
         <span className="decl__kind">{KIND_WORDS[d.keyword] ?? d.keyword}, line{d.lines > 1 ? `s ${d.line} to ${d.end_line}` : ` ${d.line}`}</span>
       </header>
-      {passage && <p className="decl__relation">{RELATION[passage.role]}</p>}
+      {passage && <p className="decl__relation">{relation(passage)}</p>}
       {d.note && <p className="decl__note">{d.note.text}</p>}
       <Axioms edition={edition} d={d} act={act} />
       <div className="decl__code" tabIndex={0} aria-label={`Statement of ${d.id}`}>
@@ -119,9 +143,9 @@ export function DeclBlock({ edition, d, passage, exact, open, onToggle, onPassag
       )}
       <div className="decl__links">
         <div>
-          <p className="decl__label">It uses</p>
-          {statementUses.length > 0 && <p>In its statement: <Names edition={edition} names={statementUses} act={act} /></p>}
-          {bodyUses.length > 0 && <p>Only in its {word.toLowerCase()}: <Names edition={edition} names={bodyUses} act={act} /></p>}
+          <p className="decl__label">Names in this statement</p>
+          {statementUses.length > 0 && <Names edition={edition} names={statementUses} act={act} />}
+          {bodyUses.length > 0 && <><p className="decl__label">Only in its {word.toLowerCase()}</p><Names edition={edition} names={bodyUses} act={act} /></>}
           {!statementUses.length && !bodyUses.length && <p>Nothing else on this page.</p>}
         </div>
         <div>

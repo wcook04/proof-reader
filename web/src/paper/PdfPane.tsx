@@ -11,7 +11,7 @@ import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import type { Mention, Passage } from "../app/edition";
 import type { Pin } from "../app/history";
-import { DWELL_MS, FOLLOW_MS, READING_LINE, type PaperHandle, type Pointed, type Target, type Where, type Zone } from "./reading-line";
+import { DWELL_MS, FOLLOW_MS, READING_LINE, type Follow, type PaperHandle, type Pointed, type Target, type Where, type Zone } from "./reading-line";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
@@ -30,12 +30,11 @@ interface Props {
   hidden: boolean;
   pin: Pin | null;
   lit: ReadonlySet<string>;
-  onFollow(id: string | null, zone: Zone): void;
+  onFollow: Follow;
   onSettle(): void;
   onPin(id: string): void;
   onName(name: string): void;
   onPoint(pointed: Pointed): void;
-  onPinLeft(): void;
   onReady(): void;
 }
 
@@ -61,6 +60,7 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
   const lastTarget = useRef<Target | null>(null);
   const line = useRef<string | null>(null);
   const zone = useRef<Zone>("before");
+  const lineAbove = useRef<string | null>(null);
 
   const [left, top, right, bottom] = crop;
   const scale = width / (right - left);
@@ -121,16 +121,22 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
 
   const whereNow = useCallback((): Where => {
     const el = scroller.current;
-    if (!el) return { passage: null, zone: "before", section: null, page: 1, into: 0 };
+    if (!el) return { passage: null, zone: "before", above: null, section: null, page: 1, into: 0 };
     const at = el.scrollTop + el.clientHeight * READING_LINE;
     let best: Passage | null = null;
     let bestGap = el.clientHeight * 0.5;
     let first = Infinity;
     let last = -Infinity;
+    let above: string | null = null;
+    let aboveTop = -Infinity;
     for (const p of passages) {
       const y = passageTop(p);
       first = Math.min(first, y);
       last = Math.max(last, y);
+      if (y <= at && y >= aboveTop) {
+        above = p.id;
+        aboveTop = y;
+      }
       const gap = Math.abs(y - at);
       if (gap <= bestGap) {
         best = p;
@@ -142,24 +148,26 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
     return {
       passage: best?.id ?? null,
       zone: best ? "tied" : at < first ? "before" : at > last ? "after" : "between",
+      above,
       section: null,
       page,
       into: (Math.max(0, at - PAGE_GAP) / step) % 1,
     };
   }, [pageHeight, passageTop, passages, sizes.length]);
 
-  const followSoon = useCallback((id: string | null, kind: Zone) => {
+  const followSoon = useCallback((id: string | null, kind: Zone, above: string | null) => {
     window.clearTimeout(follow.current);
-    follow.current = window.setTimeout(() => latest.current.onFollow(id, kind), FOLLOW_MS);
+    follow.current = window.setTimeout(() => latest.current.onFollow(id, kind, above), FOLLOW_MS);
   }, []);
 
   const read = useCallback(() => {
     const here = whereNow();
-    if (here.passage !== line.current || here.zone !== zone.current) {
+    if (here.passage !== line.current || here.zone !== zone.current || here.above !== lineAbove.current) {
       line.current = here.passage;
       zone.current = here.zone;
+      lineAbove.current = here.above;
       setActive(here.passage);
-      followSoon(here.passage, here.zone);
+      followSoon(here.passage, here.zone, here.above);
     }
   }, [followSoon, whereNow]);
 
@@ -207,7 +215,7 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
       scrollTo(target.top, true, true);
       // A return is not reading on: the right page comes back at once.
       window.clearTimeout(follow.current);
-      latest.current.onFollow(line.current, zone.current);
+      latest.current.onFollow(line.current, zone.current, lineAbove.current);
       return true;
     }
     if ("passage" in target) {
@@ -216,8 +224,9 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
       line.current = passage.id;
       zone.current = "tied";
       setActive(passage.id);
+      lineAbove.current = passage.id;
       scrollTo(passageTop(passage) - el.clientHeight * READING_LINE, instant, false);
-      followSoon(passage.id, "tied");
+      followSoon(passage.id, "tied", passage.id);
       return true;
     }
     if ("page" in target) {
@@ -234,6 +243,7 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
     top: () => scroller.current?.scrollTop ?? 0,
     width: () => scroller.current?.clientWidth ?? 0,
     where: whereNow,
+    active: () => line.current,
     block: () => null,
     focusPassage: () => scroller.current?.focus({ preventScroll: true }),
     mark: (id) => {
@@ -263,12 +273,6 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
       if (goal.current !== null) {
         if (Math.abs(el.scrollTop - goal.current) <= 2) return;
         goal.current = null;
-      }
-      const current = latest.current.pin;
-      if (current) {
-        const passage = current.passage ? passages.find((p) => p.id === current.passage) : null;
-        const gone = passage ? Math.abs(passageTop(passage) - el.scrollTop - el.clientHeight / 2) > el.clientHeight * 0.6 : current.at !== null && Math.abs(el.scrollTop - current.at) > el.clientHeight * 0.9;
-        if (gone) latest.current.onPinLeft();
       }
       read();
     };

@@ -86,8 +86,8 @@ export interface MapViewHandle {
   toggleInputs(id: string): void;
   /** Draw everything below one record, holding that record still. */
   openBelow(id: string): void;
-  /** Proof Reader: the smallest pan that brings these records into view, at the present scale. */
-  panTo(ids: readonly string[]): void;
+  /** Proof Reader: the smallest pan that brings these records into view, at the present scale; or, with `centre`, level with the middle of the canvas. */
+  panTo(ids: readonly string[], options?: { centre?: boolean }): void;
 }
 
 export interface TreeProps {
@@ -1221,7 +1221,7 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
       const b = layoutBounds(l);
       const box = { x0: b.x0 - 16, y0: b.y0 - 16, x1: b.x1 + 16, y1: b.y1 + 16 };
       // As large as fits, never below the 11px floor: what does not fit then pans.
-      if (denseRef.current) return frameBox(box, viewport(), { min: DENSE_MIN_K, max: fitMaxRef.current, anchor: boxOf(l, goalRef.current), top: true });
+      if (denseRef.current) return frameBox(box, viewport(), { min: DENSE_MIN_K, max: fitMaxRef.current, anchor: boxOf(l, goalRef.current), top: fitMaxRef.current <= 1.15 });
       return fitBounds(box, viewport(), { max: 1, min: floorK(false, compact) });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1583,13 +1583,13 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
       },
       revealIds: doRevealIds,
       focusIds: doFocusIds,
-      panTo: (ids) => {
+      panTo: (ids, options) => {
         const l = builtRef.current.layout;
         const drawn = ids.flatMap((id) => pick(l, id) ?? []);
         const cur = targetView();
         const b = boundsOf(l, drawn, 14) ?? null;
         const one = !b ? null : (b.x1 - b.x0) * cur.k > viewport().width || (b.y1 - b.y0) * cur.k > viewport().height ? boundsOf(l, drawn.slice(0, 1), 14) : b;
-        const v = one ? ensureVisible(one, viewport(), cur, cur.k) : null;
+        const v = !one ? null : options?.centre ? { ...cur, y: viewport().height / 2 - ((one.y0 + one.y1) / 2) * cur.k } : ensureVisible(one, viewport(), cur, cur.k);
         if (v) moveCamera(v, true);
       },
       focusCard: (id) => {

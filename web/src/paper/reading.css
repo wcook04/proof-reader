@@ -32,19 +32,22 @@
 
 .reading { position: relative; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; scrollbar-width: thin; outline-offset: -2px; background: var(--sheet); overflow-anchor: none; }
 .sheet { --code-cap: 0.8125rem; position: relative; background: var(--sheet); container-type: inline-size; }
-.firstline { box-sizing: border-box; margin: 0 auto; width: min(36rem, 100cqi - 2 * clamp(20px, 7cqi, 60px)); padding: 12px 0 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--ink-2); }
+.firstline { box-sizing: border-box; margin: 0 auto; width: min(var(--column, 36rem), 100cqi - 2 * clamp(20px, 7cqi, 60px)); padding: 4px 0 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--ink-2); }
+.firstline--status { padding-top: 12px; color: var(--ink); }
 .firstline button { min-height: 24px; color: var(--lit); text-decoration: underline; text-underline-offset: 3px; }
-.sheet__text { position: relative; padding: 24px clamp(20px, 7cqi, 60px) 48px; font-family: var(--font-serif); font-size: var(--fs-read); line-height: 1.58; color: var(--ink); font-variant-numeric: oldstyle-nums proportional-nums; font-kerning: normal; hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
+.sheet__text { position: relative; padding: 24px clamp(20px, 7cqi, 60px) 48px; font-family: var(--font-serif); font-size: var(--fs-read); line-height: 1.5; color: var(--ink); font-variant-numeric: oldstyle-nums proportional-nums; font-kerning: normal; hyphens: auto; -webkit-hyphens: auto; hyphenate-limit-chars: 8 3 3; -webkit-hyphenate-limit-before: 3; -webkit-hyphenate-limit-after: 3; overflow-wrap: break-word; }
 .sheet__text { --bleed: min(100cqi - 2 * clamp(10px, 3.2cqi, 28px), 44rem); }
 .sheet__text > * { max-width: 36rem; margin-left: auto; margin-right: auto; }
 .sheet__text p, .sheet__text ul, .sheet__text ol { margin: 0 auto 0.72em; }
 .sheet__text p { text-wrap: pretty; }
 
 /* The tie marks run down the sheet's edge nearest the Lean. */
-.sheet__ties { position: absolute; top: 0; right: 0; width: 14px; height: 100%; pointer-events: none; }
-.sheet .tie { position: absolute; right: 0; width: 14px; border-radius: 0; background: none; pointer-events: auto; cursor: pointer; }
-.sheet .tie::after { content: ""; position: absolute; top: 0; bottom: 0; right: 4px; width: 3px; border-radius: 2px; background: var(--tie-rest); transition: background-color 140ms linear; }
-.sheet .tie.is-lit::after, .sheet .tie.is-hover::after, .sheet .tie.is-active::after, .sheet .tie.is-pinned::after { background: var(--thread); width: 4px; }
+/* A statement's mark runs down the margin, 19px left of its text, or outside a code well. */
+.sheet__ties { position: absolute; inset: 0; pointer-events: none; }
+.sheet .tie { --edge: max(clamp(20px, 7cqi, 60px), (100cqi - var(--column, 36rem)) / 2); position: absolute; left: calc(var(--edge) - 27px); width: 12px; border-radius: 0; background: none; pointer-events: auto; cursor: pointer; }
+.sheet .tie--code { left: calc((100cqi - min(100cqi - 2 * clamp(10px, 3.2cqi, 28px), var(--bleed-max, 44rem))) / 2 - 12px); }
+.sheet .tie::after { content: ""; position: absolute; top: 0; bottom: 0; left: 6px; width: 2px; border-radius: 1px; background: var(--tie-rest); transition: background-color 140ms linear; }
+.sheet .tie.is-lit::after, .sheet .tie.is-hover::after, .sheet .tie.is-active::after, .sheet .tie.is-pinned::after { background: var(--thread); }
 
 /* Passages tied to the Lean */
 .q { cursor: pointer; border-radius: 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: background-color 140ms linear; }
@@ -174,12 +177,12 @@ dialog.plot p { margin: 8px 0 0; font-family: var(--font-sans); font-size: var(-
   .sheet__text .code-columns { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .sheet__text .code-columns pre.code { --room: calc(var(--bleed) - 2 * 14px); }
   .sheet__text .code-columns pre.code code { font-size: max(0.65rem, min(var(--code-cap), calc(var(--room) / var(--cols) / 0.6))); }
-  .pg { position: static; display: block; margin: 0 0 2px; text-align: right; }
+  .sheet__text a.pg { position: static; display: block; margin: 0 0 2px; padding: 0; text-align: right; }
 }
 
 /* A big monitor gets a bigger book, not wider margins of desk. */
 @media (min-width: 2100px) {
-  .sheet { --code-cap: 0.9375rem; }
+  .sheet { --code-cap: 0.9375rem; --column: 42rem; --bleed-max: 54rem; }
   .sheet__text { --bleed: min(100cqi - 2 * clamp(10px, 3.2cqi, 28px), 54rem); font-size: 1.3125rem; }
   .sheet__text > * { max-width: 42rem; }
   .sheet__text h2 { font-size: 1.75rem; }

@@ -16,6 +16,8 @@ const INSETS: Insets = { top: 10, right: 12, bottom: 10, left: 12 };
 /** Narrow tiles, so that at the 11px floor the proof fits half a laptop's window. */
 const TILE_W = 134;
 const TILE_H = 64;
+/** Under this height the graph is the band above the Lean. */
+const BAND = 340;
 
 export interface MapPaneHandle {
   scene(): MapScene | null;
@@ -57,8 +59,16 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
   const pausedRef = useRef(false);
   const litIds = useMemo(() => (lit.length ? new Set(lit) : null), [lit]);
   const litKey = lit.join("|");
+  const shelf = useRef<HTMLDivElement>(null);
+  // The shelf is one line: bring a lit type into it.
+  useEffect(() => {
+    const row = shelf.current;
+    const item = row?.querySelector<HTMLElement>(".is-lit");
+    if (row && item) row.scrollLeft = Math.max(0, item.offsetLeft - row.offsetLeft - 8);
+  }, [litKey]);
   const stayRef = useRef(stay);
   stayRef.current = stay;
+  const leanRef = useRef(leanOpen);
 
   // Scrolling must stay smooth, so the trail is written straight onto the tiles.
   const writeTrail = useCallback(() => {
@@ -86,7 +96,8 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
   useEffect(() => {
     if (pausedRef.current || stayRef.current || !lit.length) return;
     const drawn = lit.filter((id) => graph.nodes.has(id));
-    if (drawn.length && !inView(drawn)) tree.current?.panTo(drawn);
+    if (drawn.length && leanRef.current && (body.current?.clientHeight ?? 0) < BAND) tree.current?.panTo(drawn, { centre: true });
+    else if (drawn.length && !inView(drawn)) tree.current?.panTo(drawn);
     // Only when what is lit changes: the map re-centres itself when its room changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [litKey]);
@@ -141,7 +152,6 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
   }, [goal, inView]);
 
   // The Lean rises: remember the camera, to give it back exactly when the Lean goes.
-  const leanRef = useRef(leanOpen);
   const before = useRef<MapScene | null>(null);
   useLayoutEffect(() => {
     if (leanRef.current === leanOpen) return;
@@ -157,7 +167,8 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
     let size = "";
     const observer = new ResizeObserver(() => {
       const next = `${el.clientWidth}x${el.clientHeight}`;
-      if (next === size) return;
+      // Folded away for a statement with no card: the camera waits.
+      if (next === size || !el.clientHeight) return;
       const first = !size;
       size = next;
       if (first) return;
@@ -165,7 +176,9 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
       timer = window.setTimeout(() => {
         if (restoring.current) return;
         if (leanRef.current) {
-          if (litRef.current.length && !inView(litRef.current)) tree.current?.panTo(litRef.current);
+          // A band of graph is only useful with the card in the middle of it.
+          if (litRef.current.length && el.clientHeight < BAND) tree.current?.panTo(litRef.current, { centre: true });
+          else if (litRef.current.length && !inView(litRef.current)) tree.current?.panTo(litRef.current);
         } else if (before.current) {
           tree.current?.restoreScene(before.current);
           before.current = null;
@@ -201,7 +214,7 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
         tileWidth={TILE_W}
         tileHeight={TILE_H}
         oneCardEach
-        fitMax={1.4}
+        fitMax={1.8}
         selected={selected ?? undefined}
         litIds={litIds}
         previewIds={pointed}
@@ -230,34 +243,20 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
           ))}
         </div>
       )}
-      <div className="graph__canvas" ref={body}>{map}</div>
       {types.length > 0 && (
         <div className="vocab" aria-label="Types the proof is written in">
           <span className="vocab__name">Types</span>
-          {types.map((d) => (
-            <button key={d.id} type="button" data-vocab={d.id} className={lit.includes(d.id) ? "is-lit" : ""} onClick={() => onSelect(d.id)} onMouseEnter={() => onHover(d.id)} onMouseLeave={() => onHover(null)} onFocus={() => onHover(d.id)} onBlur={() => onHover(null)}>
-              {d.plain}
-            </button>
-          ))}
-          <span className="vocab__reached">Reached {reached} of {edition.declarations.length}</span>
+          <div className="vocab__list" ref={shelf}>
+            {types.map((d) => (
+              <button key={d.id} type="button" data-vocab={d.id} className={lit.includes(d.id) ? "is-lit" : ""} aria-label={`${d.plain} (${d.id})`} onClick={() => onSelect(d.id)} onMouseEnter={() => onHover(d.id)} onMouseLeave={() => onHover(null)} onFocus={() => onHover(d.id)} onBlur={() => onHover(null)}>
+                {d.plain}
+              </button>
+            ))}
+          </div>
+          <span className="vocab__reached">{reached} of {edition.declarations.length} declarations reached</span>
         </div>
       )}
-      <GraphKey />
+      <div className="graph__canvas" ref={body}>{map}</div>
     </section>
   );
 });
-
-/** What a card's shape, fill and lines say, for someone who has not seen a blueprint. */
-function GraphKey() {
-  return (
-    <p className="graph__key" aria-label="Key to the graph">
-      <span><i className="key-shape key-shape--definition" aria-hidden="true" />Definition</span>
-      <span><i className="key-shape key-shape--theorem" aria-hidden="true" />Theorem</span>
-      <span><i className="key-shape key-shape--axiom" aria-hidden="true" />Axiom, assumed</span>
-      <span><i className="key-trail key-trail--lean" aria-hidden="true" />In Lean</span>
-      <span><i className="key-trail key-trail--here" aria-hidden="true" />Here</span>
-      <span><svg width="18" height="8" aria-hidden="true"><path d="M0 4h18" className="key-line" /></svg>Proof use</span>
-      <span><svg width="18" height="8" aria-hidden="true"><path d="M0 4h18" className="key-line key-line--statement" /></svg>Statement use</span>
-    </p>
-  );
-}

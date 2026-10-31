@@ -69,6 +69,7 @@ function Shelf() {
                     <span className="shelf__title">{p.title}</span>
                     <span className="shelf__by">{p.authors.join(", ")}</span>
                     <span className="shelf__by">{p.venue}</span>
+                    <span className="shelf__status">The links to Lean and the notes were made with AI and have not been reviewed by the authors.</span>
                   </span>
                 </a>
               </li>

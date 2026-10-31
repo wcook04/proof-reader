@@ -49,7 +49,7 @@ STANDARD_AXIOMS = {"propext", "Quot.sound", "Classical.choice"}
 INK_DPI = 40
 INK = 200
 MARGIN = 14
-ROLES = ("states", "defines", "proves", "explains", "uses")
+ROLES = ("states", "defines", "proves", "explains", "uses", "mentions", "mirrors")
 # A type is read whole: its constructors or fields are its statement.
 READ_WHOLE = ("inductive", "structure", "class", "axiom")
 PLAIN_LIMIT = 40
@@ -475,6 +475,9 @@ def edition(slug: str) -> dict:
         # Blocks move between the PDF and the reading copy, so tie order follows the reader.
         place = {pid: index for index, pid in enumerate(setting.pop("order"))}
         data["passages"].sort(key=lambda p: place[p["id"]])
+        in_code = setting.pop("code")
+        for passage in data["passages"]:
+            passage["code"] = passage["id"] in in_code
     named_in_paper = [d["id"] for d in declarations if d["passages"]]
     custom = sorted(d["id"] for d in declarations if d["keyword"] == "axiom")
     paper = config["paper"]

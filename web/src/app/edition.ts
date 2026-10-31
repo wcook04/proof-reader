@@ -6,7 +6,9 @@ export interface Rect extends Array<number> {}
 export interface Passage {
   id: string;
   section: string;
-  role: "states" | "defines" | "proves" | "explains" | "uses";
+  role: "states" | "defines" | "proves" | "explains" | "uses" | "mentions" | "mirrors";
+  /** It is a line of code in the paper, not a sentence. */
+  code?: boolean;
   quote: string;
   lean: string[];
   page: number;

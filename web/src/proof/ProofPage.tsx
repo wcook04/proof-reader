@@ -42,11 +42,15 @@ export function saveLayout(layout: Layout) {
 
 interface Props {
   caption: ReactNode;
-  /** A signature or a reference under the pointer. Its room is always kept, so nothing moves. */
+  /** One line under the graph: the key, or what is under the pointer. */
   reading: ReactNode;
   graph: ReactNode;
   lean: ReactNode;
   leanOpen: boolean;
+  /** The reader's own choice to keep the Lean open while reading. */
+  kept: boolean;
+  /** No card to show for what is open, so the graph folds to its shelf. */
+  folded: boolean;
   onLean(open: boolean): void;
   layout: Layout;
   onLayout(next: Layout): void;
@@ -54,7 +58,7 @@ interface Props {
   onClose?(): void;
 }
 
-export const ProofPage = memo(function ProofPage({ caption, reading, graph, lean, leanOpen, onLean, layout, onLayout, onClose }: Props) {
+export const ProofPage = memo(function ProofPage({ caption, reading, graph, lean, leanOpen, kept, folded, onLean, layout, onLayout, onClose }: Props) {
   const root = useRef<HTMLDivElement>(null);
   const panes = useRef<HTMLDivElement>(null);
   const [side, setSide] = useState(false);
@@ -132,11 +136,11 @@ export const ProofPage = memo(function ProofPage({ caption, reading, graph, lean
         <div className="proof__says">{caption}</div>
         <div className="proof__show" role="group" aria-label="Show on this page">
           <button type="button" aria-pressed={layout.graph} title={layout.graph ? "Close the graph" : "Open the graph"} onClick={() => change({ ...layout, graph: !layout.graph })}>Graph</button>
-          <button type="button" aria-pressed={leanOpen} title={leanOpen ? "Close the Lean" : "Open the Lean, which then follows the paper"} onClick={() => onLean(!leanOpen)}>Lean</button>
+          <button type="button" aria-pressed={kept} title={kept ? "Close the Lean" : "Open the Lean and leave it open: it follows the paper"} onClick={() => onLean(!kept)}>{kept ? "Lean kept open" : "Keep the Lean open"}</button>
         </div>
         {onClose && <button type="button" className="proof__close" onClick={onClose}>Close</button>}
       </div>
-      <div className={`proof__panes${both ? " is-both" : ""}${dragging ? " is-dragging" : ""}`} ref={panes}>
+      <div className={`proof__panes${both ? " is-both" : ""}${both && folded && !side ? " is-fold" : ""}${dragging ? " is-dragging" : ""}`} ref={panes}>
         <div className="proof__graph" hidden={!layout.graph}>{graph}</div>
         {layout.graph && (
           <div
@@ -156,7 +160,7 @@ export const ProofPage = memo(function ProofPage({ caption, reading, graph, lean
         )}
         <div className="proof__lean" hidden={!leanOpen}>{lean}</div>
       </div>
-      <div className="proof__reading">{reading}</div>
+      {reading && <div className="proof__reading">{reading}</div>}
     </div>
   );
 });
