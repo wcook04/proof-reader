@@ -76,7 +76,7 @@ export function Threads({ root, target }: { root: RefObject<HTMLElement | null>;
         if (row && body) {
           const r = row.getBoundingClientRect();
           const s = body.getBoundingClientRect();
-          const end = glide("end", { x: s.left - box.left, y: Math.max(s.top + 8, Math.min(s.bottom - 8, r.top + 11)) - box.top });
+          const end = glide("end", { x: s.left - box.left - 3, y: Math.max(s.top + 8, Math.min(s.bottom - 8, r.top + 11)) - box.top });
           dot(start);
           stroke(start, end);
           dot(end);

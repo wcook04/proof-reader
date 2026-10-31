@@ -22,6 +22,8 @@ export interface OutlineEntry {
   title: string;
   level: number;
   ties: number;
+  /** The PDF page the section starts on. */
+  page: number;
 }
 
 /** A Lean name printed in the paper, found by matching words at build time. */

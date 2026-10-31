@@ -2,7 +2,7 @@
 // lined up beside its sentence. Above it, what Lean reports about that
 // declaration and any note, kept short so the file stays the subject.
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, type CSSProperties } from "react";
 import type { Declaration, Edition } from "../app/edition";
 import { isType } from "../model/fromEdition";
 import { READING_LINE } from "../paper/reading-line";
@@ -30,13 +30,13 @@ interface Props {
   onPassage(id: string): void;
   /** The exact lines the sentence being read describes, when it names them. */
   exact: [number, number] | null;
-  /** The reader has moved on to a part of the paper with nothing tied to the Lean. */
-  away: boolean;
+  /** A line for the reader above the Lean: how to begin, or that nothing here is tied. */
+  notice: string | null;
   /** Present when the reader came here from the map. */
   onBack?(): void;
 }
 
-export function LeanPane({ edition, selected, reading, exact, away, onSelect, onPassage, onBack }: Props) {
+export function LeanPane({ edition, selected, reading, exact, notice, onSelect, onPassage, onBack }: Props) {
   const declaration = edition.declarations.find((d) => d.id === selected) ?? edition.declarations.find((d) => reading.includes(d.id)) ?? null;
   const file = declaration?.file ?? Object.keys(edition.lean.files)[0];
   const lit = useMemo(() => edition.declarations.filter((d) => reading.includes(d.id) && d.file === file), [edition, file, reading]);
@@ -44,7 +44,7 @@ export function LeanPane({ edition, selected, reading, exact, away, onSelect, on
     <aside className="leaf" aria-label="Lean">
       <div className="leaf__head">
         {onBack && <button type="button" className="leaf__back" onClick={onBack}>Back to the map</button>}
-        {away && <p className="leaf__away">Nothing near this part of the paper is tied to the Lean. This is the last declaration you passed.</p>}
+        {notice && !onBack && <p className="leaf__notice">{notice}</p>}
         {declaration ? <Head edition={edition} d={declaration} onSelect={onSelect} onPassage={onPassage} /> : <h2 className="leaf__name">{file}</h2>}
       </div>
       <Source text={edition.lean.files[file]} name={file} focus={declaration} lit={lit} exact={exact} known={edition.declarations} onSelect={onSelect} />
@@ -74,13 +74,13 @@ function Head({ edition, d, onSelect, onPassage }: { edition: Edition; d: Declar
               ))}
             </>
           ) : (
-            <>Lean reports this uses none of the authors' axioms.</>
+            <>Lean reports this uses none of the authors’ axioms.</>
           )}
         </p>
       )}
       {d.note && <p className="leaf__note">{d.note.text}</p>}
       {!isType(d) && d.used_by.length > 0 && (
-        <p className="leaf__line">
+        <p className="leaf__line leaf__more">
           Used by{" "}
           {d.used_by.map((name) => (
             <button key={name} type="button" className="jump" onClick={() => onSelect(name)}><code>{name}</code></button>
@@ -88,7 +88,7 @@ function Head({ edition, d, onSelect, onPassage }: { edition: Edition; d: Declar
         </p>
       )}
       {pages.length > 1 && (
-        <p className="leaf__line">
+        <p className="leaf__line leaf__more">
           In the paper at{" "}
           {pages.map((p) => (
             <button key={p.id} type="button" className="jump" onClick={() => onPassage(p.id)}>page {p.page}</button>
@@ -163,7 +163,10 @@ function Source({ name, text, focus, lit, exact, known, onSelect }: SourceProps)
     if (!el || !row || !paper) return;
     const align = (behavior: ScrollBehavior) => {
       const line = paper.getBoundingClientRect().top + paper.clientHeight * READING_LINE;
-      el.scrollTo({ top: row.offsetTop - (line - el.getBoundingClientRect().top) + 11, behavior });
+      // Level with the paper's reading line where that falls inside this pane; a tall
+      // head or a stacked phone layout can put it above, and the code must still show.
+      const room = Math.max(14, Math.min(line - el.getBoundingClientRect().top, el.clientHeight * 0.6));
+      el.scrollTo({ top: row.offsetTop - room + 11, behavior });
     };
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     align(reduced ? "auto" : "smooth");
@@ -187,10 +190,12 @@ function Source({ name, text, focus, lit, exact, known, onSelect }: SourceProps)
           const on = lit.some(within) ? " is-on" : "";
           const isFocus = focus && within(focus) ? " is-on" : "";
           const isExact = exact && line >= exact[0] && line <= exact[1] ? " is-exact" : "";
+          // A long line wraps under its own code, so nesting stays readable.
+          const indent = /^ */.exec(pieces.map((piece) => piece.text).join(""))?.[0].length ?? 0;
           return (
             <span key={line} className={`source__line${on || isFocus}${isExact}`} data-line={line}>
               <span className="source__no" aria-hidden="true">{line}</span>
-              <span className="source__text">
+              <span className="source__text" style={{ "--indent": indent } as CSSProperties}>
                 {pieces.map((piece, i) => {
                   // Types take one colour on both pages, so the same name reads the same.
                   const typed = piece.kind === "ident" && /^[A-Z]/.test(piece.text);

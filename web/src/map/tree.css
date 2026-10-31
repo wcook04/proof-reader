@@ -591,7 +591,7 @@
   justify-content: center;
   gap: calc(5px / var(--k));
   /* TILE in canvas/representation.ts: the engine sizes titles to fit this box. */
-  padding: calc(10px / var(--k)) calc(8px / var(--k)) calc(7px / var(--k));
+  padding: calc(5px / var(--k)) calc(8px / var(--k));
   text-align: center;
   opacity: 0;
   pointer-events: none;

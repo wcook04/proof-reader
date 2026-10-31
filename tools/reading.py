@@ -15,6 +15,7 @@ import json
 import re
 import subprocess
 import unicodedata
+from bisect import bisect_left
 from collections import Counter
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
@@ -288,7 +289,7 @@ def page_marks(words: list[tuple[int, int]], found: dict[int, int], theirs_pages
         if page == reached + 1:
             reached = page
             text = label.format(page=page)
-            marks[start] = f'<a class="pg" data-page="{page}" href="{route}/@page-{page}" aria-label="PDF page {page}">{text}</a>'
+            marks[start] = f'<a class="pg" data-page="{page}" href="{route}/@page-{page}" title="Open page {page} of the PDF" aria-label="Open page {page} of the PDF">{text}</a>'
     return marks
 
 
@@ -300,6 +301,11 @@ def build(folder: Path, slug: str, passages: list[dict], names: list[str], pdf_w
     route = f"./#/{slug}"
     source = re.sub(r'href="#([^"]+)"', lambda m: f'href="{route}/@{m[1]}"', done["html"])
     source = re.sub(r'<a href="(https?://[^"]+)"', r'<a class="ext" href="\1" target="_blank" rel="noopener noreferrer"', source)
+    # A plot takes its width from the paper and reserves its height before it loads.
+    for figure in reading_config.get("figure", []):
+        x0, y0, x1, y1 = figure["box"]
+        source = source.replace(f'class="zoom" data-figure="{figure["name"]}"', f'class="zoom" style="--natural:{round(x1 - x0)}" data-figure="{figure["name"]}"')
+        source = source.replace(f'{figure["name"]}" alt=', f'{figure["name"]}" width="{round(x1 - x0)}" height="{round(y1 - y0)}" alt=')
     page = parse(source)
 
     # A list's bullets are drawn by the page, so they are not words on either side.
@@ -326,7 +332,17 @@ def build(folder: Path, slug: str, passages: list[dict], names: list[str], pdf_w
         place = section_at(ranges, start)
         if place:
             counts[place] = counts.get(place, 0) + 1
-    outline = [{**entry, "ties": counts.get(entry["id"], 0)} for entry in done["outline"]]
+    offsets = dict(ranges)
+    starts = [start for start, _stop in words]
+
+    def page_of(entry: dict) -> int:
+        """The PDF page a section starts on: its first word that lines up with the PDF."""
+        for index in range(bisect_left(starts, offsets.get(entry["id"], 0)), len(words)):
+            if index in found:
+                return kept[found[index]]["page"]
+        return 1
+
+    outline = [{**entry, "ties": counts.get(entry["id"], 0), "page": page_of(entry)} for entry in done["outline"]]
     order = sorted(spans, key=lambda pid: spans[pid][0])
     return {"html": body, "outline": outline, "words": len(ours), "formulas": len(done["math"]), "pages": len(marks), "order": order}
 

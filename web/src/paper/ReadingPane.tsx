@@ -50,9 +50,14 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
   const programmatic = useRef(0);
   const arrive = useRef(0);
   const placed = useRef(false);
+  // What the reader last clicked. Its Lean stays open until it scrolls out of view.
+  const held = useRef<HTMLElement | null>(null);
   const left = useRef<number | null>(null);
+  const readLine = useRef<() => void>(() => undefined);
   const [bars, setBars] = useState<Bar[]>([]);
   const [hover, setHover] = useState<string | null>(null);
+  const [zoom, setZoom] = useState<{ src: string; alt: string; caption: string } | null>(null);
+  const zoomed = useRef<HTMLDialogElement>(null);
 
   const measure = useCallback(() => {
     const el = scroller.current;
@@ -73,15 +78,18 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
     setBars(next);
   }, []);
 
-  const scrollTo = useCallback((top: number, instant = false) => {
+  const scrollTo = useCallback((top: number, instant = false, settle = false) => {
     const el = scroller.current;
     if (!el) return;
     programmatic.current = Date.now() + 900;
     el.scrollTo({ top, behavior: prefersReduced() || instant ? "auto" : "smooth" });
-    // A background tab may never run the animation, so arrive regardless.
+    // A background tab may never run the animation, so arrive regardless. A jump to
+    // a place rather than a passage then reads what the place has at the reading line.
     window.clearTimeout(arrive.current);
     arrive.current = window.setTimeout(() => {
       if (Math.abs(el.scrollTop - top) > 40) el.scrollTo({ top, behavior: "auto" });
+      programmatic.current = 0;
+      if (settle) readLine.current();
     }, 950);
   }, []);
 
@@ -100,7 +108,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
       const target = el?.querySelector<HTMLElement>(`[id="${CSS.escape(id)}"]`);
       if (!el || !target) return;
       const top = target.getBoundingClientRect().top - el.getBoundingClientRect().top + el.scrollTop;
-      scrollTo(top - 24, instant);
+      scrollTo(top - 24, instant, true);
     },
     [scrollTo],
   );
@@ -108,18 +116,36 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
   const whereNow = useCallback(() => {
     const el = scroller.current;
     if (!el) return null;
-    const line = el.scrollTop + el.clientHeight * READING_LINE;
+    // At the very end the last headings can never reach the reading line.
+    const line = el.scrollTop + el.clientHeight * (el.scrollTop + el.clientHeight >= el.scrollHeight - 4 ? 1 : READING_LINE);
     let current: string | null = null;
     for (const h of headings.current) if (h.top <= line) current = h.id;
     return current;
   }, []);
 
+  const heldInView = useCallback(() => {
+    const el = scroller.current;
+    const mark = held.current;
+    if (!el || !mark) return false;
+    const box = mark.getBoundingClientRect();
+    const pane = el.getBoundingClientRect();
+    return box.bottom > pane.top && box.top < pane.bottom;
+  }, []);
+
+  const userScrolled = useCallback(() => {
+    if (!held.current) onUserScroll();
+  }, [onUserScroll]);
+
+  useEffect(() => {
+    if (zoom) zoomed.current?.showModal();
+  }, [zoom]);
+
   useImperativeHandle(ref, () => ({
     scrollToPassage: toPassage,
     scrollToPlace: toPlace,
-    toTop: () => scrollTo(0),
+    toTop: () => scrollTo(0, false, true),
     back: () => {
-      if (left.current !== null) scrollTo(left.current);
+      if (left.current !== null) scrollTo(left.current, false, true);
       left.current = null;
     },
   }), [scrollTo, toPassage, toPlace]);
@@ -176,6 +202,11 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
       frame = 0;
       onSection(whereNow());
       if (Date.now() < programmatic.current) return;
+      if (held.current) {
+        if (heldInView()) return;
+        held.current = null;
+        onUserScroll();
+      }
       const line = el.scrollTop + el.clientHeight * READING_LINE;
       let best: string | null = null;
       let bestGap = el.clientHeight * 0.5;
@@ -193,13 +224,14 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(read);
     };
+    readLine.current = read;
     el.addEventListener("scroll", onScroll, { passive: true });
     onSection(whereNow());
     return () => {
       el.removeEventListener("scroll", onScroll);
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [bars.length, onActive, onSection, passages, whereNow]);
+  }, [bars.length, heldInView, onActive, onSection, onUserScroll, passages, whereNow]);
 
   /** Open a copy of a reference or a figure under the block that mentions it. */
   const toggleInset = useCallback(
@@ -236,6 +268,13 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
 
   const onClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
+    const plot = target.closest<HTMLElement>(".zoom");
+    if (plot) {
+      event.preventDefault();
+      const image = plot.querySelector("img");
+      if (image) setZoom({ src: image.src, alt: image.alt, caption: plot.closest("figure")?.querySelector("figcaption")?.textContent ?? "" });
+      return;
+    }
     const close = target.closest<HTMLElement>(".inset__close");
     if (close) {
       const inset = close.closest<HTMLElement>(".inset");
@@ -250,6 +289,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
         event.preventDefault();
         // A line of code tied to the Lean goes to its exact lines, not to the first name on it.
         const line = link.closest<HTMLElement>("pre .q");
+        held.current = line ?? link;
         if (line?.dataset.p) onPick(line.dataset.p.split(" ")[0]);
         else onName(link.dataset.name ?? "");
         return;
@@ -273,7 +313,10 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
     const selection = window.getSelection();
     if (selection && !selection.isCollapsed) return;
     const mark = target.closest<HTMLElement>(".q");
-    if (mark?.dataset.p) onPick(mark.dataset.p.split(" ")[0]);
+    if (mark?.dataset.p) {
+      held.current = mark;
+      onPick(mark.dataset.p.split(" ")[0]);
+    }
   };
 
   const onOver = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -282,12 +325,12 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
   };
 
   const onKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
-    if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "Home", "End"].includes(event.key)) onUserScroll();
+    if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "Home", "End"].includes(event.key)) userScrolled();
     if (event.key === "Escape") sheet.current?.querySelectorAll(".inset").forEach((el) => el.remove());
   };
 
   return (
-    <div className="reading" data-paper-pane ref={scroller} tabIndex={0} aria-label="The paper" onWheel={onUserScroll} onTouchMove={onUserScroll} onKeyDown={onKeyDown}>
+    <div className="reading" data-paper-pane ref={scroller} tabIndex={0} aria-label="The paper" onWheel={userScrolled} onTouchMove={userScrolled} onKeyDown={onKeyDown}>
       <div className="sheet" ref={sheet} onClick={onClick} onMouseOver={onOver} onMouseLeave={() => setHover(null)}>
         <Sheet html={html} />
         <div className="sheet__ties" aria-hidden="true">
@@ -302,6 +345,14 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
         </div>
       </div>
       {foot}
+      <dialog className="plot" ref={zoomed} onClose={() => setZoom(null)} onClick={() => zoomed.current?.close()}>
+        {zoom && (
+          <>
+            <img src={zoom.src} alt={zoom.alt} />
+            <p>{zoom.caption}</p>
+          </>
+        )}
+      </dialog>
     </div>
   );
 });

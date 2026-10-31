@@ -33,7 +33,7 @@ export interface TileBox {
 }
 
 /** The compact tile's box on screen (tree.css .card__compact). */
-export const TILE: TileBox = { padTop: 10, padBottom: 7, padX: 8, border: 1 };
+export const TILE: TileBox = { padTop: 5, padBottom: 5, padX: 8, border: 1 };
 
 /** A mark's text box (tree.css, mark form): the fill gives the source, so there is no corner square to clear. */
 export const MARK_TILE: TileBox = { padTop: 4, padBottom: 4, padX: 4, border: 1 };

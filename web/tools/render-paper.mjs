@@ -182,7 +182,8 @@ md.renderer.rules.code_inline = (tokens, index) => `<code>${highlight(tokens[ind
 md.renderer.rules.image = (tokens, index) => {
   const token = tokens[index];
   const name = token.attrGet("src");
-  return `<img src="papers/${slug}/${name}" alt="${escapeHtml(token.content)}" data-figure="${escapeHtml(name)}">`;
+  const src = `papers/${slug}/${name}`;
+  return `<a class="zoom" data-figure="${escapeHtml(name)}" href="${src}"><img src="${src}" alt="${escapeHtml(token.content)}"></a>`;
 };
 
 const outline = [];

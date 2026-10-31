@@ -1,6 +1,7 @@
 // The paper's sections down the left of the desk, with the one being read marked
-// and each section's count of sentences tied to the Lean. Above them, a search of
-// the paper's text and the Lean's names, read from the page already in the browser.
+// and each section's count of passages tied to the Lean. Above them, a search of
+// the paper's text and the Lean's names. The rail stays for the PDF as well, so
+// the two views of the paper share one frame.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Declaration, OutlineEntry } from "../app/edition";
@@ -12,18 +13,22 @@ interface Props {
   /** On a narrow screen the list opens over the page. */
   open: boolean;
   declarations: Declaration[];
-  /** The page is in the browser, so its text can be searched. */
-  ready: boolean;
+  /** The Lean files, by name, so search reaches inside the proofs. */
+  files: Record<string, string>;
+  /** The reading copy, which search reads even while the PDF is showing. */
+  html: string | null;
+  copy: "reading" | "pdf";
   onJump(id: string): void;
   onTop(): void;
   onName(name: string): void;
-  onPdf(): void;
+  onPage(page: number): void;
 }
 
 interface Block {
   element: HTMLElement;
   text: string;
   section: string;
+  page: number;
 }
 
 interface Found {
@@ -32,20 +37,24 @@ interface Found {
 }
 
 const LIMIT = 24;
-const BLOCKS = ".sheet__text p, .sheet__text li, .sheet__text pre, .sheet__text figcaption, .sheet__text aside, .sheet__text h2, .sheet__text h3";
+const BLOCKS = "p, li, pre, figcaption, aside, h2, h3";
 
-/** The page's blocks, each with the section it falls under. */
-function readBlocks(outline: OutlineEntry[]): Block[] {
+/** The paper's blocks, each with its section and PDF page. */
+function readBlocks(outline: OutlineEntry[], html: string): Block[] {
+  const root: ParentNode = document.querySelector(".sheet__text") ?? new DOMParser().parseFromString(html, "text/html");
   const label = new Map(outline.map((e) => [e.id, e.number ? `Section ${e.number}` : e.title]));
   const blocks: Block[] = [];
   let section = "Title and abstract";
-  document.querySelectorAll<HTMLElement>(BLOCKS).forEach((element) => {
+  let page = 1;
+  root.querySelectorAll<HTMLElement>(BLOCKS).forEach((element) => {
     if (element.closest(".inset")) return;
     if (/^H[23]$/.test(element.tagName)) section = label.get(element.id) ?? section;
-    const copy = element.cloneNode(true) as HTMLElement;
-    copy.querySelectorAll(".pg, .katex-html").forEach((part) => part.remove());
-    const text = copy.textContent ?? "";
-    if (text.trim()) blocks.push({ element, text: text.replace(/\s+/g, " "), section });
+    const mark = element.querySelector<HTMLElement>(".pg");
+    if (mark) page = Number(mark.dataset.page);
+    const clone = element.cloneNode(true) as HTMLElement;
+    clone.querySelectorAll(".pg, .katex-html").forEach((part) => part.remove());
+    const text = clone.textContent ?? "";
+    if (text.trim()) blocks.push({ element, text: text.replace(/\s+/g, " "), section, page });
   });
   return blocks;
 }
@@ -64,10 +73,11 @@ function Snippet({ text, at, length }: { text: string; at: number; length: numbe
   );
 }
 
-export function Contents({ outline, current, words, open, declarations, ready, onJump, onTop, onName, onPdf }: Props) {
+export function Contents({ outline, current, words, open, declarations, files, html, copy, onJump, onTop, onName, onPage }: Props) {
   const list = useRef<HTMLOListElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const blocks = useRef<Block[]>([]);
+  const readFrom = useRef(copy);
   const [query, setQuery] = useState("");
   const needle = query.trim().toLowerCase();
 
@@ -79,10 +89,6 @@ export function Contents({ outline, current, words, open, declarations, ready, o
     const top = item.offsetTop - el.offsetTop;
     if (top < el.scrollTop + 24 || top > el.scrollTop + el.clientHeight - 48) el.scrollTop = Math.max(0, top - el.clientHeight / 3);
   }, [current]);
-
-  useEffect(() => {
-    if (ready) blocks.current = readBlocks(outline);
-  }, [outline, ready]);
 
   // Slash starts a search, as on most reading sites.
   useEffect(() => {
@@ -99,9 +105,27 @@ export function Contents({ outline, current, words, open, declarations, ready, o
 
   const names = useMemo(() => (needle ? declarations.filter((d) => d.id.toLowerCase().includes(needle)).slice(0, 6) : []), [declarations, needle]);
 
-  const found = useMemo(() => {
+  // Lines of Lean that match, each opening the declaration it belongs to.
+  const inLean = useMemo(() => {
     if (needle.length < 2) return [];
-    if (!blocks.current.length) blocks.current = readBlocks(outline);
+    const hits: { name: string; line: number; text: string; at: number }[] = [];
+    for (const d of declarations) {
+      const lines = files[d.file]?.split("\n") ?? [];
+      for (let line = d.line; line <= d.end_line; line++) {
+        const text = lines[line - 1]?.trim() ?? "";
+        const at = text.toLowerCase().indexOf(needle);
+        if (at >= 0 && d.id.toLowerCase() !== needle) hits.push({ name: d.id, line, text, at });
+      }
+    }
+    return hits.slice(0, 8);
+  }, [declarations, files, needle]);
+
+  const found = useMemo(() => {
+    if (needle.length < 2 || !html) return [];
+    if (!blocks.current.length || readFrom.current !== copy) {
+      blocks.current = readBlocks(outline, html);
+      readFrom.current = copy;
+    }
     const hits: Found[] = [];
     for (const block of blocks.current) {
       const at = block.text.toLowerCase().indexOf(needle);
@@ -109,13 +133,20 @@ export function Contents({ outline, current, words, open, declarations, ready, o
       if (hits.length === LIMIT) break;
     }
     return hits;
-  }, [needle, outline]);
+  }, [copy, html, needle, outline]);
 
   const go = (block: Block) => {
+    if (!block.element.isConnected) return onPage(block.page);
     const pane = document.querySelector<HTMLElement>("[data-paper-pane]");
     if (!pane) return;
     const top = block.element.getBoundingClientRect().top - pane.getBoundingClientRect().top + pane.scrollTop;
     pane.scrollTo({ top: top - pane.clientHeight * 0.3, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  };
+
+  const openFirst = () => {
+    if (names[0]) onName(names[0].id);
+    else if (found[0]) go(found[0].block);
+    else if (inLean[0]) onName(inLean[0].name);
   };
 
   return (
@@ -125,10 +156,11 @@ export function Contents({ outline, current, words, open, declarations, ready, o
           ref={input}
           type="search"
           value={query}
-          placeholder="Search the paper and Lean"
+          placeholder="Search paper and Lean  ( / )"
           aria-label="Search the paper and the Lean names"
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
+            if (event.key === "Enter") openFirst();
             if (event.key === "Escape") {
               setQuery("");
               event.currentTarget.blur();
@@ -137,7 +169,7 @@ export function Contents({ outline, current, words, open, declarations, ready, o
         />
       </div>
       {needle ? (
-        names.length + found.length === 0 ? (
+        names.length + found.length + inLean.length === 0 ? (
           <p className="rail__none">Nothing matches that.</p>
         ) : (
           <ul className="rail__found">
@@ -146,6 +178,14 @@ export function Contents({ outline, current, words, open, declarations, ready, o
                 <button type="button" onClick={() => onName(d.id)}>
                   <code>{d.id}</code>
                   <span className="rail__where">Lean, line {d.line}</span>
+                </button>
+              </li>
+            ))}
+            {inLean.map((hit) => (
+              <li key={`${hit.name}${hit.line}`}>
+                <button type="button" onClick={() => onName(hit.name)}>
+                  <code><Snippet text={hit.text} at={hit.at} length={needle.length} /></code>
+                  <span className="rail__where">{hit.name}, line {hit.line}</span>
                 </button>
               </li>
             ))}
@@ -171,15 +211,14 @@ export function Contents({ outline, current, words, open, declarations, ready, o
               <button type="button" className="rail__item" aria-current={entry.id === current ? "location" : undefined} onClick={() => onJump(entry.id)}>
                 {entry.number && <span className="rail__no">{entry.number}</span>}
                 <span className="rail__title">{entry.title}</span>
-                {entry.ties > 0 && <span className="rail__ties" title={`${entry.ties} sentences and lines of code tied to the Lean`}>{entry.ties}</span>}
+                {entry.ties > 0 && <span className="rail__ties" title={`${entry.ties} passages tied to the Lean`}>{entry.ties}</span>}
               </button>
             </li>
           ))}
         </ol>
       )}
       <p className="rail__key">
-        <span className="rail__ties">Amber</span> counts sentences and code lines tied to the Lean. A program matched all {words.toLocaleString("en-GB")} words here against the authors' PDF.{" "}
-        <button type="button" onClick={onPdf}>See the PDF</button>
+        <span className="rail__ties">Amber</span> counts the passages tied to the Lean. The left and right arrow keys step through them. A program matched all {words.toLocaleString("en-GB")} words of the reading copy against the authors’ PDF.
       </p>
     </nav>
   );

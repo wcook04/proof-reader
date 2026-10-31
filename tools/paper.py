@@ -451,6 +451,7 @@ def build(slugs: list[str]) -> None:
         out = PUBLIC / slug
         out.mkdir(exist_ok=True)
         page = built.pop("reading_html")
+        (out / "reading.html").unlink(missing_ok=True)
         if page:
             (out / "reading.html").write_text(page, encoding="utf-8")
             crop_figures(folder / built["paper"]["pdf"], built, out, load_paper(slug)[1])

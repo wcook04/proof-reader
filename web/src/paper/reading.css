@@ -13,7 +13,7 @@
 }
 
 .reading { position: relative; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; scrollbar-width: thin; padding: 20px 0 20px 0; outline-offset: -2px; }
-.sheet { position: relative; max-width: 780px; min-height: 100%; margin: 0 0 0 auto; background: var(--sheet); box-shadow: var(--sheet-shadow); container-type: inline-size; }
+.sheet { --code-cap: 0.8125rem; position: relative; max-width: 780px; min-height: 100%; margin: 0 0 0 auto; background: var(--sheet); box-shadow: var(--sheet-shadow); container-type: inline-size; }
 .sheet__text { position: relative; padding: 52px clamp(20px, 7cqi, 60px) 64px; font-family: var(--font-serif); font-size: var(--fs-read); line-height: 1.58; color: var(--ink); font-variant-numeric: oldstyle-nums proportional-nums; font-kerning: normal; hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
 .sheet__text { --bleed: min(100cqi - 2 * clamp(10px, 3.2cqi, 28px), 44rem); }
 .sheet__text > * { max-width: 36rem; margin-left: auto; margin-right: auto; }
@@ -32,9 +32,9 @@
 .q::selection, .sheet__text ::selection { background: rgb(180 101 10 / 0.24); }
 
 /* The page marks of the PDF */
-.sheet__text a.pg { position: absolute; left: clamp(3px, 1cqi, 10px); margin-top: 0.42em; padding: 1px 2px; font-family: var(--font-sans); font-size: 0.6875rem; line-height: 1.3; font-style: normal; font-weight: 400; font-variant-numeric: lining-nums tabular-nums; letter-spacing: 0.01em; color: var(--ink-3); text-decoration: none; hyphens: none; user-select: none; }
+.sheet__text a.pg { position: absolute; left: clamp(3px, 1cqi, 10px); margin-top: calc(0.42em - 5px); padding: 6px 2px; font-family: var(--font-sans); font-size: 0.6875rem; line-height: 1.3; font-style: normal; font-weight: 400; font-variant-numeric: lining-nums tabular-nums; letter-spacing: 0.01em; color: var(--ink-3); text-decoration: none; hyphens: none; user-select: none; }
 .sheet__text a.pg:hover { color: var(--lit); text-decoration: underline; text-underline-offset: 2px; }
-.sheet__text pre a.pg { margin-top: -29px; }
+.sheet__text pre a.pg { margin-top: -34px; }
 
 /* The title block */
 .sheet__text .front { margin-bottom: 26px; }
@@ -77,7 +77,7 @@
 /* Code on its own. Lines hold their columns, so a listing's type shrinks to fit the
    sheet rather than wrapping; the JetBrains Mono advance is 0.6em. */
 .sheet__text pre.code { --room: calc(var(--bleed) - 2 * 14px); width: var(--bleed); max-width: none; margin: 1.05em 0 1.2em calc(50% - var(--bleed) / 2); padding: 10px 14px; overflow-x: auto; background: var(--code-well); border-radius: var(--radius-m); hyphens: none; scrollbar-width: thin; }
-.sheet__text pre.code code { display: block; width: max-content; min-width: 100%; font-size: max(0.65rem, min(0.8125rem, calc(var(--room) / var(--cols) / 0.6))); line-height: 1.56; font-variant-numeric: normal; color: var(--ink); }
+.sheet__text pre.code code { display: block; width: max-content; min-width: 100%; font-size: max(0.65rem, min(var(--code-cap), calc(var(--room) / var(--cols) / 0.6))); line-height: 1.56; font-variant-numeric: normal; color: var(--ink); }
 .cl { display: block; min-height: 1.56em; white-space: pre; }
 .cl:has(.q.is-active) { background: var(--highlight); box-shadow: -14px 0 0 var(--highlight), 14px 0 0 var(--highlight); }
 .cl:has(.q.is-lit):not(:has(.q.is-active)), .cl:has(.q.is-hover):not(:has(.q.is-active)) { background: var(--highlight-soft); box-shadow: -14px 0 0 var(--highlight-soft), 14px 0 0 var(--highlight-soft); }
@@ -90,13 +90,18 @@
 
 .sheet__text .code-columns { display: grid; grid-template-columns: auto auto; gap: 0 12px; justify-content: space-between; width: var(--bleed); max-width: none; margin: 1.05em 0 1.2em calc(50% - var(--bleed) / 2); }
 .sheet__text .code-columns pre.code { --room: calc(var(--bleed) - 12px - 4 * 14px); width: auto; margin: 0; min-width: 0; }
-.sheet__text .code-columns pre.code code { font-size: max(0.625rem, min(0.8125rem, calc(var(--room) / var(--total) / 0.6))); }
+.sheet__text .code-columns pre.code code { font-size: max(0.625rem, min(var(--code-cap), calc(var(--room) / var(--total) / 0.6))); }
 
 /* Figures */
 .sheet__text figure { margin: 1.4em auto 1.5em; }
 .sheet__text figcaption { margin-top: 0.7em; font-family: var(--font-sans); font-size: 0.875rem; line-height: 1.42; color: var(--ink-2); text-align: center; font-variant-numeric: lining-nums; hyphens: manual; text-wrap: balance; }
-.sheet__text figure img { display: block; width: var(--bleed); max-width: none; height: auto; margin-left: calc(50% - var(--bleed) / 2); mix-blend-mode: multiply; }
-.sheet__text figure img[data-figure="fig-9.svg"] { width: 66%; margin: 0 auto; }
+.sheet__text .zoom { display: block; width: min(var(--bleed), calc(var(--natural) * 1.75px)); max-width: none; margin-left: calc(50% - min(var(--bleed), calc(var(--natural) * 1.75px)) / 2); padding: 0; border: 0; background: none; cursor: zoom-in; }
+.sheet__text .zoom img { display: block; width: 100%; height: auto; mix-blend-mode: multiply; }
+.sheet__text .zoom:focus-visible { outline: 2px solid var(--lit); outline-offset: 2px; }
+dialog.plot { width: min(1280px, 94vw); max-height: 94vh; padding: 14px 18px 12px; border: 0; border-radius: var(--radius-l); background: var(--sheet); box-shadow: var(--sheet-shadow); cursor: zoom-out; }
+dialog.plot::backdrop { background: rgb(40 30 15 / 0.5); }
+dialog.plot img { display: block; width: 100%; height: auto; max-height: 82vh; object-fit: contain; }
+dialog.plot p { margin: 8px 0 0; font-family: var(--font-sans); font-size: var(--fs-ui); color: var(--ink-2); text-align: center; }
 .rules { margin: 0.9em auto 1.1em; }
 .rule-name { font-size: 0.86em; font-variant-caps: small-caps; letter-spacing: 0.01em; }
 
@@ -126,7 +131,7 @@
 .sheet__text .inset--figure pre.code, .sheet__text .inset--figure .code-columns { margin-left: 0; margin-top: 0; margin-bottom: 0; }
 .sheet__text .inset--figure img { margin-left: 0; }
 .inset__close { position: absolute; right: 10px; top: 8px; min-height: 24px; padding: 0 2px; font-family: var(--font-sans); font-size: var(--fs-sm); color: var(--ink-3); text-decoration: underline; text-underline-offset: 3px; }
-.inset--figure .inset__close { top: 4px; right: 8px; }
+.inset--figure .inset__close { top: auto; bottom: 5px; right: 4px; }
 .inset__close:hover { color: var(--lit); }
 @keyframes inset-in { from { opacity: 0; transform: translateY(-4px); } }
 
@@ -137,8 +142,17 @@
 @container (max-width: 560px) {
   .sheet__text .code-columns { grid-template-columns: minmax(0, 1fr); gap: 10px; }
   .sheet__text .code-columns pre.code { --room: calc(var(--bleed) - 2 * 14px); }
-  .sheet__text .code-columns pre.code code { font-size: max(0.65rem, min(0.8125rem, calc(var(--room) / var(--cols) / 0.6))); }
+  .sheet__text .code-columns pre.code code { font-size: max(0.65rem, min(var(--code-cap), calc(var(--room) / var(--cols) / 0.6))); }
   .pg { position: static; display: block; margin: 0 0 2px; text-align: right; }
+}
+
+/* A big monitor gets a bigger book, not wider margins of desk. */
+@media (min-width: 2100px) {
+  .sheet { --code-cap: 0.9375rem; max-width: 1000px; }
+  .sheet__text { --bleed: min(100cqi - 2 * clamp(10px, 3.2cqi, 28px), 54rem); font-size: 1.3125rem; }
+  .sheet__text > * { max-width: 42rem; }
+  .sheet__text h2 { font-size: 1.75rem; }
+  .sheet__text h3 { font-size: 1.4375rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

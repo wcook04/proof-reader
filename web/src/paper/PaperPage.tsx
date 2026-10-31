@@ -40,6 +40,8 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
   const [back, setBack] = useState<string | null>(null);
   const [rail, setRail] = useState(false);
   const [pdfPage, setPdfPage] = useState(place?.startsWith("page-") ? place : null);
+  // Only a plain address opens on the main claim, so only then is that worth saying.
+  const [fresh, setFresh] = useState(!record);
 
   useEffect(() => {
     if (!edition.reading) return;
@@ -111,6 +113,7 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
 
   const pickPassage = useCallback(
     (id: string) => {
+      setFresh(false);
       setAxiom(null);
       setActive(id);
       setPinned(passages.get(id)?.lean[0] ?? null);
@@ -122,6 +125,7 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
 
   /** A name clicked in the paper: open its Lean and leave the reader's place alone. */
   const pickName = useCallback((name: string) => {
+    setFresh(false);
     setAxiom(null);
     setActive(null);
     setPinned(name);
@@ -168,14 +172,24 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
     setBack(null);
   }, []);
 
-  const jumpTo = useCallback((id: string) => {
-    setRail(false);
-    pdf.current?.scrollToPlace?.(id);
-  }, []);
+  const jumpTo = useCallback(
+    (id: string) => {
+      setRail(false);
+      const page = edition.reading?.outline.find((e) => e.id === id)?.page;
+      pdf.current?.scrollToPlace?.(copy === "reading" || !page ? id : `page-${page}`);
+    },
+    [copy, edition],
+  );
 
   const jumpTop = useCallback(() => {
     setRail(false);
-    pdf.current?.toTop?.();
+    if (copy === "reading") pdf.current?.toTop?.();
+    else pdf.current?.scrollToPlace?.("page-1");
+  }, [copy]);
+
+  const jumpToPage = useCallback((page: number) => {
+    setRail(false);
+    pdf.current?.scrollToPlace?.(`page-${page}`);
   }, []);
 
   const toPdfPage = useCallback((page: number) => switchCopy("pdf", `page-${page}`), [switchCopy]);
@@ -191,9 +205,11 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
       const onTie = edition.passages.some((p) => p.id === activeRef.current);
       const next = edition.passages[Math.max(0, Math.min(edition.passages.length - 1, at.current + (onTie || by > 0 ? by : 0)))];
       if (!next) return;
+      setFresh(false);
       setPinned(null);
       setAxiom(null);
       setActive(next.id);
+      window.history.replaceState(null, "", routeHref({ paper: edition.slug, record: `@${next.id}` }));
       pdf.current?.scrollToPassage(next.id);
     },
     [edition],
@@ -217,11 +233,20 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
 
   const { paper, lean } = edition;
   const focus = selected ? declarations.get(selected) : undefined;
+  const outline = edition.reading?.outline ?? [];
+  const tiedSections = [...new Set(outline.filter((e) => e.ties > 0 && e.number).map((e) => e.number.split(".")[0]))];
+  const whereTied = tiedSections.length ? ` The ties are in section${tiedSections.length > 1 ? "s" : ""} ${list(tiedSections)}.` : "";
+  const notice = fresh
+    ? "Opened at the paper’s main claim. A sentence with a bar at the page’s edge is tied to the Lean: click it to light its exact lines."
+    : !active && !pinned && !axiom
+      ? `Nothing here is tied to the Lean.${whereTied}`
+      : null;
+  const currentSection = copy === "reading" ? section : outline.find((e) => e.number === activePassage?.section)?.id ?? null;
   const credit = (
     <p>
       Paper © its authors, <a href={paper.licence_url}>{paper.licence}</a>
       {copy === "reading" ? ". Reading copy retypeset from the PDF, with the same words and the plots cut from it; the layout is ours" : ", with only its blank margins trimmed"}.
-      {" "}Lean from the authors' artifact, built here on Lean {lean.version}. Ties and notes made with AI, not reviewed by the authors.
+      {" "}Lean from the authors’ artifact, built here on Lean {lean.version}. Ties and notes made with AI, not reviewed by the authors.
     </p>
   );
 
@@ -237,9 +262,7 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
           {copy === "reading" && edition.reading ? <p className="bar__paper">{paper.short_title}</p> : <h1 className="bar__paper">{paper.short_title}</h1>}
           <p>{paper.authors.join(", ")}</p>
         </div>
-        {edition.reading && copy === "reading" && (
-          <button type="button" className="bar__contents" aria-expanded={rail} onClick={() => setRail(!rail)}>Contents</button>
-        )}
+        {edition.reading && <button type="button" className="bar__contents" aria-expanded={rail} onClick={() => setRail(!rail)}>Contents</button>}
         {back && copy === "reading" && <button type="button" className="bar__back" onClick={jumpBack}>Back to {back}</button>}
         {edition.reading && (
           <div className="switch" role="group" aria-label="The left-hand page">
@@ -248,9 +271,9 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
           </div>
         )}
         <div className="stepper">
-          <button type="button" onClick={() => step(-1)} disabled={order === 0}>Previous</button>
-          <span title="Step through the sentences tied to the Lean">{order >= 0 ? `Tie ${order + 1} of ${edition.passages.length}` : `${edition.passages.length} ties`}</span>
-          <button type="button" onClick={() => step(1)} disabled={at.current >= edition.passages.length - 1}>Next</button>
+          <button type="button" title="The previous passage tied to the Lean (left arrow key)" onClick={() => step(-1)} disabled={order === 0}>Previous</button>
+          <span>{at.current + 1} of {edition.passages.length} tied passages</span>
+          <button type="button" title="The next passage tied to the Lean (right arrow key)" onClick={() => step(1)} disabled={at.current >= edition.passages.length - 1}>Next</button>
         </div>
         <div className="switch" role="group" aria-label="The right-hand page">
           <button type="button" aria-pressed={view === "lean"} onClick={() => show("lean")}>Lean</button>
@@ -259,43 +282,45 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
         <a className="bar__link" href={paper.url}>Published paper</a>
         <a className="bar__link" href={lean.source}>Lean artifact</a>
       </header>
-      <main className={`spread${copy === "reading" && edition.reading ? " spread--reading" : ""}`} ref={spread}>
+      <main className={`spread${edition.reading ? " spread--reading" : ""}`} ref={spread}>
+        {edition.reading && (
+          <Contents
+            outline={edition.reading.outline}
+            current={currentSection}
+            words={edition.reading.words}
+            open={rail}
+            declarations={edition.declarations}
+            files={edition.lean.files}
+            html={html}
+            copy={copy}
+            onJump={jumpTo}
+            onTop={jumpTop}
+            onName={pickName}
+            onPage={jumpToPage}
+          />
+        )}
         {copy === "reading" && edition.reading ? (
-          <>
-            <Contents
-              outline={edition.reading.outline}
-              current={section}
-              words={edition.reading.words}
-              open={rail}
-              declarations={edition.declarations}
-              ready={html !== null}
-              onJump={jumpTo}
-              onTop={jumpTop}
+          html ? (
+            <ReadingPane
+              ref={pdf}
+              html={html}
+              passages={edition.passages}
+              active={active}
+              lit={litPassages}
+              start={opening.current}
+              place={place}
+              onActive={setActive}
+              onSection={setSection}
+              onPick={pickPassage}
               onName={pickName}
-              onPdf={() => switchCopy("pdf")}
+              onPage={toPdfPage}
+              onJump={onJump}
+              onUserScroll={release}
+              foot={<footer className="foot foot--sheet">{credit}</footer>}
             />
-            {html ? (
-              <ReadingPane
-                ref={pdf}
-                html={html}
-                passages={edition.passages}
-                active={active}
-                lit={litPassages}
-                start={opening.current}
-                place={place}
-                onActive={setActive}
-                onSection={setSection}
-                onPick={pickPassage}
-                onName={pickName}
-                onPage={toPdfPage}
-                onJump={onJump}
-                onUserScroll={release}
-                foot={<footer className="foot foot--sheet">{credit}</footer>}
-              />
-            ) : (
-              <p className="status" data-paper-pane>Opening the paper…</p>
-            )}
-          </>
+          ) : (
+            <p className="status" data-paper-pane>Opening the paper…</p>
+          )
         ) : (
           <Suspense fallback={<p className="status" data-paper-pane>Opening the PDF…</p>}>
             <PdfPane
@@ -323,7 +348,7 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
             selected={selected}
             reading={axiom ? [axiom] : reading}
             exact={axiom || !activePassage ? null : exact}
-            away={!active && !pinned && !axiom}
+            notice={notice}
             onSelect={choose}
             onPassage={toPassage}
             onBack={fromMap ? () => show("map") : undefined}
