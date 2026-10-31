@@ -135,7 +135,9 @@ change their sources and rebuild them.
 | [web/](web/) | The website |
 | [web/src/map/](web/src/map/) | The map, copied from [lean-exposition](https://github.com/wcook04/lean-exposition) |
 | [history.ts](web/src/app/history.ts) | What one history entry remembers |
+| [web/src/lean/](web/src/lean/) | Shared Lean code rendering and tokens |
 | [web/src/proof/](web/src/proof/) | The right page: graph, Lean, handle |
+| [check-source.mjs](web/tools/check-source.mjs) | Reject source files with no entry point; run with `npm run check:source` in `web/` |
 | [tests/](tests/) | Python unit tests and the browser [journey](tests/journey.py) |
 | [Pages workflow](.github/workflows/pages.yml) | Check every paper, build the site and publish to GitHub Pages |
 

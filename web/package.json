@@ -10,7 +10,9 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "npm run check:source && tsc --noEmit && vite build",
+    "check:source": "node tools/check-source.mjs",
+    "test:source": "node --test tools/check-source.test.mjs",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit"
   },

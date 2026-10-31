@@ -26,6 +26,8 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq poppler-utils
       - run: npm ci
         working-directory: web
+      - run: npm run test:source
+        working-directory: web
       - run: python -m unittest discover -s tests
       # Checks every link and every word of each reading copy against its PDF.
       - name: Check each paper and build its data
