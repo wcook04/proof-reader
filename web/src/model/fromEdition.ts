@@ -51,6 +51,7 @@ export function editionGraph(edition: Edition): ArgGraph {
       rawName: d.id,
       declaration: d.id,
       shape: shapeOf(d),
+      leanFill: d.keyword === "axiom" ? undefined : edition.analytics.sorry.includes(d.id) ? "part" : "whole",
       status: d.keyword === "axiom" ? "axiom" : "kernel_checked",
       origin: LEAN,
     });

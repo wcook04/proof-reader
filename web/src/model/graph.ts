@@ -41,6 +41,8 @@ export interface ArgNode {
   label: string;
   /** The word on the card, when the kind's own name is too general. */
   kindLabel?: string;
+  /** How much of this Lean holds: whole, or part where it contains sorry. An axiom has its own mark. */
+  leanFill?: "whole" | "part";
   /** The raw Lean name, drawn small under a plain title. */
   rawName?: string;
   /** The form a card takes: blueprint readers read definition and theorem from its shape. */

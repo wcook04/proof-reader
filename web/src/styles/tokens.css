@@ -102,6 +102,11 @@
   /* A recorded failed outcome, and only that. */
   --fail: #a04034;
 
+  /* What the Lean holds, a soft fill on a map card, as in a blueprint. */
+  --lean-fill: #cde4c8;
+  --lean-fill-part: #e6f1dc;
+  --lean-fill-line: #a3c79f;
+
   /* Connectors. Each relation type has its own colour, at rest and lit, and its
      own pattern; every rest colour keeps at least 3:1 against the ground.
      A lit support route is amber (attention); lit assumptions and Lean
@@ -185,6 +190,9 @@
   --lit-line: #f3a43a;
   --lit-glow: rgb(243 164 58 / 0.28);
   --fail: #ea8470;
+  --lean-fill: #2f4b3b;
+  --lean-fill-part: #32393b;
+  --lean-fill-line: #4f7559;
   --rel-supports: #6a7581;
   --rel-supports-lit: #f3a43a;
   --rel-assumes: #7d68b8;
@@ -231,6 +239,9 @@
     --lit-line: #f3a43a;
     --lit-glow: rgb(243 164 58 / 0.28);
     --fail: #ea8470;
+    --lean-fill: #2f4b3b;
+    --lean-fill-part: #32393b;
+    --lean-fill-line: #4f7559;
     --rel-supports: #6a7581;
     --rel-supports-lit: #f3a43a;
     --rel-assumes: #7d68b8;

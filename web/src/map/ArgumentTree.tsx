@@ -2429,6 +2429,7 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
               data-kind={node.kind}
               data-shape={node.shape}
               data-raw={node.rawName}
+              data-lean={node.leanFill}
               data-full={node.label}
               data-section={section ?? undefined}
               className={cardClass(lid, node, leaf)}

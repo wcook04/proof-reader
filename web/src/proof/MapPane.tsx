@@ -1,6 +1,6 @@
 // The graph of the proof, adapted from Lean Exposition's map beside the paper. It
 // comes along with the reading: every branch drawn, the statement under the reading
-// line outlined, what has been passed tinted. The camera moves only if a card has left
+// line in amber, what lies ahead quieter. A soft green says what Lean holds. The camera moves only if a card has left
 // the view, and when the Lean rises it pans only as far as keeps the card in the band
 // left above it; closing the Lean puts the camera back exactly. The reader stays in
 // charge: moving the map pauses following.
@@ -64,10 +64,10 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
   const writeTrail = useCallback(() => {
     body.current?.querySelectorAll<HTMLElement>(".card[data-record]").forEach((card) => {
       const id = card.dataset.record!;
-      const state = litIds?.has(id) ? "here" : passed.has(id) ? "passed" : "";
+      const state = litIds?.has(id) ? "here" : passed.has(id) || id === goal ? "" : "ahead";
       if ((card.dataset.trail ?? "") !== state) card.dataset.trail = state;
     });
-  }, [litIds, passed]);
+  }, [goal, litIds, passed]);
   useEffect(writeTrail);
 
   const inView = useCallback((ids: readonly string[]) => {
@@ -236,7 +236,7 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
           <span className="vocab__name">Types</span>
           {types.map((d) => (
             <button key={d.id} type="button" data-vocab={d.id} className={lit.includes(d.id) ? "is-lit" : ""} onClick={() => onSelect(d.id)} onMouseEnter={() => onHover(d.id)} onMouseLeave={() => onHover(null)} onFocus={() => onHover(d.id)} onBlur={() => onHover(null)}>
-              {d.plain} <code>{d.id}</code>
+              {d.plain}
             </button>
           ))}
           <span className="vocab__reached">Reached {reached} of {edition.declarations.length}</span>
@@ -247,17 +247,17 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
   );
 });
 
-/** What a card's shape and a line's pattern say, for someone who has not seen a blueprint. */
+/** What a card's shape, fill and lines say, for someone who has not seen a blueprint. */
 function GraphKey() {
   return (
     <p className="graph__key" aria-label="Key to the graph">
       <span><i className="key-shape key-shape--definition" aria-hidden="true" />Definition</span>
-      <span><i className="key-shape key-shape--theorem" aria-hidden="true" />Theorem, proved</span>
+      <span><i className="key-shape key-shape--theorem" aria-hidden="true" />Theorem</span>
       <span><i className="key-shape key-shape--axiom" aria-hidden="true" />Axiom, assumed</span>
+      <span><i className="key-trail key-trail--lean" aria-hidden="true" />In Lean</span>
+      <span><i className="key-trail key-trail--here" aria-hidden="true" />Here</span>
       <span><svg width="18" height="8" aria-hidden="true"><path d="M0 4h18" className="key-line" /></svg>Proof use</span>
       <span><svg width="18" height="8" aria-hidden="true"><path d="M0 4h18" className="key-line key-line--statement" /></svg>Statement use</span>
-      <span><i className="key-trail key-trail--here" aria-hidden="true" />Here</span>
-      <span><i className="key-trail key-trail--passed" aria-hidden="true" />Passed</span>
     </p>
   );
 }

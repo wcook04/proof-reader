@@ -606,7 +606,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   ) : point?.kind === "text" ? (
     <p><b>{point.title}.</b> {point.text}</p>
   ) : named.length ? (
-    <p><b>{named.map((d) => d.plain).join(", ")}.</b> It has Lean: {named.map((d) => `lines ${d.line} to ${d.end_line}`).join(", ")}. Click to read it.</p>
+    <p><b>{named.map((d) => d.plain).join(", ")}</b> <code className="proof__sig">{named.map((d) => d.id).join(", ")}</code>. It has Lean: {named.map((d) => `lines ${d.line} to ${d.end_line}`).join(", ")}. Click to read it.</p>
   ) : line.zone === "after" ? (
     <p>The {edition.coverage.ties} ties on this page are in {edition.coverage.sections.map(sectionLabel).join(", ")}. {lean.scope}</p>
   ) : (

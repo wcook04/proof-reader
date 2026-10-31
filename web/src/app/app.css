@@ -166,7 +166,7 @@ button:disabled { cursor: default; }
 .proof__handle:hover span, .is-dragging .proof__handle span { background: var(--ink-3); }
 .proof[data-side] .proof__handle { width: 12px; height: auto; border: 0; border-left: 1px solid var(--rule); border-right: 1px solid var(--rule); cursor: ew-resize; }
 .proof[data-side] .proof__handle span { width: 3px; height: 40px; }
-.proof__reading { flex: none; height: 48px; display: flex; align-items: center; padding: 4px 16px; border-top: 1px solid var(--rule); overflow: hidden; }
+.proof__reading { flex: none; height: 44px; display: flex; align-items: center; padding: 4px 16px; border-top: 1px solid var(--rule); overflow: hidden; }
 .proof__reading p { margin: 0; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: var(--fs-sm); line-height: 1.36; color: var(--ink-2); }
 .proof__reading b { font-weight: 600; color: var(--ink); }
 .proof__sig { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink); }
@@ -191,7 +191,7 @@ button:disabled { cursor: default; }
 .key-line--statement { stroke-dasharray: 4 3; stroke: var(--rel-formalizes); }
 .key-trail { display: inline-block; width: 12px; height: 10px; border-radius: 2px; border: 1.5px solid var(--card-border); }
 .key-trail--here { border-color: var(--lit-line); background: var(--lit-wash); }
-.key-trail--passed { background: color-mix(in oklab, var(--rel-formalizes) 16%, var(--raised)); border-color: color-mix(in oklab, var(--rel-formalizes) 55%, var(--card-border)); }
+.key-trail--lean { background: var(--lean-fill); border-color: var(--lean-fill-line); }
 
 /* Shape says definition or theorem, as in a blueprint. */
 .graph .tree .card[data-shape="definition"] { border-radius: 2px; }
@@ -201,14 +201,18 @@ button:disabled { cursor: default; }
 .graph .tree .card--leaf::after { display: none; }
 .graph .card__compact { justify-content: center; }
 .card__craw { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-mono); font-size: calc(10.5px / var(--k)); line-height: 1.2; color: var(--ink-2); }
-.graph .card[data-trail="passed"]:not(.is-selected) { background: color-mix(in oklab, var(--rel-formalizes) 16%, var(--raised)); border-color: color-mix(in oklab, var(--rel-formalizes) 55%, var(--card-border)); }
-.graph .card[data-trail="here"]:not(.is-selected) { border-color: var(--lit-line); background: var(--lit-wash); box-shadow: 0 0 0 1.5px var(--lit-line); }
+.graph .tree .card[data-lean="whole"] { background: var(--lean-fill); border-color: var(--lean-fill-line); }
+.graph .tree .card[data-lean="part"] { background: var(--lean-fill-part); border-color: color-mix(in oklab, var(--lean-fill-line) 55%, var(--card-border)); }
+.graph .tree .card[data-trail="ahead"][data-lean="whole"] { background: color-mix(in oklab, var(--lean-fill) 45%, var(--sheet)); border-color: color-mix(in oklab, var(--lean-fill-line) 50%, var(--sheet)); }
+.graph .tree .card[data-trail="ahead"][data-lean="part"] { background: color-mix(in oklab, var(--lean-fill-part) 45%, var(--sheet)); }
+.graph .tree .card[data-trail="ahead"]:not([data-shape="axiom"]) .card__ctitle { color: var(--ink-2); }
+.graph .tree .card[data-trail="here"]:not(.is-selected) { border-color: var(--lit-line); background: var(--lit-wash); box-shadow: 0 0 0 1.5px var(--lit-line); }
 .graph .link--lean_type_dependency { stroke: var(--rel-formalizes); stroke-dasharray: calc(5px / var(--k)) calc(3.5px / var(--k)); }
 
 .claims { flex: none; display: flex; flex-wrap: wrap; gap: 4px; padding: 4px 12px; font-size: var(--fs-sm); }
 .claims button { min-height: 28px; padding: 0 8px; border-radius: var(--radius-s); color: var(--ink-2); }
 .claims button[aria-pressed="true"] { background: var(--sunk); color: var(--ink); }
-.vocab { flex: none; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; padding: 2px 16px; border-top: 1px solid var(--rule); font-size: var(--fs-xs); color: var(--ink-3); }
+.vocab { flex: none; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 10px; padding: 1px 12px 0 16px; border-top: 1px solid var(--rule); font-size: var(--fs-xs); color: var(--ink-3); }
 .vocab__reached { margin-left: auto; font-size: var(--fs-xs); color: var(--ink-2); font-variant-numeric: tabular-nums; }
 .vocab code { font-family: var(--font-mono); font-size: 0.6875rem; color: var(--ink-3); }
 .vocab button { min-height: 24px; font-size: var(--fs-xs); color: var(--ink-2); border-bottom: 2px solid transparent; }
