@@ -50,7 +50,10 @@ prose, positions tell a heading from a footnote, and the PDF's link targets give
 citation and cross-reference its destination. Use the reading copy route for any paper
 with an open licence. A paper without a `paper.md` still works, on the PDF alone.
 
-The draft is close, and `paper.py check` lists where it differs from the PDF. Repair `paper.md` by hand:
+The draft is close, and `paper.py check` lists where it differs from the PDF. Run `npm ci` in
+`web/` once first, and write at least one claim in `links.json` (step 4), because `check` stops
+without one. `check` ignores the top 7.5% of each PDF page, so words printed there do not count.
+Repair `paper.md` by hand:
 
 - **The first page.** The title block, abstract, keywords and the licence box arrive in
   page order, some of them in the middle of the introduction. Lay them out as Sam

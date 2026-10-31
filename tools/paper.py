@@ -98,6 +98,18 @@ def module_file(project: Path, module: str) -> Path:
     return project / (module.replace(".", "/") + ".lean")
 
 
+def declaration_line(lines: list[str], first: int, last: int) -> int:
+    """The line of a declaration's keyword. Lean starts the range at a docstring or attribute."""
+    line = first
+    if lines[line - 1].lstrip().startswith("/--"):
+        while line < last and "-/" not in lines[line - 1]:
+            line += 1
+        line += 1
+    while line < last and not WRITTEN.match(lines[line - 1]):
+        line += 1
+    return line
+
+
 def shards(folder: Path, config: dict) -> tuple[dict, dict]:
     """The declarations people wrote, each with the rest folded into it."""
     report = json.loads((folder / "generated" / "lean.json").read_text(encoding="utf-8"))
@@ -108,15 +120,16 @@ def shards(folder: Path, config: dict) -> tuple[dict, dict]:
     for name, row in rows.items():
         if row["line"] is None or row["kind"] == "constructor":
             continue
-        line = texts[row["module"]].splitlines()[row["line"] - 1]
-        match = WRITTEN.match(line)
+        source = texts[row["module"]].splitlines()
+        at = declaration_line(source, row["line"], row["end_line"])
+        match = WRITTEN.match(source[at - 1])
         if not match:
             continue
         # Lean gives Ty.rec and Ty.casesOn the lines of `inductive Ty`, so the
         # declared name has to agree. An instance may have no written name.
         keyword, declared = match.group(1).split()[0], match.group(2)
         if name == declared or name.endswith(f".{declared}") or (keyword == "instance" and not declared):
-            written[name] = {**row, "keyword": keyword}
+            written[name] = {**row, "line": at, "keyword": keyword}
 
     def owner(name: str) -> str | None:
         probe = name

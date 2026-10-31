@@ -112,6 +112,19 @@ class Rects(unittest.TestCase):
         self.assertEqual((page, last, len(rects)), (1, 1, 2))
 
 
+class DeclarationLine(unittest.TestCase):
+    def test_a_plain_declaration_stays_where_it_is(self):
+        self.assertEqual(paper.declaration_line(["theorem a : True := trivial"], 1, 1), 1)
+
+    def test_skips_a_docstring(self):
+        lines = ["/-- Adding zero.", "theorem in prose, not code. -/", "theorem a : True := trivial"]
+        self.assertEqual(paper.declaration_line(lines, 1, 3), 3)
+
+    def test_skips_an_attribute_on_its_own_line(self):
+        lines = ["/-- Adding zero. -/", "@[simp]", "theorem a : True :=", "  trivial"]
+        self.assertEqual(paper.declaration_line(lines, 1, 4), 3)
+
+
 class Written(unittest.TestCase):
     def test_keeps_what_people_write(self):
         for line in ("theorem isoL", "private def x", "@[simp] theorem y", "instance foo : Bar", "axiom closedWorld", "noncomputable def z"):

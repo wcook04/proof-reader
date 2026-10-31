@@ -95,6 +95,7 @@ person or an AI assistant. The commands are:
 python3 tools/paper.py new my-paper       # then add the PDF, Lean and paper.toml
 python3 tools/paper.py extract my-paper   # build the Lean and list its declarations
 python3 tools/transcribe.py my-paper      # draft paper.md from the PDF's structure
+# write links.json as the guide describes; check stops until it has a claim
 python3 tools/paper.py check my-paper     # compare the text and check the links
 python3 tools/paper.py build              # write the data the site reads
 ```
