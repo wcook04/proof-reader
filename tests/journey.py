@@ -162,6 +162,14 @@ def visible_mark(page: Page, offset: int = 0) -> str | None:
     )
 
 
+def bring_mark(page: Page) -> None:
+    """Read on a little until a plain statement is on screen, as a reader would."""
+    for _ in range(10):
+        if visible_mark(page):
+            return
+        wheel_to(page, top(page) + 90)
+
+
 def mark(page: Page, passage: str):
     return page.locator(f'.sheet__text .q[data-p~="{passage}"]').first
 
@@ -259,12 +267,8 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     wait_until(page, lambda: "Following the paper" in caption(page), "and follows from there")
 
     print("Hover")
+    bring_mark(page)
     other = visible_mark(page)
-    for _ in range(6):
-        if other:
-            break
-        wheel_to(page, top(page) + 90)
-        other = visible_mark(page)
     check(other is not None, f"a second statement is on screen: {other}")
     was_top = top(page)
     was_entries = entries(page)
@@ -719,6 +723,8 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
         page.keyboard.press("Escape")
         wait_until(page, lambda: not lean_open(page), "at rest in Graph mode")
         page.wait_for_timeout(500)
+        bring_mark(page)
+        page.wait_for_timeout(300)
         return {"top": top(page), "camera": camera(page), "active": active(page)}
 
     def plain_statement() -> str:
@@ -783,6 +789,8 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     page.locator(".rail__item", has_text="Background").click()
     page.wait_for_timeout(1500)
     wheel_to(page, 5200)
+    bring_mark(page)
+    page.wait_for_timeout(300)
     jumped = top(page)
     check(abs(jumped - want["top"]) > 100, "a jump to another section")
     plain_statement()
