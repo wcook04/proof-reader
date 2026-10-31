@@ -199,6 +199,28 @@ class Drafting(unittest.TestCase):
         runs = [self.run_of(80, top) for top in (100, 116, 132)] + [self.run_of(120, top) for top in (100, 116, 132)]
         self.assertEqual(len(transcribe.split_columns(runs)), 1)
 
+    def prose(self, left, top, text="some words here"):
+        font = transcribe.Font(15, "Libertine", "#000000", False, False, False, False, False)
+        return transcribe.Run(1, top, left, 200, 14, font, text)
+
+    def test_a_two_column_page_reads_down_each_column(self):
+        runs = [self.prose(50, top) for top in range(100, 400, 18)] + [self.prose(320, top) for top in range(100, 400, 18)]
+        parts = transcribe.columns_of(runs, 600)
+        self.assertEqual([len(part) for part in parts], [17, 17])
+        self.assertTrue(all(run.left == 50 for run in parts[0]))
+
+    def test_a_full_width_title_stays_above_its_columns(self):
+        title = self.prose(50, 60, "a title running right across the page")
+        title.width = 470
+        runs = [title] + [self.prose(50, top) for top in range(100, 300, 18)] + [self.prose(320, top) for top in range(100, 300, 18)]
+        parts = transcribe.columns_of(runs, 600)
+        self.assertEqual(parts[0], [title])
+        self.assertEqual(len(parts), 3)
+
+    def test_code_side_by_side_does_not_make_two_columns(self):
+        runs = [self.run_of(50, top) for top in range(100, 300, 18)] + [self.run_of(320, top) for top in range(100, 300, 18)]
+        self.assertEqual(len(transcribe.columns_of(runs, 600)), 1)
+
     def test_a_citation_bracket_stays_outside_its_link(self):
         self.assertEqual(transcribe.tidy_links("[de Bruijn \\[1972](#cite-a)\\]"), "[de Bruijn \\[1972\\]](#cite-a)")
 

@@ -111,6 +111,7 @@ class Block:
     caption: Line | None = None
     anchor: str = ""
     closed: bool = False
+    part: int = 0
 
 
 def read_runs(pdf: Path) -> tuple[list[Run], float, float]:
@@ -138,13 +139,13 @@ def read_runs(pdf: Path) -> tuple[list[Run], float, float]:
     return runs, width, height
 
 
-def read_links(pdf: Path) -> tuple[dict[int, list[dict]], list[dict]]:
-    """The PDF's link annotations by page, and its named targets, in points."""
+def read_links(pdf: Path) -> tuple[dict[int, list[dict]], list[dict], float]:
+    """The PDF's link annotations by page, its named targets in points, and its page height."""
     try:
         from pypdf import PdfReader
     except ImportError:
         print("pypdf is not installed, so citations will not be linked", file=sys.stderr)
-        return {}, []
+        return {}, [], 0.0
     reader = PdfReader(str(pdf))
     links: dict[int, list[dict]] = {}
     for number, page in enumerate(reader.pages, 1):
@@ -166,7 +167,7 @@ def read_links(pdf: Path) -> tuple[dict[int, list[dict]], list[dict]]:
         page = reader.get_destination_page_number(target)
         targets.append({"name": name, "page": page + 1, "left": float(target.left or 0),
                         "top": float(reader.pages[page].mediabox.height) - float(target.top or 0)})
-    return links, targets
+    return links, targets, float(reader.pages[0].mediabox.height)
 
 
 def attach_links(runs: list[Run], links: dict[int, list[dict]], scale: float) -> None:
@@ -282,6 +283,62 @@ def split_columns(runs: list[Run]) -> list[list[Run]]:
     if best:
         return split_columns(best[1]) + split_columns(best[2])
     return [runs]
+
+
+def columns_of(runs: list[Run], width: float) -> list[list[Run]]:
+    """A page in reading order: full-width stretches, and two columns between them.
+
+    A page is in two columns when a good share of its rows have prose on both sides
+    of an empty gutter. Code set side by side has a gutter too, so code does not count.
+    """
+    middle = width / 2
+
+    def gutter(row: list[Run]) -> bool:
+        lefts = [r for r in row if r.right <= middle + 4]
+        rights = [r for r in row if r.left >= middle - 4]
+        return len(lefts) + len(rights) == len(row) and bool(lefts) and bool(rights) and min(r.left for r in rights) - max(r.right for r in lefts) >= 9
+
+    def across(row: list[Run]) -> bool:
+        return not gutter(row) and any(r.right > middle + 4 for r in row) and any(r.left < middle - 4 for r in row)
+
+    def prose_both_sides(row: list[Run]) -> bool:
+        return gutter(row) and any(not r.font.mono and r.right <= middle + 4 for r in row) and any(not r.font.mono and r.left >= middle - 4 for r in row)
+
+    rows = rows_of(runs)
+    if sum(prose_both_sides(row) for row in rows) < len(rows) * 0.35:
+        return [runs]
+    parts: list[list[Run]] = []
+    stretch: list[list[Run]] = []
+
+    def flush() -> None:
+        flat = [r for row in stretch for r in row]
+        parts.extend(part for part in ([r for r in flat if r.left < middle], [r for r in flat if r.left >= middle]) if part)
+        stretch.clear()
+
+    for row in rows:
+        if across(row):
+            flush()
+            if parts and getattr(parts[-1], "wide", False):
+                parts[-1].extend(row)
+            else:
+                parts.append(WideRows(row))
+        else:
+            stretch.append(row)
+    flush()
+    return parts
+
+
+class WideRows(list):
+    """Rows that cross the gutter, kept together."""
+    wide = True
+
+
+def edges(runs: list[Run], body: Font, margin: float, right: float) -> tuple[float, float]:
+    """Where this stretch's text begins and ends, falling back on the page's."""
+    text = [r for r in runs if r.font is body]
+    if len(text) < 8:
+        return margin, right
+    return Counter(round(r.left) for r in text).most_common(1)[0][0], Counter(round(r.right) for r in text).most_common(1)[0][0]
 
 
 def page_blocks(runs: list[Run], body: Font, margin: float, right: float) -> list[Block]:
@@ -490,8 +547,8 @@ def merge_pages(pages: list[list[Block]]) -> list[Block]:
         for block in blocks:
             if block.kind == "para" and block.number != "indent":
                 open_para = next((b for b in reversed(out) if b.kind == "para"), None)
-                seen_text = any(b.kind in ("para", "heading", "item") and b.page == block.page and b is not block for b in out)
-                if open_para is not None and open_para.page < block.page and not seen_text:
+                seen_text = any(b.kind in ("para", "heading", "item") and b.part == block.part and b is not block for b in out)
+                if open_para is not None and open_para.part < block.part and not seen_text:
                     last = open_para.lines[-1].text
                     if not re.search(r"[.:?!]$", last) or last.endswith(("e.g.", "i.e.")):
                         open_para.lines.extend(block.lines)
@@ -577,16 +634,21 @@ def transcribe(slug: str, force: bool) -> None:
         raise SystemExit(f"{out.relative_to(ROOT)} exists. It may hold repairs, so it is left alone; use --force to replace it.")
     pdf = folder / config["paper"]["pdf"]
     runs, width, height = read_runs(pdf)
-    links, targets = read_links(pdf)
+    links, targets, points = read_links(pdf)
     pages = max(run.page for run in runs)
-    scale = height / 720 if abs(height - 1080) < 1 else height / 792
+    scale = height / points if points else 1.0
     attach_links(runs, links, scale)
     runs = drop_furniture(runs, height, pages)
     body = common_font(runs)
     margin = Counter(round(r.left) for r in runs if r.font is body).most_common(1)[0][0]
     by_page = [[run for run in runs if run.page == number] for number in range(1, pages + 1)]
     right = Counter(round(r.right) for r in runs if r.font is body).most_common(1)[0][0]
-    blocks = merge_pages([page_blocks(page, body, margin, right) for page in by_page])
+    parts = [part for page in by_page for part in columns_of(page, width)]
+    drafted = [page_blocks(part, body, *edges(part, body, margin, right)) for part in parts]
+    for index, part_blocks in enumerate(drafted):
+        for block in part_blocks:
+            block.part = index
+    blocks = merge_pages(drafted)
     tag_references(blocks, targets, scale)
 
     words = re.findall(r"[A-Za-z][\w-]*", " ".join(r.text for r in runs if not r.font.mono))
