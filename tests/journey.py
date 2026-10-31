@@ -260,6 +260,11 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
 
     print("Hover")
     other = visible_mark(page)
+    for _ in range(6):
+        if other:
+            break
+        wheel_to(page, top(page) + 90)
+        other = visible_mark(page)
     check(other is not None, f"a second statement is on screen: {other}")
     was_top = top(page)
     was_entries = entries(page)
@@ -267,11 +272,11 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     box = target.evaluate("(el) => { const b = el.getClientRects()[0]; return { x: b.left, y: b.top, width: b.width, height: b.height }; }")
     page.mouse.move(box["x"] + 8, box["y"] + 6)
     check("pointer" == target.evaluate("(el) => getComputedStyle(el).cursor"), "the pointer says it can be clicked")
-    wait_until(page, lambda: "It has Lean" in page.locator(".proof__reading").inner_text(), "a dwell names it in plain words under the graph")
+    wait_until(page, lambda: "Has Lean" in page.locator(".proof__reading").inner_text(), "a dwell names it in plain words under the graph")
     check(abs(top(page) - was_top) <= 1 and entries(page) == was_entries and not lean_open(page), "pointing moves nothing and adds no history")
     shot(page, shots, "03-point")
     page.mouse.move(box["x"] + 6, 20)
-    wait_until(page, lambda: "It has Lean" not in page.locator(".proof__reading").inner_text(), "leaving restores")
+    wait_until(page, lambda: "Has Lean" not in page.locator(".proof__reading").inner_text(), "leaving restores")
 
     print("Lean mode, chosen on the toggle")
     page.locator(".mode-toggle button", has_text="Lean").click()

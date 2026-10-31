@@ -23,17 +23,17 @@ export const KIND_WORDS: Record<string, string> = {
 
 /** How the paper's words stand to the Lean, saying no more than the two say. */
 function relation(p: Passage): string {
-  if (p.role === "mirrors") return "This line of the paper’s Haskell corresponds to it.";
+  const here = p.code ? "line" : "sentence";
   const words: Record<Passage["role"], string> = {
-    states: "state it",
-    defines: "define it",
-    proves: "prove a step of it",
-    explains: "explain it",
-    uses: "use it",
-    mentions: "only mention it",
-    mirrors: "",
+    states: "States this result.",
+    defines: "Defines this term.",
+    proves: "Proves a step of this result.",
+    explains: `The authors explain it in this ${here}.`,
+    uses: `The authors use it in this ${here}.`,
+    mentions: `The authors only mention it in this ${here}.`,
+    mirrors: "The Lean version of this line of the paper’s Haskell.",
   };
-  return `In this ${p.code ? "line" : "sentence"} the authors ${words[p.role]}.`;
+  return words[p.role];
 }
 
 export const list = (names: string[]) => (names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`);

@@ -1,7 +1,7 @@
 # Proof Reader
 
 Proof Reader shows a research paper beside its proof in [Lean](https://lean-lang.org), a
-language in which a computer program verifies each step of a proof. You read the paper on the
+programming language whose compiler rejects a proof with a wrong step. You read the paper on the
 left page as you read any paper. The right page holds a graph of the Lean proof, which moves to
 the statement you are reading, and a click on a statement shows the authors' exact Lean lines.
 You do not have to search the authors' files to find the Lean for a sentence.

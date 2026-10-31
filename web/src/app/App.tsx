@@ -67,7 +67,7 @@ function Shelf() {
       <div className="shelf__in">
         <div>
           <h1>Proof Reader</h1>
-          <p className="shelf__lede">Proof Reader shows a research paper beside its proof in Lean, a language in which a computer program verifies each step of a proof. As you scroll the paper, a graph of the proof moves to the statement you are reading. Click a statement to read the authors’ exact Lean lines, and press Back to return to your place.</p>
+          <p className="shelf__lede">Proof Reader shows a research paper beside its proof in Lean, a programming language whose compiler rejects a proof with a wrong step. As you scroll the paper, a graph of the proof moves to the statement you are reading. Click a statement to read the authors’ exact Lean lines, and press Back to return to your place.</p>
           <ul>
             {papers.map((p) => (
               <li key={p.slug}>

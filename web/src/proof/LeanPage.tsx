@@ -22,7 +22,7 @@ export interface Step {
   untied: { section: string | null; last: Passage | null } | null;
 }
 
-const LINK_CAVEAT = "An AI linked this statement to this Lean. No program has compared what the two say.";
+const LINK_CAVEAT = "An AI agent read each statement and its Lean and linked them. The authors have not reviewed these links, and no program tests whether the two say the same thing.";
 
 export interface LeanPageHandle {
   top(): number;

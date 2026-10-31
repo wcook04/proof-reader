@@ -354,8 +354,8 @@ export function PaperPage({ edition }: { edition: Edition }) {
     const where = handle.where();
     if (entryRef.current.copy === "pdf") return `@page-${where.page}`;
     if (handle.top() < 4) return undefined;
-    const active = handle.active() ?? where.passage;
-    if (active) return `@${active}`;
+    // Level statements keep the one in hand, so this is the statement carrying the highlighter.
+    if (where.passage) return `@${where.passage}`;
     const block = handle.block();
     return block ? `@${block}` : where.section ? `@${where.section}` : undefined;
   }, [pane]);
@@ -668,7 +668,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   ) : point?.kind === "text" ? (
     <p><b>{point.title}.</b> {point.text}</p>
   ) : named.length ? (
-    <p><b>{named.map((d) => d.plain).join(", ")}</b> <code className="proof__sig">{named.map((d) => d.id).join(", ")}</code>. It has Lean: {named.map((d) => `lines ${d.line} to ${d.end_line}`).join(", ")}. Click to read it.</p>
+    <p><b>{named.map((d) => d.plain).join(", ")}</b> <code className="proof__sig">{named.map((d) => d.id).join(", ")}</code>. Has Lean, {named.map((d) => `lines ${d.line} to ${d.end_line}`).join(", ")}. Click to read it.</p>
   ) : entry.lean ? null : line.zone === "after" ? (
     <p>{lean.scope}</p>
   ) : (
