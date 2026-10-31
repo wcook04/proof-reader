@@ -151,7 +151,7 @@ const PEEK_OUT_MS = 200;
 
 /** World widths. Narrow enough that a goal's first row usually reads at k = 1 on a laptop. */
 function widthOf(node: ArgNode, isRoot: boolean, compact: boolean, rootW: number): number {
-  if (isRoot) return compact ? 260 : rootW;
+  if (isRoot) return compact ? 380 : rootW;
   if (compact) return 184;
   if (node.kind === "declaration") return 196;
   return 176;
@@ -174,7 +174,7 @@ function lidsOf(l: Layout, record: string): string[] {
 }
 
 function guessHeight(node: ArgNode, isRoot: boolean, compact: boolean): number {
-  if (isRoot) return compact ? 76 : 300;
+  if (isRoot) return compact ? 104 : 300;
   if (compact) return 62;
   return node.kind === "declaration" ? 112 : 124;
 }
@@ -1255,7 +1255,11 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
       const ids = [goal, ...builtRef.current.skeleton.filter((e) => e.from === goal).map((e) => e.to)];
       const b = boundsOf(l, ids, compact ? 24 : 14);
       if (!b) return null;
-      if (compact) return fitBounds(b, vp, { max: 1, min: COMPACT_FLOOR, top: true });
+      if (compact) {
+        // Proof Reader's map always shows the whole proof.
+        const whole = layoutBounds(l);
+        return fitBounds({ x0: whole.x0 - 24, y0: whole.y0 - 24, x1: whole.x1 + 24, y1: whole.y1 + 24 }, vp, { max: 1, min: MIN_K });
+      }
       // The plate and its whole first row inside the visible canvas: k = 1 if that fits,
       // else the largest k down to the floor that fits, else the floor with the plate on top.
       const availW = vp.width - vp.insets.left - vp.insets.right;
@@ -2696,7 +2700,7 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
             >
               <div className="card__full">
                 <p className="card__head">
-                  <span className="caps card__kind">{kindName(node.kind)}</span>
+                  <span className="caps card__kind">{node.kindLabel ?? kindName(node.kind)}</span>
                   <span className="card__src" title={sourceTitle}>
                     <span className="src-sq" aria-hidden="true" />
                     <span className="card__srcname">{source}</span>
@@ -2788,7 +2792,7 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
               </div>
               <div className="card__compact" aria-hidden="true">
                 <span className="src-sq" />
-                {isRoot && <span className="card__cmain">Main result</span>}
+                {isRoot && <span className="card__cmain">{node.kindLabel ?? "Main result"}</span>}
                 <span className={`card__ctitle${node.kind === "declaration" ? " lean" : ""}`}>
                   {node.kind === "declaration" ? <LeanName name={node.label} camel /> : isRoot ? <WholeWords text={node.label} /> : node.label}
                 </span>

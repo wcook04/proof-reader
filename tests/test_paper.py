@@ -32,6 +32,16 @@ class FindQuote(unittest.TestCase):
         self.assertEqual(paper.find_quote("the foxes", words("the", "fox")), [])
 
 
+class Mentions(unittest.TestCase):
+    def test_finds_names_inside_punctuation(self):
+        found = paper.find_mentions(words("the", "(unembed),", "unembedded"), ["unembed"])
+        self.assertEqual([m["name"] for m in found], ["unembed"])
+
+    def test_prefers_the_longer_name(self):
+        found = paper.find_mentions(words("STLCCtx"), ["STLC", "STLCCtx"])
+        self.assertEqual([m["name"] for m in found], ["STLCCtx"])
+
+
 class Rects(unittest.TestCase):
     def test_one_rectangle_per_printed_line(self):
         row = words("one", "two")

@@ -5,12 +5,12 @@ description: Add a Lean-checked paper to Proof Reader. Use when given a paper an
 
 # Add a paper
 
-A paper page shows the authors' own PDF beside a map of their Lean, tied together
-passage by passage. The paper is never rewritten. Your job is to find which words
-of the paper belong to which Lean declaration.
+A paper page is an open book: the authors' PDF on the left, their Lean on the right,
+each sentence level with the code it describes. The paper is never rewritten. Your job
+is to find which words of the paper belong to which Lean declaration.
 
-Everything mechanical is done by `tools/paper.py`. The only thing you write is
-`papers/<slug>/links.json`.
+Everything mechanical is done by `tools/paper.py`, including linking every Lean name
+printed in the paper. The only thing you write is `papers/<slug>/links.json`.
 
 ## 1. Set up the folder
 
@@ -103,9 +103,12 @@ python3 tools/paper.py build <slug>
 cd web && npm run dev
 ```
 
-Open `#/<slug>`. Scroll the paper and watch the map and the Lean follow. Choose some
+Open `#/<slug>`. Scroll the paper and watch the Lean follow. Open the map, click some
 cards and confirm the paper moves to the right words. Look at it at laptop and monitor
 widths. Fix what you find in `links.json`.
+
+If Lean is slow to start, check where elan keeps its toolchains. A toolchain on an
+external drive can turn a 15-second extraction into many minutes.
 
 ## What stays true on every page
 

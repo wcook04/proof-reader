@@ -12,7 +12,7 @@ export const MARK_K = 0.5;
 export const STEPS_K = 1;
 export const STEPS_FLOOR = 0.85;
 /** The side pane's tree uses smaller cards and a lower floor. */
-export const COMPACT_FLOOR = 0.75;
+export const COMPACT_FLOOR = 0.4;
 export const MIN_K = 0.1;
 export const MAX_K = 1.8;
 

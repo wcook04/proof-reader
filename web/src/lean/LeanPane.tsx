@@ -1,128 +1,84 @@
-// The selected Lean declaration: what the paper says about it, what Lean
-// reports about it, and the authors' file itself with its lines picked out.
+// The right-hand page: the authors' Lean file, with the declaration being read
+// lined up beside its sentence. Above it, what Lean reports about that
+// declaration and any note, kept short so the file stays the subject.
 
 import { useEffect, useMemo, useRef } from "react";
-import type { Claim, Declaration, Edition, Passage } from "../app/edition";
+import type { Declaration, Edition } from "../app/edition";
+import { READING_LINE } from "../paper/PdfPane";
 import { tokenizeLean } from "./leanTokens";
 
-const ROLE_WORDS: Record<Passage["role"], string> = {
-  states: "states it",
-  defines: "introduces it",
-  proves: "proves it",
-  explains: "explains it",
-  uses: "uses it",
+const KIND_WORDS: Record<string, string> = {
+  theorem: "Theorem",
+  lemma: "Lemma",
+  def: "Definition",
+  abbrev: "Definition",
+  instance: "Instance",
+  axiom: "Axiom",
+  inductive: "Type",
+  structure: "Type",
+  class: "Type class",
+  opaque: "Definition",
 };
 
 interface Props {
   edition: Edition;
   selected: string | null;
+  /** Every declaration the passage being read is about. */
+  reading: string[];
   onSelect(id: string): void;
   onPassage(id: string): void;
+  /** Present when the reader came here from the map. */
+  onBack?(): void;
 }
 
-export function LeanPane({ edition, selected, onSelect, onPassage }: Props) {
-  const declaration = edition.declarations.find((d) => d.id === selected) ?? null;
-  const claim = edition.claims.find((c) => c.id === selected) ?? null;
+export function LeanPane({ edition, selected, reading, onSelect, onPassage, onBack }: Props) {
+  const declaration = edition.declarations.find((d) => d.id === selected) ?? edition.declarations.find((d) => reading.includes(d.id)) ?? null;
   const file = declaration?.file ?? Object.keys(edition.lean.files)[0];
+  const lit = useMemo(() => edition.declarations.filter((d) => reading.includes(d.id) && d.file === file), [edition, file, reading]);
   return (
-    <aside className="lean" aria-label="Lean">
-      <div className="lean__card">
-        {declaration ? (
-          <Card edition={edition} d={declaration} onSelect={onSelect} onPassage={onPassage} />
-        ) : claim ? (
-          <ClaimCard edition={edition} claim={claim} onSelect={onSelect} onPassage={onPassage} />
-        ) : (
-          <p className="lean__hint">Scroll the paper, or choose a card on the map.</p>
-        )}
+    <aside className="leaf" aria-label="Lean">
+      <div className="leaf__head">
+        {onBack && <button type="button" className="leaf__back" onClick={onBack}>Back to the map</button>}
+        {declaration ? <Head edition={edition} d={declaration} onSelect={onSelect} onPassage={onPassage} /> : <h2 className="leaf__name">{file}</h2>}
       </div>
-      <Source
-        name={file}
-        text={edition.lean.files[file]}
-        declaration={declaration}
-        known={edition.declarations}
-        onSelect={onSelect}
-      />
+      <Source text={edition.lean.files[file]} name={file} focus={declaration} lit={lit} known={edition.declarations} onSelect={onSelect} />
     </aside>
   );
 }
 
-function Quotes({ edition, ids, onPassage }: { edition: Edition; ids: string[]; onPassage(id: string): void }) {
-  const passages = ids.map((id) => edition.passages.find((p) => p.id === id)).filter((p): p is Passage => !!p);
-  return (
-    <ul className="quotes">
-      {passages.map((p) => (
-        <li key={p.id}>
-          <button type="button" onClick={() => onPassage(p.id)}>
-            <span className="quotes__where">
-              §{p.section}, p.{p.page} · {ROLE_WORDS[p.role]}
-            </span>
-            <q>{p.quote}</q>
-          </button>
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-function Names({ title, names, onSelect }: { title: string; names: string[]; onSelect(id: string): void }) {
-  if (!names.length) return null;
-  return (
-    <p className="names">
-      <span className="caps">{title}</span>{" "}
-      {names.map((name) => (
-        <button key={name} type="button" className="name" onClick={() => onSelect(name)}>
-          {name}
-        </button>
-      ))}
-    </p>
-  );
-}
-
-function Card({ edition, d, onSelect, onPassage }: { edition: Edition; d: Declaration; onSelect(id: string): void; onPassage(id: string): void }) {
+function Head({ edition, d, onSelect, onPassage }: { edition: Edition; d: Declaration; onSelect(id: string): void; onPassage(id: string): void }) {
   const isProof = d.keyword === "theorem" || d.keyword === "lemma";
+  const pages = d.passages.map((id) => edition.passages.find((p) => p.id === id)).filter((p) => !!p);
   return (
     <>
-      <p className="lean__kind caps">
-        Lean {d.keyword} · lines {d.line}–{d.end_line}
-      </p>
-      <h2 className="lean__name">{d.id}</h2>
-      {d.passages.length ? (
-        <Quotes edition={edition} ids={d.passages} onPassage={onPassage} />
-      ) : (
-        <p className="lean__none">Not tied to a passage of the paper.</p>
-      )}
-      {d.note && <p className="lean__note"><span className="caps">Note</span> {d.note.text}</p>}
+      <h2 className="leaf__name">
+        {d.id}
+        <span>{KIND_WORDS[d.keyword] ?? d.keyword}, lines {d.line} to {d.end_line}</span>
+      </h2>
+      {d.keyword === "axiom" && <p className="leaf__line leaf__axiom">Assumed, not proved. Lean takes this as given.</p>}
       {isProof && (
-        <p className="lean__rests">
-          <span className="caps">Lean reports</span>{" "}
+        <p className="leaf__line">
           {d.axioms.length ? (
             <>
-              it rests on{" "}
+              Lean reports this rests on{" "}
               {d.axioms.map((a) => (
-                <button key={a} type="button" className="name name--axiom" onClick={() => onSelect(a)}>
-                  {a}
-                </button>
+                <button key={a} type="button" className="jump leaf__axiom" onClick={() => onSelect(a)}><code>{a}</code></button>
               ))}
             </>
           ) : (
-            <>it uses none of the authors' axioms</>
+            <>Lean reports this uses none of the authors' axioms.</>
           )}
-          {d.standard_axioms.length ? <>{d.axioms.length ? " and on" : ", and rests on"} Lean's standard {d.standard_axioms.join(", ")}.</> : "."}
         </p>
       )}
-      <Names title="Uses" names={d.uses} onSelect={onSelect} />
-      <Names title="Used by" names={d.used_by} onSelect={onSelect} />
-    </>
-  );
-}
-
-function ClaimCard({ edition, claim, onSelect, onPassage }: { edition: Edition; claim: Claim; onSelect(id: string): void; onPassage(id: string): void }) {
-  return (
-    <>
-      <p className="lean__kind caps">The paper's claim · §{claim.section}</p>
-      <h2 className="lean__title">{claim.title}</h2>
-      <Quotes edition={edition} ids={[claim.passage]} onPassage={onPassage} />
-      <Names title="Stated in Lean as" names={claim.lean} onSelect={onSelect} />
+      {d.note && <p className="leaf__note">{d.note.text}</p>}
+      {pages.length > 1 && (
+        <p className="leaf__line">
+          {pages.length} places in the paper, on page{" "}
+          {pages.map((p) => (
+            <button key={p.id} type="button" className="jump" onClick={() => onPassage(p.id)}>{p.page}</button>
+          ))}
+        </p>
+      )}
     </>
   );
 }
@@ -132,9 +88,9 @@ interface Piece {
   kind: string;
 }
 
-/** Split a file into lines of tokens, setting comments apart from code. */
+/** Split a file into lines of tokens, setting the authors' comments apart from code. */
 function lineTokens(text: string): Piece[][] {
-  let inBlock = 0;
+  let inBlock = false;
   return text.split("\n").map((line) => {
     const pieces: Piece[] = [];
     let rest = line;
@@ -142,9 +98,9 @@ function lineTokens(text: string): Piece[][] {
       if (inBlock) {
         const close = rest.indexOf("-/");
         const end = close < 0 ? rest.length : close + 2;
-        pieces.push({ text: rest.slice(0, end), kind: "comment" });
+        pieces.push({ text: rest.slice(0, end), kind: "prose" });
         rest = rest.slice(end);
-        if (close >= 0) inBlock = 0;
+        if (close >= 0) inBlock = false;
         continue;
       }
       const block = rest.indexOf("/-");
@@ -158,58 +114,84 @@ function lineTokens(text: string): Piece[][] {
         pieces.push({ text: rest, kind: "comment" });
         break;
       }
-      inBlock = 1;
-      pieces.push({ text: rest.slice(0, 2), kind: "comment" });
+      inBlock = true;
+      pieces.push({ text: rest.slice(0, 2), kind: "prose" });
       rest = rest.slice(2);
     }
     return pieces;
   });
 }
 
-function Source({ name, text, declaration, known, onSelect }: { name: string; text: string; declaration: Declaration | null; known: Declaration[]; onSelect(id: string): void }) {
-  const lines = useMemo(() => lineTokens(text), [text]);
+interface SourceProps {
+  name: string;
+  text: string;
+  focus: Declaration | null;
+  lit: Declaration[];
+  known: Declaration[];
+  onSelect(id: string): void;
+}
+
+function Source({ name, text, focus, lit, known, onSelect }: SourceProps) {
+  const lines = useMemo(() => tokenLines(text), [text]);
   const names = useMemo(() => new Set(known.map((d) => d.id)), [known]);
   const body = useRef<HTMLDivElement>(null);
 
+  // Bring the declaration level with the paper's reading line, so the sentence
+  // and its Lean sit side by side.
   useEffect(() => {
-    if (!declaration) return;
+    if (!focus) return;
     const el = body.current;
-    const row = el?.querySelector<HTMLElement>(`[data-line="${declaration.line}"]`);
-    if (!el || !row) return;
+    const row = el?.querySelector<HTMLElement>(`[data-line="${focus.line}"]`);
+    const paper = document.querySelector<HTMLElement>(".pdf");
+    if (!el || !row || !paper) return;
+    const align = (behavior: ScrollBehavior) => {
+      const line = paper.getBoundingClientRect().top + paper.clientHeight * READING_LINE;
+      el.scrollTo({ top: row.offsetTop - (line - el.getBoundingClientRect().top) + 11, behavior });
+    };
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    el.scrollTo({ top: row.offsetTop - 28, behavior: reduced ? "auto" : "smooth" });
-  }, [declaration]);
+    align(reduced ? "auto" : "smooth");
+    // The code font can arrive after this and rewrap the lines, so level up again.
+    let live = true;
+    void document.fonts.ready.then(() => live && align("auto"));
+    const observer = new ResizeObserver(() => align("auto"));
+    observer.observe(el);
+    return () => {
+      live = false;
+      observer.disconnect();
+    };
+  }, [focus]);
 
   return (
-    <div className="source">
-      <p className="source__name">{name}</p>
-      <div className="source__body" ref={body} tabIndex={0} aria-label={`Lean source, ${name}`}>
-        <code className="lean-code">
-          {lines.map((pieces, index) => {
-            const line = index + 1;
-            const on = !!declaration && line >= declaration.line && line <= declaration.end_line;
-            return (
-              <span key={line} className={`source__line${on ? " is-on" : ""}`} data-line={line}>
-                <span className="source__no" aria-hidden="true">{line}</span>
-                <span className="source__text">
-                  {pieces.map((piece, i) =>
-                    names.has(piece.text) ? (
-                      <button key={i} type="button" className={`source__ref${piece.text === declaration?.id ? " is-self" : ""}`} onClick={() => onSelect(piece.text)}>
-                        {piece.text}
-                      </button>
-                    ) : piece.kind === "space" || piece.kind === "punct" ? (
-                      piece.text
-                    ) : (
-                      <span key={i} className={`lk lk--${piece.kind}`}>{piece.text}</span>
-                    ),
-                  )}
-                  {"\n"}
-                </span>
+    <div className="source__body" ref={body} tabIndex={0} aria-label={`Lean source, ${name}`}>
+      <code className="lean-code">
+        {lines.map((pieces, index) => {
+          const line = index + 1;
+          const within = (d: Declaration) => line >= d.line && line <= d.end_line;
+          const on = lit.some(within) ? " is-on" : "";
+          const isFocus = focus && within(focus) ? " is-on" : "";
+          return (
+            <span key={line} className={`source__line${on || isFocus}`} data-line={line}>
+              <span className="source__no" aria-hidden="true">{line}</span>
+              <span className="source__text">
+                {pieces.map((piece, i) =>
+                  names.has(piece.text) ? (
+                    <button key={i} type="button" className={`source__ref${piece.text === focus?.id ? " is-self" : ""}`} onClick={() => onSelect(piece.text)}>
+                      {piece.text}
+                    </button>
+                  ) : piece.kind === "space" || piece.kind === "punct" ? (
+                    piece.text
+                  ) : (
+                    <span key={i} className={`lk lk--${piece.kind}`}>{piece.text}</span>
+                  ),
+                )}
+                {"\n"}
               </span>
-            );
-          })}
-        </code>
-      </div>
+            </span>
+          );
+        })}
+      </code>
     </div>
   );
 }
+
+const tokenLines = lineTokens;

@@ -1,27 +1,43 @@
-// One paper's Lean declarations as the graph the copied map engine draws.
-// The map's "supports" relation carries Lean's own uses here: an edge runs from
-// a declaration to something it refers to, as Lean reports it.
+// One paper's Lean as the graph the copied map engine draws. The map's
+// "supports" relation carries Lean's own uses: an edge runs from a declaration
+// to something it refers to, as Lean reports it. Types sit on a shelf below the
+// map instead: nearly everything uses them, and drawn as cards they bury the
+// shape of the proof.
 
-import type { Edition } from "../app/edition";
+import type { Declaration, Edition } from "../app/edition";
 import type { ArgEdge, ArgGraph, ArgNode, LinkKind, Origin } from "./graph";
 
 const origin = (family: string, label: string, slot: 0 | 1 | 2 | 3): Origin => ({ family, label, slot, place: null, locator: null, url: null });
 const LEAN = origin("lean", "Lean", 3);
 const PAPER = origin("paper", "The paper", 1);
 
+const KIND_WORDS: Record<string, string> = {
+  theorem: "Theorem",
+  lemma: "Lemma",
+  def: "Definition",
+  abbrev: "Definition",
+  instance: "Instance",
+  axiom: "Axiom",
+  opaque: "Definition",
+};
+
+export const isType = (d: Declaration) => ["inductive", "structure", "class"].includes(d.keyword);
+
 export function editionGraph(edition: Edition): ArgGraph {
   const goal = edition.claims[0]?.id ?? "";
+  const drawn = edition.declarations.filter((d) => !isType(d));
   const nodes = new Map<string, ArgNode>();
   const blank = { papers: {}, region: goal, passedExtraction: true };
   for (const claim of edition.claims) {
-    nodes.set(claim.id, { ...blank, id: claim.id, ref: claim.id, kind: "goal", label: claim.title, status: "external", origin: PAPER });
+    nodes.set(claim.id, { ...blank, id: claim.id, ref: claim.id, kind: "goal", kindLabel: "The paper's claim", label: claim.title, status: "external", origin: PAPER });
   }
-  for (const d of edition.declarations) {
+  for (const d of drawn) {
     nodes.set(d.id, {
       ...blank,
       id: d.id,
       ref: d.id,
       kind: d.keyword === "axiom" ? "assumption" : "declaration",
+      kindLabel: KIND_WORDS[d.keyword],
       label: d.id,
       declaration: d.id,
       status: d.keyword === "axiom" ? "axiom" : "kernel_checked",
@@ -32,8 +48,7 @@ export function editionGraph(edition: Edition): ArgGraph {
   const add = (from: string, to: string, kind: LinkKind) =>
     edges.push({ key: `${from}→${to}→${kind}`, from, to, kind, linkIds: [`${from}→${to}`], scoped: false, semanticClass: kind });
   for (const claim of edition.claims) for (const name of claim.lean) add(claim.id, name, "formalizes");
-  const axioms = new Set(edition.analytics.axioms);
-  for (const d of edition.declarations) for (const to of d.uses) add(d.id, to, axioms.has(to) ? "assumes" : "supports");
+  for (const d of drawn) for (const to of d.uses) if (nodes.has(to)) add(d.id, to, "supports");
 
   const out = new Map<string, ArgEdge[]>();
   const into = new Map<string, ArgEdge[]>();
@@ -49,7 +64,7 @@ export function editionGraph(edition: Edition): ArgGraph {
   return {
     origins: [
       { family: "paper", label: "The paper", slot: 1, count: edition.claims.length },
-      { family: "lean", label: "Lean", slot: 3, count: edition.declarations.length },
+      { family: "lean", label: "Lean", slot: 3, count: drawn.length },
     ],
     cites: [],
     nodes,

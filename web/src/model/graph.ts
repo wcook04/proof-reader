@@ -39,6 +39,8 @@ export interface ArgNode {
   ref: string;
   kind: NodeKind;
   label: string;
+  /** The word on the card, when the kind's own name is too general. */
+  kindLabel?: string;
   status: string;
   /** Exact declaration identity from the node record, never inferred from its label. */
   declaration?: string;

@@ -157,6 +157,30 @@ def pdf_words(pdf: Path) -> tuple[list[dict], list[tuple[float, float]]]:
     return words, sizes
 
 
+def text_edges(words: list[dict], sizes: list[tuple[float, float]]) -> list[list[float]]:
+    """Where the printed text starts and ends on each page, for the margin marks."""
+    edges = []
+    for number, (width, _) in enumerate(sizes, start=1):
+        boxes = [w["box"] for w in words if w["page"] == number]
+        edges.append([round(min(b[0] for b in boxes), 1), round(max(b[2] for b in boxes), 1)] if boxes else [0.0, width])
+    return edges
+
+
+def find_mentions(words: list[dict], names: list[str]) -> list[dict]:
+    """Every printed occurrence of a Lean name, so each one can open its Lean."""
+    pattern = re.compile(
+        r"(?<![A-Za-z0-9_'])(" + "|".join(re.escape(n) for n in sorted(names, key=len, reverse=True)) + r")(?![A-Za-z0-9_'])"
+    )
+    found = []
+    for word in words:
+        x0, y0, x1, y1 = word["box"]
+        step = (x1 - x0) / max(1, len(word["text"]))
+        for match in pattern.finditer(word["text"]):
+            found.append({"name": match[1], "page": word["page"],
+                          "rect": [round(x0 + step * match.start(), 1), round(y0, 1), round(x0 + step * match.end(), 1), round(y1, 1)]})
+    return found
+
+
 def find_quote(quote: str, words: list[dict]) -> list[int]:
     """Start indices of the quote, joining words a line break split with a hyphen."""
     target = re.sub(r"\s+", "", normal(quote))
@@ -309,7 +333,7 @@ def edition(slug: str) -> dict:
     paper = config["paper"]
     return {
         "schema": 1, "slug": slug,
-        "paper": {**paper, "pages": len(data["sizes"]), "sizes": data["sizes"]},
+        "paper": {**paper, "pages": len(data["sizes"]), "sizes": data["sizes"], "text_edges": text_edges(data["words"], data["sizes"])},
         "lean": {**{k: v for k, v in config["lean"].items() if k != "project"},
                  "toolchain": (lean_project(data["folder"], config) / "lean-toolchain").read_text().strip(),
                  "version": shard_info["lean_version"],
@@ -317,6 +341,7 @@ def edition(slug: str) -> dict:
         "credit": config.get("credit", {}),
         "claims": links.get("claims", []),
         "passages": [{k: v for k, v in p.items() if k != "order"} for p in data["passages"]],
+        "mentions": find_mentions(data["words"], [d["id"] for d in declarations]),
         "declarations": declarations,
         "analytics": {
             "declarations": len(declarations),
@@ -353,6 +378,8 @@ def build(slugs: list[str]) -> None:
         out.mkdir(exist_ok=True)
         (out / "edition.json").write_text(json.dumps(built, ensure_ascii=False), encoding="utf-8")
         shutil.copyfile(folder / built["paper"]["pdf"], out / "paper.pdf")
+        subprocess.run(["pdftocairo", "-png", "-singlefile", "-f", "1", "-l", "1", "-scale-to", "420",
+                        str(folder / built["paper"]["pdf"]), str(out / "first-page")], check=True)
         paper = built["paper"]
         shelf.append({"slug": slug, "title": paper["title"], "authors": paper["authors"], "venue": paper.get("venue", ""),
                       "declarations": built["analytics"]["declarations"]})

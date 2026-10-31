@@ -4,14 +4,19 @@ Read a paper beside its Lean proof.
 
 Many papers now come with a Lean proof, but the two sit in different places: a PDF
 here, an artifact there, and nothing connecting a sentence to the code that proves it.
-Proof Reader puts them on one screen. The authors' own PDF sits on the left, a map of
-their Lean declarations in the middle, and the Lean source on the right. As you scroll
-the paper, the map and the source follow. Choose a card or a name, and the paper moves
-to the words that discuss it.
+Proof Reader lays them out like an open book. The authors' own PDF is the left page
+and their Lean is the right page, with each sentence level with the code it describes.
+
+- Scroll the paper and the Lean follows, with the same highlighter on both pages.
+- Click a highlighted sentence, or any Lean name printed in the paper, to open its
+  Lean. Your place in the paper stays put.
+- Open the map to see the whole proof at once, click a card to read its Lean, and go
+  back to the map.
+- See which results rest on an axiom, as Lean itself reports it.
 
 It writes no explanation of its own. The paper is shown unchanged, the map and axiom
-facts come from Lean itself, and the only added words are short notes where the paper
-and the Lean differ, each marked and tied to the passage it rests on.
+facts come from Lean, and the only added words are short notes where the paper and the
+Lean differ, each tied to the passage it rests on.
 
 ## Add a paper
 
@@ -56,9 +61,11 @@ Open the address it prints. `npm run build` writes a static site to `web/dist`; 
 
 `check` confirms that every quotation appears in the PDF exactly once and that every
 name is a real declaration. It cannot confirm that a passage is about the code it
-points to; that takes reading both. Lean's report says what a proof depends on, and
-says nothing about whether a statement means what the paper says. The ties and notes
-on a page are unreviewed until an author says otherwise, and each page says so.
+points to; that takes reading both. Names printed in the paper are linked by matching
+the name alone, so a paper's Haskell `STLC` opens the Lean `STLC`. Lean's report says
+what a proof depends on, and says nothing about whether a statement means what the
+paper says. The links and notes on a page are unreviewed until an author says
+otherwise, and each page says so.
 
 ## Repository map
 

@@ -14,6 +14,13 @@ export interface Passage {
   rects: number[][];
 }
 
+/** A Lean name printed in the paper, found by matching words at build time. */
+export interface Mention {
+  name: string;
+  page: number;
+  rect: number[];
+}
+
 export interface Claim {
   id: string;
   title: string;
@@ -54,6 +61,7 @@ export interface Edition {
     licence_url: string;
     pages: number;
     sizes: [number, number][];
+    text_edges: [number, number][];
   };
   lean: {
     modules: string[];
@@ -67,6 +75,7 @@ export interface Edition {
   };
   claims: Claim[];
   passages: Passage[];
+  mentions: Mention[];
   declarations: Declaration[];
   analytics: {
     declarations: number;
