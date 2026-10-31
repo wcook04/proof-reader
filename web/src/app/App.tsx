@@ -67,7 +67,7 @@ function Shelf() {
       <div className="shelf__in">
         <div>
           <h1>Proof Reader</h1>
-          <p className="shelf__lede">Read a paper beside its Lean proof. Scroll the paper and the graph of the proof and the authors’ Lean follow. Click a statement to open its exact lines, and go back to where you were.</p>
+          <p className="shelf__lede">Proof Reader shows a research paper beside its proof in Lean, a language in which a computer program verifies each step of a proof. As you scroll the paper, a graph of the proof moves to the statement you are reading. Click a statement to read the authors’ exact Lean lines, and press Back to return to your place.</p>
           <ul>
             {papers.map((p) => (
               <li key={p.slug}>
@@ -77,7 +77,7 @@ function Shelf() {
                     <span className="shelf__title">{p.title}</span>
                     <span className="shelf__by">{p.authors.join(", ")}</span>
                     <span className="shelf__by">{p.venue}</span>
-                    <span className="shelf__status">The links to Lean and the notes were made with AI and have not been reviewed by the authors.</span>
+                    <span className="shelf__status">The links from this paper to its proof in Lean, and the notes, were made with AI and have not been reviewed by the authors.</span>
                   </span>
                 </a>
               </li>
@@ -87,7 +87,7 @@ function Shelf() {
         <img
           className="shelf__picture"
           src={`${import.meta.env.BASE_URL}reader.webp`}
-          alt="A paper on the left page with one sentence highlighted, and on the right the graph of its Lean proof above the Lean theorem the sentence describes."
+          alt="A paper on the left page with one sentence highlighted, and on the right the Lean lines linked to that sentence."
           width={1600}
           height={840}
         />

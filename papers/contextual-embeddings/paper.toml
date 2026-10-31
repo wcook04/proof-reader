@@ -16,7 +16,7 @@ modules = ["CE"]
 source = "https://doi.org/10.5281/zenodo.19081887"
 source_name = "Contextual Embeddings artifact, Lean/CE.lean"
 licence = "CC BY 4.0"
-scope = "This page covers Lean/CE.lean, the proof behind section 3.3. The artifact's two levelled files, behind section 6.3, are separate Lean modules."
+scope = "This page links to Lean/CE.lean, the proof described in section 3.3. The two levelled files in the artifact, described in section 6.3, are separate Lean modules and are not linked here."
 
 [reading]
 language = "haskell"

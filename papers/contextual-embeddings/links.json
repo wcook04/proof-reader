@@ -881,31 +881,31 @@
    ]
   },
   "STLC": {
-   "text": "The paper's Haskell calls two constructors Lam and App. The Lean calls them Lambda and Apply.",
+   "text": "Two constructors are named Lam and App in the paper's Haskell, and Lambda and Apply in the Lean.",
    "because": [
     "stlc"
    ]
   },
   "ProxyTop": {
-   "text": "The paper's constructor has the same name as its type, ProxyTop. The Lean constructor is PTop.",
+   "text": "In the paper's Haskell the constructor has the same name as its type, ProxyTop. In the Lean the constructor is PTop.",
    "because": [
     "proxytop"
    ]
   },
   "ProxyVar": {
-   "text": "This is the type the paper's Haskell calls Var. Its constructor MkVar is the Lean PVar.",
+   "text": "This type is named Var in the paper's Haskell, and its constructor MkVar is PVar in the Lean.",
    "because": [
     "existential"
    ]
   },
   "weakenPVar": {
-   "text": "This is the function the paper's Haskell calls weakenCVar. Its MkVar is the Lean PVar.",
+   "text": "This function is named weakenCVar in the paper's Haskell, and its MkVar is PVar in the Lean.",
    "because": [
     "weaken"
    ]
   },
   "instReifyIndexSnoc": {
-   "text": "The Haskell instance leaves the snoc to a type equality so that instance selection cannot see it. The Lean instance writes the snoc directly in its head.",
+   "text": "In the Haskell instance the snoc is a type equality, which instance selection does not see. In the Lean instance the snoc is written directly in the instance head.",
    "because": [
     "defer-snoc"
    ]

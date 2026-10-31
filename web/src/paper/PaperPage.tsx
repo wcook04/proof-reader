@@ -652,7 +652,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const says = (() => {
     if (shown.mode === "preview") return <><b>Previewing</b> {plainOf(shown.decl ?? undefined) || stepView.title}. Move away to return.</>;
     if (shown.mode === "pin") return <><b>Pinned</b> {plainOf(pin?.decl ?? undefined) || stepView.title}<button type="button" className="proof__unpin" onClick={closeLean}>Unpin</button></>;
-    if (shown.mode === "after") return <><b>{hereLabel ? `Nothing in ${hereLabel} is in this Lean.` : "Nothing here is in this Lean."}</b> It covers {sectionLabel(firstTie)} to {sectionLabel(lastSection)}.</>;
+    if (shown.mode === "after") return <><b>{hereLabel ? `No statement in ${hereLabel} is linked to this Lean.` : "No statement here is linked to this Lean."}</b> The linked statements are in {sectionLabel(firstTie)} to {sectionLabel(lastSection)}.</>;
     if (shown.mode === "between") return <><b>No statement at this line.</b> The last was {name}.</>;
     if (shown.mode === "start") return <><b>Before the first statement,</b> in {sectionLabel(firstTie)}. Showing the main claim.</>;
     return <><b>Following the paper:</b> {stepView.title}</>;
@@ -672,7 +672,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   ) : entry.lean ? null : line.zone === "after" ? (
     <p>{lean.scope}</p>
   ) : (
-    <p className="proof__key">Square cards are definitions, round cards theorems and the violet box an axiom; green means it is in Lean, and a dashed line a use in a statement.</p>
+    <p className="proof__key">Square cards are definitions, round cards theorems and the violet box an axiom; green means defined or proved in Lean, and a dashed line means used in a statement.</p>
   );
 
   const act = useMemo((): LeanActions => ({ walk: (id) => walk(id), name: (id) => setPoint(id ? { kind: "name", id } : null), plain: plainOf }), [plainOf, walk]);
@@ -683,8 +683,8 @@ export function PaperPage({ edition }: { edition: Edition }) {
     <p>
       Paper © its authors, <a href={paper.licence_url}>{paper.licence}</a>
       {copy === "reading" ? ". Reading copy retypeset from the PDF, with the same words and the plots cut from it; the layout is ours" : ", with only its blank margins trimmed"}.
-      {" "}A program matched {edition.reading ? `all ${edition.reading.words.toLocaleString("en-GB")} words of the reading copy` : "each quotation"} against the authors’ PDF.
-      {" "}Lean from the authors’ artifact, built here on Lean {lean.version}. Ties, notes and plain titles were made with AI and have not been reviewed by the authors.
+      {" "}A program compared {edition.reading ? `all ${edition.reading.words.toLocaleString("en-GB")} words of the reading copy` : "each quotation"} with the authors’ PDF and found no differences.
+      {" "}Lean from the authors’ artifact, built here on Lean {lean.version}. Links, notes and plain titles were made with AI and have not been reviewed by the authors.
     </p>
   );
 
@@ -778,9 +778,9 @@ export function PaperPage({ edition }: { edition: Edition }) {
               onReady={() => setTick((t) => t + 1)}
               hint={(
                 <>
-                <p className="firstline firstline--status">The links to Lean and the notes were made with AI and have not been reviewed by the authors.</p>
+                <p className="firstline firstline--status">The links from this paper to its proof in Lean, and the notes, were made with AI and have not been reviewed by the authors.</p>
                 <p className="firstline">
-                  Statements with a mark beside them open their Lean.
+                  Click a statement with a mark beside it to read its Lean.
                   {firstSection && <> The first is in <button type="button" onClick={() => jumpTo(firstSection.id)}>{sectionLabel(firstSection.number)}</button></>}
                   {claimSection && <>, the main claim in <button type="button" onClick={() => jumpTo(claimSection.id)}>{sectionLabel(claimSection.number)}</button></>}.
                 </p>

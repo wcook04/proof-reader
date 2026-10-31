@@ -1,6 +1,6 @@
 ---
 name: add-paper
-description: Add a Lean-checked paper to Proof Reader. Use when given a paper and its Lean project, to set the paper for reading, tie each sentence and line of code to the exact Lean it describes, give each declaration a plain title and write short notes grounded in the paper, so the paper appears on the site beside its Lean.
+description: Add a paper with a Lean proof to Proof Reader. Use when given a paper and its Lean project, to set the paper for reading, tie each sentence and line of code to the exact Lean it describes, give each declaration a plain title and write short notes grounded in the paper, so the paper appears on the site beside its Lean.
 ---
 
 # Add a paper
@@ -27,7 +27,7 @@ python3 tools/paper.py new <slug>
   licences.
 
 **Licence.** Hosting the PDF needs an open licence such as CC BY, or the authors'
-permission. Check the paper itself and the artifact's record. If neither allows
+permission. Read the licence in the paper itself and in the artifact's record. If neither allows
 it, stop and say so. Do not host the file.
 
 ```sh
@@ -50,7 +50,7 @@ prose, positions tell a heading from a footnote, and the PDF's link targets give
 citation and cross-reference its destination. Use the reading copy route for any paper
 with an open licence. A paper without a `paper.md` still works, on the PDF alone.
 
-The draft is close, and the check below shows where it is not. Repair `paper.md` by hand:
+The draft is close, and `paper.py check` lists where it differs from the PDF. Repair `paper.md` by hand:
 
 - **The first page.** The title block, abstract, keywords and the licence box arrive in
   page order, some of them in the middle of the introduction. Lay them out as Sam
@@ -69,12 +69,12 @@ cd web && npm install && cd ..
 python3 tools/paper.py check <slug>
 ```
 
-The check needs `extract` to have run, so do step 1 first. It lists every word that
+The command needs `extract` to have run, so do step 1 first. It lists every word that
 differs from the PDF. It stops at zero differences or it stops the build.
 
 **What it cannot see.** Words that are all present but in the wrong place inside a moved
-block pass the check. A figure's `where` once landed in the wrong column and the check
-was content. So read every code listing against the PDF yourself, particularly the
+block pass the comparison. A figure's `where` once landed in the wrong column and the
+comparison passed. So read every code listing against the PDF yourself, particularly the
 side-by-side ones.
 
 ## 3. Read both sides
@@ -110,7 +110,7 @@ supports, or that a file is out of date.
 **Claims** are what the paper says the Lean establishes. Each one becomes the top of
 a map, so use the paper's own words for its title and name the theorems that state it.
 
-**Passages** tie words to declarations.
+**Passages** link words to declarations.
 
 - `quote` is copied exactly from the PDF, and short enough to read at a glance: one
   sentence is usually right.
@@ -121,15 +121,15 @@ a map, so use the paper's own words for its title and name the theorems that sta
 - `lines` names the exact Lean lines, when the passage is about less than the whole
   declaration. They must lie inside the first declaration in `lean`. This is the point
   of the page: "isoR's CLam case" should land on `CLam`'s lines, not on the top of `isoR`.
-- Tie lines of code as well as sentences. When the paper prints a definition, a quote of
-  one Haskell equation tied to the matching Lean line lets a reader walk the two side by
+- Link lines of code as well as sentences. When the paper prints a definition, a quote of
+  one Haskell equation linked to the matching Lean line lets a reader read the two side by
   side. A quote may run across lines of code.
-- Tie every declaration you can. A passage may tie to several.
+- Link every declaration you can. A passage may link to several.
 - If a quote occurs twice, lengthen it, or add `"page": n` for the PDF and `"nth": n` for
   the reading copy.
 
 **Names** need no work: every Lean name printed in the paper as code is linked for you.
-If the Lean covers only part of the paper, list those sections under `"name_sections"`,
+If the Lean covers only some sections of the paper, list those sections under `"name_sections"`,
 so that a later section's own `Ty` does not open a different `Ty`. If a name is also an
 ordinary word, list it under `"unlinked_names"`.
 
@@ -137,8 +137,8 @@ ordinary word, list it under `"unlinked_names"`.
 sides, give every declaration in the proof a short title under `"plain"`, in the paper's own
 words where it has them ("Reflexive case", not a phrase of yours): at most 40 characters, words a newcomer can read, never the name again. These are what
 a reader sees on cards, in Back labels and in headings, with the raw name small beside them.
-The check stops if one is missing, and the title is yours to keep honest: it must say what the
-Lean does and no more.
+`paper.py check` stops if one is missing. You answer for each title: it must say what the Lean
+does and no more.
 
 **Notes** are the only sentences of ours on the page, so they earn their place. Write one
 only when the paper and the Lean differ in a way a careful reader would want to know:
@@ -148,7 +148,7 @@ interpretation of what the authors meant, no claims about the mathematics beyond
 the paper and the Lean say. Lean's own report of axioms and dependencies is computed, so
 never restate it in a note.
 
-## 5. Check it
+## 5. Run the comparison
 
 ```sh
 python3 tools/paper.py check <slug>
@@ -156,11 +156,11 @@ python3 tools/paper.py check <slug>
 
 This fails if a quote is not found exactly once, if a word differs from the PDF, if
 `lines` fall outside their declaration, or if a name is not a Lean declaration. It then
-prints how many declarations are tied and what rests on each axiom. Tie the ones still
+prints how many declarations are linked and what depends on each axiom. Link the ones still
 listed where the paper discusses them. Some declarations are helpers the paper never
-mentions: leave those untied.
+mentions: leave those unlinked.
 
-Then check the meaning yourself, because the tool cannot. For each passage, read the
+Then confirm the meaning yourself, because no program can. For each passage, read the
 Lean lines it points to and confirm the passage really is about them. For each note,
 confirm it against both sides.
 
@@ -180,7 +180,7 @@ widths. Fix what you find in `links.json` or `paper.md`.
 someone who wants to see one thing. `#/<slug>/<declaration>` opens a declaration, and
 `#/<slug>/@declarations` the index at the back.
 
-If Lean is slow to start, check where elan keeps its toolchains. A toolchain on an
+If Lean is slow to start, find where elan keeps its toolchains. A toolchain on an
 external drive can turn a 15-second extraction into many minutes.
 
 ## What stays true on every page
@@ -190,7 +190,7 @@ external drive can turn a 15-second extraction into many minutes.
   retypeset.
 - Every other word is a quotation from the paper, Lean's own output, a note marked as a
   note, or a declaration's plain title.
-- The footer says the ties, notes and plain titles were made with AI and not reviewed by the
+- The line above the title and the footer say the links, notes and plain titles were made with AI and not reviewed by the
   authors.
   Change that only when an author has reviewed them.
 - Publishing a page is the maintainer's decision. Adding a paper to the repository does

@@ -23,17 +23,17 @@ export const KIND_WORDS: Record<string, string> = {
 
 /** How the paper's words stand to the Lean, saying no more than the two say. */
 function relation(p: Passage): string {
-  const it = p.code ? "This line" : "This sentence";
+  if (p.role === "mirrors") return "This line of the paper’s Haskell corresponds to it.";
   const words: Record<Passage["role"], string> = {
-    states: "states it",
-    defines: "defines it",
-    proves: "proves part of it",
-    explains: "explains it",
-    uses: "uses it",
-    mentions: "only mentions it",
-    mirrors: "corresponds to it",
+    states: "state it",
+    defines: "define it",
+    proves: "prove a step of it",
+    explains: "explain it",
+    uses: "use it",
+    mentions: "only mention it",
+    mirrors: "",
   };
-  return `${p.role === "mirrors" ? "This Haskell line" : it} ${words[p.role]}.`;
+  return `In this ${p.code ? "line" : "sentence"} the authors ${words[p.role]}.`;
 }
 
 export const list = (names: string[]) => (names.length < 2 ? names.join("") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`);
@@ -52,20 +52,20 @@ function Names({ edition, names, act }: { edition: Edition; names: string[]; act
 }
 
 function Axioms({ edition, d, act }: { edition: Edition; d: Declaration; act: LeanActions }) {
-  if (d.keyword === "axiom") return <p className="decl__axiom">Assumed, not proved. Lean takes this as given.</p>;
+  if (d.keyword === "axiom") return <p className="decl__axiom">Assumed, not proved. Lean accepts this without a proof.</p>;
   if (d.keyword !== "theorem" && d.keyword !== "lemma") return null;
   const sorry = edition.analytics.sorry.includes(d.id);
   return (
     <p className="decl__facts">
       {d.axioms.length > 0 ? (
         <>
-          Lean reports that this rests on the authors’ axiom <Names edition={edition} names={d.axioms} act={act} />
+          Lean reports that this depends on the authors’ axiom <Names edition={edition} names={d.axioms} act={act} />
           {d.standard_axioms.length > 0 && <>, and on Lean’s standard {list(d.standard_axioms)}</>}.
         </>
       ) : d.standard_axioms.length > 0 ? (
-        <>Lean reports that this rests only on its standard {list(d.standard_axioms)}.</>
+        <>Lean reports that this depends only on its standard {list(d.standard_axioms)}.</>
       ) : (
-        <>Lean reports that this rests on no axioms.</>
+        <>Lean reports that this depends on no axioms.</>
       )}
       {sorry && <strong> It contains sorry.</strong>}
     </p>

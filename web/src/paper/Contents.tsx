@@ -176,7 +176,7 @@ export function Contents({ outline, current, open, declarations, files, html, co
       </div>
       {needle ? (
         names.length + found.length + inLean.length === 0 ? (
-          <p className="rail__none">Nothing matches that.</p>
+          <p className="rail__none">Nothing in the paper or the Lean matches that search.</p>
         ) : (
           <ul className="rail__found">
             {found.map(({ block, at }) => (
@@ -229,7 +229,7 @@ export function Contents({ outline, current, open, declarations, files, html, co
         </ol>
       )}
       <p className="rail__key">
-        <span>Numbers count statements. <kbd>j</kbd> and <kbd>k</kbd> step through them, <kbd>Enter</kbd> opens, <kbd>Esc</kbd> closes, <kbd>g</kbd> switches, <kbd>[</kbd> goes back.</span>
+        <span>Each number counts a section’s statements with Lean. <kbd>j</kbd> and <kbd>k</kbd> step through them, <kbd>Enter</kbd> opens, <kbd>Esc</kbd> closes, <kbd>g</kbd> switches, <kbd>[</kbd> goes back.</span>
       </p>
     </nav>
   );

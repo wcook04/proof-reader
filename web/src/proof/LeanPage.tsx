@@ -8,7 +8,7 @@ import { routeHref } from "../app/router";
 import { DeclLink, LeanCode, useFileLines, type LeanActions } from "../lean/code";
 import { sectionLabel, shapeOf } from "../model/fromEdition";
 import { READING_LINE } from "../paper/reading-line";
-import { DeclBlock, KIND_WORDS, foldWord, list } from "./DeclBlock";
+import { DeclBlock, KIND_WORDS, list } from "./DeclBlock";
 
 export interface Step {
   /** Names the view, so its scroll can be kept while something else is previewed. */
@@ -22,7 +22,7 @@ export interface Step {
   untied: { section: string | null; last: Passage | null } | null;
 }
 
-const LINK_CAVEAT = "An AI read the two and linked them. No program has checked that they say the same thing.";
+const LINK_CAVEAT = "An AI linked this statement to this Lean. No program has compared what the two say.";
 
 export interface LeanPageHandle {
   top(): number;
@@ -212,7 +212,7 @@ function Untied({ edition, untied, onPassage }: { edition: Edition; untied: NonN
   const last = untied.last;
   return (
     <div className="untied">
-      <h3>{untied.section ? `Nothing in ${untied.section} is in this Lean.` : "Nothing here is in this Lean."}</h3>
+      <h3>{untied.section ? `No statement in ${untied.section} is linked to this Lean.` : "No statement here is linked to this Lean."}</h3>
       <p>The {edition.coverage.ties} statements linked to it are in {list(tied)}. {edition.lean.scope}</p>
       <p className="untied__go">
         {last && <button type="button" onClick={() => onPassage(last.id)}>Go to the last statement, in {sectionLabel(last.section)}</button>}
@@ -232,8 +232,8 @@ function AllDeclarations({ edition, act }: { edition: Edition; act: LeanActions 
       {analytics.axioms.map((name) => (
         <p key={name}>
           <DeclLink paper={slug} name={name} act={act} className="declname declname--axiom" /> is the authors’ axiom, assumed and not proved.{" "}
-          {(analytics.resting_on_axioms[name] ?? []).length > 0 ? <>Resting on it: {plain(analytics.resting_on_axioms[name])}.</> : <>Nothing here rests on it.</>}
-          {analytics.free_of_axioms.length > 0 && <> Free of it: {plain(analytics.free_of_axioms)}.</>}
+          {(analytics.resting_on_axioms[name] ?? []).length > 0 ? <>Proofs that depend on it: {plain(analytics.resting_on_axioms[name])}.</> : <>No proof here depends on it.</>}
+          {analytics.free_of_axioms.length > 0 && <> Proofs that do not: {plain(analytics.free_of_axioms)}.</>}
         </p>
       ))}
       <p>
@@ -259,15 +259,10 @@ function AllDeclarations({ edition, act }: { edition: Edition; act: LeanActions 
           })}
         </tbody>
       </table>
-      <p className="index__source">Names, kinds, lines, uses and axioms come from Lean {edition.lean.version} itself, run on the authors’ file. {foldNote(edition)}</p>
+      <p className="index__source">These names, kinds, line numbers, uses and axioms are the output of Lean {edition.lean.version} on the authors’ file.</p>
     </div>
   );
 }
-
-const foldNote = (edition: Edition) => {
-  const proofs = edition.declarations.filter((d) => foldWord(d) === "Proof").length;
-  return `${proofs} of them are theorems.`;
-};
 
 function WholeFile({ edition, step, act, names, scroller }: { edition: Edition; step: Step; act: LeanActions; names: ReadonlySet<string>; scroller: React.RefObject<HTMLDivElement | null> }) {
   const focus = edition.declarations.find((d) => d.id === step.decls[0]) ?? null;

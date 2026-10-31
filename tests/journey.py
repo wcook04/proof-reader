@@ -214,7 +214,7 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check(page.locator(".firstline--status").is_visible() and page.locator(".firstline--status").bounding_box()["y"] < page.locator(".sheet__text h1").bounding_box()["y"], "the status line stands above the title")
     check("not been reviewed by the authors" in page.locator(".firstline--status").inner_text(), "and says who made the links")
     check(page.locator(".firstline").last.is_visible(), "the first screen says what to do")
-    check("Statements with a mark" in page.locator(".firstline").last.inner_text(), "in plain words")
+    check("Click a statement with a mark" in page.locator(".firstline").last.inner_text(), "in plain words")
     check("Before the first statement" in caption(page), f"the caption says where the ties are: {caption(page)}")
     check(page.locator(".proof__graph").is_visible() and not lean_open(page), "at rest the right page is the graph, and the Lean waits")
     check(page.locator(".skip").count() == 1, "there is a skip link")
@@ -464,7 +464,7 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     stop_here("jumped to 3.6")
 
     print("Past the last tie")
-    check("is in this Lean" in caption(page), f"the caption says the Lean stops: {caption(page)}")
+    check("linked to this Lean" in caption(page), f"the caption says the Lean stops: {caption(page)}")
     check("After the last statement" in page.locator(".stepper").inner_text(), "the counter says so too")
     check("section 6.3" in page.locator(".proof__reading").inner_text(), "and what is and is not covered, in the paper's own scope")
     page.locator(".mode-toggle button", has_text="Lean").click()

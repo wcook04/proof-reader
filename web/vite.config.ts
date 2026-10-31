@@ -24,9 +24,9 @@ const escapeHtml = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "
 function llmsText(papers: ShelfItem[]): string {
   return `# Proof Reader
 
-> Read a paper beside its Lean proof. The paper is on one page and the proof on the other: a graph of the Lean declarations above the authors' own lines, tied to the paper statement by statement.
+> A website for reading a research paper beside its proof in Lean, a language in which a computer program verifies each step of a proof. The paper is on the left page. The right page holds a graph of the Lean declarations and the authors' Lean lines, linked to the paper statement by statement.
 
-The papers and their Lean are their authors'. The reading copy of each paper is compared with its PDF word for word by a program. The ties between statements and Lean, and any notes, were made with AI and have not been reviewed by the authors unless a paper says otherwise. Facts about Lean (kinds, lines, uses, axioms) come from Lean itself, run on the authors' project.
+The papers and their Lean are their authors'. A program compares the reading copy of each paper with its PDF, word for word. The links between statements and Lean, and any notes and plain titles, were made with AI and have not been reviewed by the authors unless a paper says otherwise. Facts about Lean (kinds, lines, uses, axioms) come from Lean itself, run on the authors' project.
 
 ## Papers
 
@@ -37,16 +37,16 @@ ${papers.map((p) => `- [${p.title}](${SITE_URL}${p.slug}/): ${p.authors.join(", 
 All data is static under ${SITE_URL}papers/.
 
 - [papers/index.json](${SITE_URL}papers/index.json): every paper, with its title, authors and venue
-- papers/<slug>/edition.json: one paper's data. \`paper\` holds its metadata and licence; \`lean\` holds the toolchain and the authors' source files; \`claims\` the results the paper says the Lean establishes; \`passages\` each tied statement, with its verbatim \`quote\`, its \`role\`, the Lean names it is tied to and, where given, the exact \`lines\`; \`declarations\` each Lean declaration with its kind, lines, \`uses_statement\`, \`uses_proof\`, \`used_by_statement\`, \`used_by_proof\` and axioms; \`coverage\` the sections that hold ties; \`analytics\` the axiom summary
+- papers/<slug>/edition.json: one paper's data. \`paper\` holds its metadata and licence; \`lean\` holds the toolchain and the authors' source files; \`claims\` the results the paper says the Lean establishes; \`passages\` each linked statement, with its verbatim \`quote\`, its \`role\`, the Lean names it is linked to and, where given, the exact \`lines\`; \`declarations\` each Lean declaration with its kind, lines, \`uses_statement\`, \`uses_proof\`, \`used_by_statement\`, \`used_by_proof\` and axioms; \`coverage\` the sections with linked statements; \`analytics\` the axiom summary
 - papers/<slug>/source.json: the authors' Lean files, and where each Lean name is printed in the PDF
-- papers/<slug>/reading.html: the paper's reading copy as HTML, with its ties, Lean names and page marks in place
+- papers/<slug>/reading.html: the paper's reading copy as HTML, with its statements, Lean names and page marks marked up
 - papers/<slug>/paper.pdf: the authors' PDF, unchanged
 
 ## Addresses
 
 - ${SITE_URL}#/<slug>: a paper
 - ${SITE_URL}#/<slug>/<name>: a Lean declaration
-- ${SITE_URL}#/<slug>/@<passage>: one tied statement, using a passage id from edition.json
+- ${SITE_URL}#/<slug>/@<passage>: one linked statement, using a passage id from edition.json
 - ${SITE_URL}#/<slug>/@declarations: every declaration, with the axiom summary
 - ${SITE_URL}#/<slug>/@page-<n>: a page of the PDF
 
@@ -88,7 +88,7 @@ function notFound(base: string, papers: ShelfItem[]): string {
 <main>
 <p class="lockup"><a href="https://wcook04.github.io/" rel="author"><img src="${base}plectis.svg" alt="Will Cook: all websites and films" width="26" height="26" /></a><i></i><a href="${base}">Proof Reader</a></p>
 <h1>There is nothing at this address.</h1>
-<p>Proof Reader reads a paper beside its Lean proof. These are the papers it holds:</p>
+<p>Proof Reader shows a paper beside its Lean proof. These are the papers on the site:</p>
 <ul>
 ${papers.map((p) => `<li><a href="${base}#/${encodeURIComponent(p.slug)}">${escapeHtml(p.title)}</a></li>`).join("\n")}
 </ul>
@@ -102,7 +102,7 @@ ${papers.map((p) => `<li><a href="${base}#/${encodeURIComponent(p.slug)}">${esca
 /** A page for each paper, so a shared link has that paper's own title and picture. */
 function paperPage(html: string, paper: ShelfItem, base: string): string {
   const title = escapeHtml(`${paper.title}, read beside its Lean proof`);
-  const description = escapeHtml(`${paper.authors.join(", ")}. Read the paper beside the graph of its Lean proof and the authors' own lines.`);
+  const description = escapeHtml(`${paper.authors.join(", ")}. Read the paper beside a graph of its Lean proof and the authors' Lean lines.`);
   const url = `${SITE_URL}${paper.slug}/`;
   return html
     .replace(/<title>[\s\S]*?<\/title>/, `<title>${title} · Proof Reader</title>`)
