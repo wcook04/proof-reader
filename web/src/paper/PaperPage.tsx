@@ -10,6 +10,7 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { blankEntry, newEntryId, pushEntry, readEntry, replaceEntry, returning, type Copy, type Entry, type Pin, type Tab } from "../app/history";
 import { paperFile, type Edition, type Passage } from "../app/edition";
+import { Lockup, SisterSites } from "../app/Family";
 import { readRoute, routeHref } from "../app/router";
 import { setScheme, useScheme } from "../app/theme";
 import type { LeanActions } from "../lean/code";
@@ -641,10 +642,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
       }}>Skip to the paper</a>
       <header className={`bar${showRight && wide && edition.reading ? " bar--spread" : ""}`}>
         <div className="bar__left">
-          <a className="bar__home" href={routeHref({})} aria-label="Proof Reader, all papers">
-            <img src={`${import.meta.env.BASE_URL}favicon.svg`} alt="" width={22} height={22} />
-            <span className="bar__name">Proof Reader</span>
-          </a>
+          <Lockup />
           {edition.reading && !wide && <button type="button" className="bar__contents" aria-expanded={rail} onClick={() => setRail(!rail)}>Contents</button>}
         </div>
         <div className="bar__column">
@@ -728,7 +726,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
                 </p>
                 </>
               )}
-              foot={<footer className="foot">{credit}</footer>}
+              foot={<footer className="foot">{credit}<SisterSites /></footer>}
             />
           ) : (
             copy === "reading" && <p className="status" data-paper-pane>Opening the paper…</p>
@@ -751,6 +749,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
                 onName={(id) => walk(id, "paper")}
                 onPoint={onPoint}
                 onReady={() => setTick((t) => t + 1)}
+                foot={<footer className="foot">{credit}<SisterSites /></footer>}
               />
             </Suspense>
           )}

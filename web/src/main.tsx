@@ -10,6 +10,7 @@ import "@fontsource/jetbrains-mono/700.css";
 
 import "./styles/tokens.css";
 import "./styles/base.css";
+import "./styles/family.css";
 import "./app/app.css";
 import "./paper/reading.css";
 

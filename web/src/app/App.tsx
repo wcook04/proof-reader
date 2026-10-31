@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { PaperPage } from "../paper/PaperPage";
+import { Lockup, SisterSites } from "./Family";
 import { loadEdition, loadShelf, paperFile, type Edition, type ShelfItem } from "./edition";
 import { readRoute, routeHref, type Route } from "./router";
 
@@ -39,7 +40,12 @@ function Loaded({ slug }: { slug: string }) {
       live = false;
     };
   }, [slug]);
-  if (failed) return <div className="lost"><h1>There is no paper at this address.</h1><p><a href={routeHref({})}>See all papers</a></p></div>;
+  if (failed) return (
+    <>
+      <header className="bar"><div className="bar__left"><Lockup /></div></header>
+      <div className="lost"><h1>There is no paper at this address.</h1><p><a href={routeHref({})}>See all papers</a></p></div>
+    </>
+  );
   if (!edition) return <p className="status">Opening the paper…</p>;
   return <PaperPage edition={edition} />;
 }
@@ -51,11 +57,13 @@ function Shelf() {
     void loadShelf().then((s) => setPapers(s.papers));
   }, []);
   return (
+    <>
+    <a className="skip" href="#papers" onClick={(event) => {
+      event.preventDefault();
+      document.querySelector<HTMLElement>(".shelf li a")?.focus();
+    }}>Skip to the papers</a>
+    <header className="bar"><div className="bar__left"><Lockup here /></div></header>
     <main className="shelf" id="papers" tabIndex={-1}>
-      <a className="skip" href="#papers" onClick={(event) => {
-        event.preventDefault();
-        document.querySelector<HTMLElement>(".shelf li a")?.focus();
-      }}>Skip to the papers</a>
       <div className="shelf__in">
         <div>
           <h1>Proof Reader</h1>
@@ -84,6 +92,8 @@ function Shelf() {
           height={840}
         />
       </div>
+      <footer className="shelf__foot"><SisterSites /></footer>
     </main>
+    </>
   );
 }

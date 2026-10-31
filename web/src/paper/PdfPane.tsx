@@ -5,7 +5,7 @@
 // is as large as the page allows. Scrolling reports the passage at the reading
 // line. It stays paper-coloured at night: it is the authors' page.
 
-import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import * as pdfjs from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import type { PDFDocumentProxy } from "pdfjs-dist";
@@ -36,6 +36,8 @@ interface Props {
   onName(name: string): void;
   onPoint(pointed: Pointed): void;
   onReady(): void;
+  /** Below the last page: whose words these are, and the family's other sites. */
+  foot?: ReactNode;
 }
 
 export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, ref) {
@@ -407,6 +409,7 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
           </div>
         );
       })}
+      {props.foot}
     </div>
   );
 });

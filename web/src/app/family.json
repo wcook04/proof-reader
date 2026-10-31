@@ -1,0 +1,12 @@
+{
+  "about": "A small copy of Will Cook's list of websites, from sites.json at https://github.com/wcook04/wcook04.github.io. Copied at build time so that no page asks another host for it.",
+  "owner": { "name": "Will Cook", "home": "https://wcook04.github.io/" },
+  "sites": [
+    { "id": "maths", "name": "Plectis Mathematics", "url": "https://wcook04.github.io/practical-formal-verification/map/" },
+    { "id": "lean-exposition", "name": "Lean Exposition", "url": "https://wcook04.github.io/lean-exposition-site/" },
+    { "id": "atlas", "name": "Plectis Atlas", "url": "https://wcook04.github.io/plectis-atlas/" },
+    { "id": "formal-verification", "name": "Practical Formal Verification", "url": "https://wcook04.github.io/practical-formal-verification/explorer/" },
+    { "id": "zenith", "name": "Zenith", "url": "https://wcook04.github.io/plectis-zenith/" },
+    { "id": "proof-reader", "name": "Proof Reader", "url": "https://wcook04.github.io/proof-reader/" }
+  ]
+}

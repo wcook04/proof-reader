@@ -114,3 +114,6 @@ otherwise, and each page says so.
 
 Code is Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Each paper and Lean
 project keeps its own licence and credit, named in its `paper.toml` and on its page.
+
+Proof Reader is one of Will Cook's sites. All websites, code and videos are on
+[my home page](https://wcook04.github.io/).

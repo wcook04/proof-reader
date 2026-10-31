@@ -193,6 +193,9 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     page.on("pageerror", lambda e: errors.append(str(e)))
     page.on("console", lambda m: errors.append(m.text) if m.type == "error" else None)
     stack: list[tuple[str, dict]] = []
+    served = url.split("/")[2]
+    foreign: list[str] = []
+    page.on("request", lambda r: foreign.append(r.url) if r.url.startswith("http") and r.url.split("/")[2] != served else None)
 
     def stop_here(name: str) -> None:
         stack.append((name, snapshot(page)))
@@ -211,6 +214,24 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check(page.locator(".proof__graph").is_visible() and not lean_open(page), "at rest the right page is the graph, and the Lean waits")
     check(page.locator(".skip").count() == 1, "there is a skip link")
     shot(page, shots, "01-arrive")
+
+    print("The family")
+    home = page.locator(".fam-lockup__home")
+    check(home.get_attribute("href") == "https://wcook04.github.io/", "the plait links home")
+    check(home.locator("img").get_attribute("alt") == "Will Cook: all websites and films", "with the family's accessible name")
+    check(home.locator("img").evaluate("(img) => img.complete && img.naturalWidth > 0"), "and its picture loads from this site")
+    check(page.locator(".bar").bounding_box()["height"] <= 47, "the header keeps its height")
+    foot = page.locator(".foot .fam-sites").first
+    check(foot.count() == 1 and "All websites and films" in foot.text_content() and "Plectis Atlas" in foot.text_content(), "the end of the paper lists the sister sites")
+    check(foreign == [], f"nothing is asked of another host: {foreign[:2]}")
+    page.goto(url, wait_until="load")
+    page.wait_for_selector(".shelf li a")
+    check(page.locator(".fam-lockup__home").get_attribute("href") == "https://wcook04.github.io/", "the front page has the lockup too")
+    check(page.locator(".shelf__foot .fam-sites__list li").count() == 7, "and the sister sites")
+    page.locator(".shelf li a").first.click()
+    page.wait_for_selector(".sheet__text .q", state="attached")
+    page.wait_for_selector(".card")
+    page.wait_for_timeout(700)
 
     print("Read")
     base_entries = entries(page)
@@ -818,7 +839,7 @@ def serve(dist: Path) -> tuple[str, socketserver.TCPServer]:
 
 def static_files(page: Page, url: str) -> None:
     print("Under the base path")
-    for name, needle in (("llms.txt", "edition.json"), ("sitemap.xml", "<urlset"), (f"{SLUG}/index.html", "og:title"), ("og.png", ""), ("favicon.svg", "<svg")):
+    for name, needle in (("llms.txt", "edition.json"), ("sitemap.xml", "<urlset"), (f"{SLUG}/index.html", "og:title"), ("og.png", ""), ("favicon.svg", "<svg"), ("plectis.svg", "<svg")):
         response = page.request.get(url + name)
         check(response.ok, f"{name} is served")
         if needle:
