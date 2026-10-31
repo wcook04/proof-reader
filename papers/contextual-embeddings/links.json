@@ -1,108 +1,866 @@
 {
-  "schema": 1,
-  "claims": [
-    {
-      "id": "isomorphism",
-      "title": "unembed and contextualise form an isomorphism",
-      "section": "3.3",
-      "passage": "proven",
-      "lean": ["isoL", "isoR"]
-    }
-  ],
-  "passages": [
-    {"id": "ty", "section": "2", "role": "defines", "lean": ["Ty"],
-     "quote": "Ty represents the types of the guest language"},
-    {"id": "ctx", "section": "2", "role": "defines", "lean": ["Ctx"],
-     "quote": "Ctx represents the guest language’s typing context, which is a “snoc” list of types."},
-    {"id": "index", "section": "2", "role": "defines", "lean": ["Index"],
-     "quote": "The Index ts t type represents de Bruijn indices"},
-    {"id": "stlc", "section": "2", "role": "defines", "lean": ["STLC"],
-     "quote": "STLC is a first-order embedding of the standard STLC with a unit type."},
-    {"id": "proxytop", "section": "3.1", "role": "defines", "lean": ["ProxyTop"],
-     "quote": "We exclude exotic terms by exchanging Index for a truncated version ProxyTop."},
-    {"id": "proxytop-only-top", "section": "3.1", "role": "explains", "lean": ["ProxyTop"],
-     "quote": "ProxyTop is just like Index, but only has the Top constructor, allowing access only to the most recently bound variable."},
-    {"id": "reify-class", "section": "3.1", "role": "defines", "lean": ["ReifyIndex"],
-     "quote": "We define a type class ReifyIndex ts ts' that features a (modified) reify function:"},
-    {"id": "instance-refl", "section": "3.1", "role": "defines", "lean": ["instReifyIndexRefl"],
-     "quote": "The first instance corresponds to the reflexive case, where the context is not extended and our Index is guaranteed to be Top."},
-    {"id": "instance-step", "section": "3.1", "role": "defines", "lean": ["instReifyIndexSnoc"],
-     "quote": "The second instance provides the Step case."},
-    {"id": "snoc-pop", "section": "3.1", "role": "explains", "lean": ["instReifyIndexSnoc"],
-     "quote": "every ‘snoc’ corresponds to a Pop, until the contexts are equal."},
-    {"id": "defer-snoc", "section": "3.1", "role": "explains", "lean": ["instReifyIndexSnoc"],
-     "quote": "we intentionally defer this ‘snoc’ check until after the instance has already been selected"},
-    {"id": "contextual-embedding", "section": "3.2", "role": "defines", "lean": ["STLCCtx"],
-     "quote": "The Contextual Embedding decorates the intrinsically typed first-order embedding by binding a strongly typed singleton object (ProxyTop) that snapshots the context at each variable’s binding site"},
-    {"id": "unembed", "section": "3.3", "role": "defines", "lean": ["unembed"],
-     "quote": "One of the greatest advantages of this embedding technique is that it supports type-safe unembedding."},
-    {"id": "cvar-case", "section": "3.3", "role": "explains", "lean": ["unembed"],
-     "quote": "Most of the heavy lifting is hidden in the CVar case, where the ReifyIndex instance and ProxyTop stored inside it are used to reify the de Bruijn index."},
-    {"id": "contextualise", "section": "3.3", "role": "defines", "lean": ["contextualise"],
-     "quote": "We complement unembed with its inverse, contextualise (right of Fig. 2), which translates the first-order embedding back to the Contextual Embedding."},
-    {"id": "lam-ignores", "section": "3.3", "role": "explains", "lean": ["contextualise"],
-     "quote": "In the Lam case, we ignore the variable."},
-    {"id": "existential", "section": "3.3", "role": "defines", "lean": ["ProxyVar"],
-     "quote": "To achieve this we define an existential type that captures just this data."},
-    {"id": "workhorse", "section": "3.3", "role": "defines", "lean": ["fromIndex"],
-     "quote": "The workhorse that carries it out is the function fromIndex."},
-    {"id": "weaken", "section": "3.3", "role": "explains", "lean": ["fromIndex", "weakenPVar"],
-     "quote": "For every Pop, we weaken the context of the existential wrapper and thereby automatically weaken the ReifyIndex instance."},
-    {"id": "top-case", "section": "3.3", "role": "explains", "lean": ["fromIndex", "varTop"],
-     "quote": "For Top, we return ProxyTop in the existential wrapper."},
-    {"id": "inject", "section": "3.3", "role": "defines", "lean": ["fromVar", "toCVar"],
-     "quote": "we compose this conversion with a simple function that injects Var into the full Contextual Embedding (STLCCtx) to implement toCVar."},
-    {"id": "proven", "section": "3.3", "role": "states", "lean": ["isoL", "isoR"],
-     "quote": "We have proven that unembed and contextualise form an isomorphism in Lean 4"},
-    {"id": "core", "section": "3.3", "role": "explains", "lean": ["indexIsoL", "indexIsoR"],
-     "quote": "The core of the proof lies in the isomorphism between Index and ProxyTop with ReifyIndex."},
-    {"id": "isoL-statement", "section": "3.3", "role": "states", "lean": ["isoL"],
-     "quote": "theorem isoL {ts:Ctx} {t:Ty} {e:STLC ts t} : unembed (contextualise e) = e"},
-    {"id": "isoR-statement", "section": "3.3", "role": "states", "lean": ["isoR"],
-     "quote": "theorem isoR {ts:Ctx} {t:Ty} {e:STLCCtx ts t} : contextualise (unembed e) = e"},
-    {"id": "indexIsoL", "section": "3.3", "role": "states", "lean": ["indexIsoL"],
-     "quote": "This lemma says that reify is the inverse of fromIndex."},
-    {"id": "indexIsoL-proof", "section": "3.3", "role": "proves", "lean": ["indexIsoL"],
-     "quote": "This follows by a straightforward induction on the index."},
-    {"id": "indexIsoR", "section": "3.3", "role": "states", "lean": ["indexIsoR"],
-     "quote": "The opposite direction is more difficult because we no longer have a concrete index on which to induct."},
-    {"id": "closed-world", "section": "3.3", "role": "states", "lean": ["closedWorld"],
-     "quote": "we need a ‘closed world’ axiom which says ‘if you give me a ReifyIndex instance, it must be one of our two defined instances’."},
-    {"id": "closed-world-why", "section": "3.3", "role": "explains", "lean": ["closedWorld"],
-     "quote": "We believe this is a reasonable assertion to make in practice because we can hide the type class from users by not exporting it."},
-    {"id": "case-analysis", "section": "3.3", "role": "proves", "lean": ["indexIsoR"],
-     "quote": "we can now complete the proof in this direction by case analysis on the ReifyIndex instances."},
-    {"id": "isoL-var", "section": "3.3", "role": "proves", "lean": ["isoL"],
-     "quote": "isoL’s Var case, which relies on indexIsoL"},
-    {"id": "isoR-cvar", "section": "3.3", "role": "proves", "lean": ["isoR"],
-     "quote": "isoR’s CVar case, which relies on indexIsoR"},
-    {"id": "isoR-clam", "section": "3.3", "role": "proves", "lean": ["isoR"],
-     "quote": "isoR’s CLam case, which requires function extensionality."}
-  ],
-  "notes": {
-    "STLC": {
-      "text": "The paper's Haskell calls two constructors Lam and App. The Lean calls them Lambda and Apply.",
-      "because": ["stlc"]
-    },
-    "ProxyTop": {
-      "text": "The paper's constructor has the same name as its type, ProxyTop. The Lean constructor is PTop.",
-      "because": ["proxytop"]
-    },
-    "ProxyVar": {
-      "text": "This is the type the paper's Haskell calls Var.",
-      "because": ["existential"]
-    },
-    "weakenPVar": {
-      "text": "This is the function the paper's Haskell calls weakenCVar.",
-      "because": ["weaken"]
-    },
-    "instReifyIndexSnoc": {
-      "text": "The Haskell instance leaves the snoc to a type equality so that instance selection cannot see it. The Lean instance writes the snoc directly in its head.",
-      "because": ["defer-snoc"]
-    },
-    "closedWorld": {
-      "text": "One axiom with two cases, one for each instance of ReifyIndex.",
-      "because": ["closed-world"]
-    }
+ "schema": 1,
+ "claims": [
+  {
+   "id": "isomorphism",
+   "title": "unembed and contextualise form an isomorphism",
+   "section": "3.3",
+   "passage": "proven",
+   "lean": [
+    "isoL",
+    "isoR"
+   ]
   }
+ ],
+ "name_sections": [
+  "2",
+  "3"
+ ],
+ "passages": [
+  {
+   "id": "ty",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "Ty"
+   ],
+   "quote": "Ty represents the types of the guest language"
+  },
+  {
+   "id": "ctx",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "Ctx"
+   ],
+   "quote": "Ctx represents the guest language’s typing context, which is a “snoc” list of types."
+  },
+  {
+   "id": "index",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "Index"
+   ],
+   "quote": "The Index ts t type represents de Bruijn indices"
+  },
+  {
+   "id": "stlc",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "STLC"
+   ],
+   "quote": "STLC is a first-order embedding of the standard STLC with a unit type."
+  },
+  {
+   "id": "proxytop",
+   "section": "3.1",
+   "role": "defines",
+   "lean": [
+    "ProxyTop"
+   ],
+   "quote": "We exclude exotic terms by exchanging Index for a truncated version ProxyTop."
+  },
+  {
+   "id": "proxytop-only-top",
+   "section": "3.1",
+   "role": "explains",
+   "lean": [
+    "ProxyTop"
+   ],
+   "quote": "ProxyTop is just like Index, but only has the Top constructor, allowing access only to the most recently bound variable.",
+   "lines": [
+    34,
+    34
+   ]
+  },
+  {
+   "id": "reify-class",
+   "section": "3.1",
+   "role": "defines",
+   "lean": [
+    "ReifyIndex"
+   ],
+   "quote": "We define a type class ReifyIndex ts ts' that features a (modified) reify function:"
+  },
+  {
+   "id": "instance-refl",
+   "section": "3.1",
+   "role": "defines",
+   "lean": [
+    "instReifyIndexRefl"
+   ],
+   "quote": "The first instance corresponds to the reflexive case, where the context is not extended and our Index is guaranteed to be Top.",
+   "lines": [
+    42,
+    44
+   ]
+  },
+  {
+   "id": "instance-step",
+   "section": "3.1",
+   "role": "defines",
+   "lean": [
+    "instReifyIndexSnoc"
+   ],
+   "quote": "The second instance provides the Step case.",
+   "lines": [
+    46,
+    47
+   ]
+  },
+  {
+   "id": "snoc-pop",
+   "section": "3.1",
+   "role": "explains",
+   "lean": [
+    "instReifyIndexSnoc"
+   ],
+   "quote": "every ‘snoc’ corresponds to a Pop, until the contexts are equal.",
+   "lines": [
+    47,
+    47
+   ]
+  },
+  {
+   "id": "defer-snoc",
+   "section": "3.1",
+   "role": "explains",
+   "lean": [
+    "instReifyIndexSnoc"
+   ],
+   "quote": "we intentionally defer this ‘snoc’ check until after the instance has already been selected"
+  },
+  {
+   "id": "contextual-embedding",
+   "section": "3.2",
+   "role": "defines",
+   "lean": [
+    "STLCCtx"
+   ],
+   "quote": "The Contextual Embedding decorates the intrinsically typed first-order embedding by binding a strongly typed singleton object (ProxyTop) that snapshots the context at each variable’s binding site"
+  },
+  {
+   "id": "unembed",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "unembed"
+   ],
+   "quote": "One of the greatest advantages of this embedding technique is that it supports type-safe unembedding."
+  },
+  {
+   "id": "cvar-case",
+   "section": "3.3",
+   "role": "explains",
+   "lean": [
+    "unembed"
+   ],
+   "quote": "Most of the heavy lifting is hidden in the CVar case, where the ReifyIndex instance and ProxyTop stored inside it are used to reify the de Bruijn index.",
+   "lines": [
+    62,
+    62
+   ]
+  },
+  {
+   "id": "contextualise",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "contextualise"
+   ],
+   "quote": "We complement unembed with its inverse, contextualise (right of Fig. 2), which translates the first-order embedding back to the Contextual Embedding."
+  },
+  {
+   "id": "lam-ignores",
+   "section": "3.3",
+   "role": "explains",
+   "lean": [
+    "contextualise"
+   ],
+   "quote": "In the Lam case, we ignore the variable.",
+   "lines": [
+    92,
+    92
+   ]
+  },
+  {
+   "id": "existential",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "ProxyVar"
+   ],
+   "quote": "To achieve this we define an existential type that captures just this data."
+  },
+  {
+   "id": "workhorse",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "fromIndex"
+   ],
+   "quote": "The workhorse that carries it out is the function fromIndex."
+  },
+  {
+   "id": "weaken",
+   "section": "3.3",
+   "role": "explains",
+   "lean": [
+    "fromIndex",
+    "weakenPVar"
+   ],
+   "quote": "For every Pop, we weaken the context of the existential wrapper and thereby automatically weaken the ReifyIndex instance.",
+   "lines": [
+    85,
+    85
+   ]
+  },
+  {
+   "id": "top-case",
+   "section": "3.3",
+   "role": "explains",
+   "lean": [
+    "fromIndex",
+    "varTop"
+   ],
+   "quote": "For Top, we return ProxyTop in the existential wrapper.",
+   "lines": [
+    84,
+    84
+   ]
+  },
+  {
+   "id": "inject",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "fromVar",
+    "toCVar"
+   ],
+   "quote": "we compose this conversion with a simple function that injects Var into the full Contextual Embedding (STLCCtx) to implement toCVar."
+  },
+  {
+   "id": "proven",
+   "section": "3.3",
+   "role": "states",
+   "lean": [
+    "isoL",
+    "isoR"
+   ],
+   "quote": "We have proven that unembed and contextualise form an isomorphism in Lean 4"
+  },
+  {
+   "id": "core",
+   "section": "3.3",
+   "role": "explains",
+   "lean": [
+    "indexIsoL",
+    "indexIsoR"
+   ],
+   "quote": "The core of the proof lies in the isomorphism between Index and ProxyTop with ReifyIndex."
+  },
+  {
+   "id": "isoL-statement",
+   "section": "3.3",
+   "role": "states",
+   "lean": [
+    "isoL"
+   ],
+   "quote": "theorem isoL {ts:Ctx} {t:Ty} {e:STLC ts t} : unembed (contextualise e) = e",
+   "lines": [
+    199,
+    200
+   ]
+  },
+  {
+   "id": "isoR-statement",
+   "section": "3.3",
+   "role": "states",
+   "lean": [
+    "isoR"
+   ],
+   "quote": "theorem isoR {ts:Ctx} {t:Ty} {e:STLCCtx ts t} : contextualise (unembed e) = e",
+   "lines": [
+    210,
+    211
+   ]
+  },
+  {
+   "id": "indexIsoL",
+   "section": "3.3",
+   "role": "states",
+   "lean": [
+    "indexIsoL"
+   ],
+   "quote": "This lemma says that reify is the inverse of fromIndex.",
+   "lines": [
+    120,
+    121
+   ]
+  },
+  {
+   "id": "indexIsoL-proof",
+   "section": "3.3",
+   "role": "proves",
+   "lean": [
+    "indexIsoL"
+   ],
+   "quote": "This follows by a straightforward induction on the index.",
+   "lines": [
+    122,
+    125
+   ]
+  },
+  {
+   "id": "indexIsoR",
+   "section": "3.3",
+   "role": "states",
+   "lean": [
+    "indexIsoR"
+   ],
+   "quote": "The opposite direction is more difficult because we no longer have a concrete index on which to induct.",
+   "lines": [
+    162,
+    164
+   ]
+  },
+  {
+   "id": "closed-world",
+   "section": "3.3",
+   "role": "states",
+   "lean": [
+    "closedWorld"
+   ],
+   "quote": "we need a ‘closed world’ axiom which says ‘if you give me a ReifyIndex instance, it must be one of our two defined instances’.",
+   "lines": [
+    142,
+    154
+   ]
+  },
+  {
+   "id": "closed-world-why",
+   "section": "3.3",
+   "role": "explains",
+   "lean": [
+    "closedWorld"
+   ],
+   "quote": "We believe this is a reasonable assertion to make in practice because we can hide the type class from users by not exporting it."
+  },
+  {
+   "id": "case-analysis",
+   "section": "3.3",
+   "role": "proves",
+   "lean": [
+    "indexIsoR"
+   ],
+   "quote": "we can now complete the proof in this direction by case analysis on the ReifyIndex instances.",
+   "lines": [
+    165,
+    183
+   ]
+  },
+  {
+   "id": "isoL-var",
+   "section": "3.3",
+   "role": "proves",
+   "lean": [
+    "isoL"
+   ],
+   "quote": "isoL’s Var case, which relies on indexIsoL",
+   "lines": [
+    205,
+    205
+   ]
+  },
+  {
+   "id": "isoR-cvar",
+   "section": "3.3",
+   "role": "proves",
+   "lean": [
+    "isoR"
+   ],
+   "quote": "isoR’s CVar case, which relies on indexIsoR",
+   "lines": [
+    215,
+    216
+   ]
+  },
+  {
+   "id": "isoR-clam",
+   "section": "3.3",
+   "role": "proves",
+   "lean": [
+    "isoR"
+   ],
+   "quote": "isoR’s CLam case, which requires function extensionality.",
+   "lines": [
+    217,
+    221
+   ]
+  },
+  {
+   "id": "code-ty",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "Ty"
+   ],
+   "lines": [
+    1,
+    4
+   ],
+   "quote": "data Ty = Unit | Ty :-> Ty",
+   "page": 4,
+   "nth": 1
+  },
+  {
+   "id": "code-ctx",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "Ctx"
+   ],
+   "lines": [
+    10,
+    13
+   ],
+   "quote": "data Ctx = Empty | Ctx :/: Ty",
+   "page": 4,
+   "nth": 1
+  },
+  {
+   "id": "code-top",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "Index"
+   ],
+   "lines": [
+    18,
+    18
+   ],
+   "quote": "Top :: Index (ts :/: t) t",
+   "page": 4,
+   "nth": 1
+  },
+  {
+   "id": "code-pop",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "Index"
+   ],
+   "lines": [
+    19,
+    19
+   ],
+   "quote": "Pop :: Index ts t -> Index (ts :/: t') t",
+   "page": 4,
+   "nth": 1
+  },
+  {
+   "id": "code-var",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "STLC"
+   ],
+   "lines": [
+    25,
+    25
+   ],
+   "quote": "Var :: Index ts t -> STLC ts t"
+  },
+  {
+   "id": "code-lam",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "STLC"
+   ],
+   "lines": [
+    27,
+    27
+   ],
+   "quote": "Lam :: STLC (ts :/: t1) t2 -> STLC ts (t1 :-> t2)"
+  },
+  {
+   "id": "code-app",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "STLC"
+   ],
+   "lines": [
+    28,
+    28
+   ],
+   "quote": "App :: STLC ts (t1 :-> t2) -> STLC ts t1 -> STLC ts t2"
+  },
+  {
+   "id": "code-star",
+   "section": "2",
+   "role": "defines",
+   "lean": [
+    "STLC"
+   ],
+   "lines": [
+    26,
+    26
+   ],
+   "quote": "Star :: STLC ts Unit"
+  },
+  {
+   "id": "code-proxytop",
+   "section": "3.1",
+   "role": "defines",
+   "lean": [
+    "ProxyTop"
+   ],
+   "lines": [
+    33,
+    34
+   ],
+   "quote": "data ProxyTop :: Ctx -> Ty -> Type where ProxyTop :: ProxyTop (ts :/: t) t"
+  },
+  {
+   "id": "code-reify-class",
+   "section": "3.1",
+   "role": "defines",
+   "lean": [
+    "ReifyIndex"
+   ],
+   "lines": [
+    38,
+    39
+   ],
+   "quote": "class ReifyIndex ts ts' where reify :: ProxyTop ts t -> Index ts' t"
+  },
+  {
+   "id": "code-refl",
+   "section": "3.1",
+   "role": "defines",
+   "lean": [
+    "instReifyIndexRefl"
+   ],
+   "lines": [
+    42,
+    44
+   ],
+   "quote": "ReifyIndex ts ts where reify ProxyTop = Top"
+  },
+  {
+   "id": "code-snoc",
+   "section": "3.1",
+   "role": "defines",
+   "lean": [
+    "instReifyIndexSnoc"
+   ],
+   "lines": [
+    46,
+    47
+   ],
+   "quote": "instance (ReifyIndex ts ts', ts'' ~ (ts' :/: a)) => ReifyIndex ts ts'' where reify i = Pop (reify i)"
+  },
+  {
+   "id": "code-cvar",
+   "section": "3.2",
+   "role": "defines",
+   "lean": [
+    "STLCCtx"
+   ],
+   "lines": [
+    50,
+    50
+   ],
+   "quote": "CVar :: ReifyIndex ts ts' => ProxyTop ts a -> STLCCtx ts' a"
+  },
+  {
+   "id": "code-clam",
+   "section": "3.2",
+   "role": "defines",
+   "lean": [
+    "STLCCtx"
+   ],
+   "lines": [
+    52,
+    52
+   ],
+   "quote": "CLam :: (ProxyTop (ts :/: a) a -> STLCCtx (ts :/: a) b) -> STLCCtx ts (a :-> b)"
+  },
+  {
+   "id": "code-capp",
+   "section": "3.2",
+   "role": "defines",
+   "lean": [
+    "STLCCtx"
+   ],
+   "lines": [
+    53,
+    53
+   ],
+   "quote": "CApp :: STLCCtx ts (a :-> b) -> STLCCtx ts a -> STLCCtx ts b"
+  },
+  {
+   "id": "code-cstar",
+   "section": "3.2",
+   "role": "defines",
+   "lean": [
+    "STLCCtx"
+   ],
+   "lines": [
+    51,
+    51
+   ],
+   "quote": "CStar :: STLCCtx ts Unit"
+  },
+  {
+   "id": "fig2-cvar",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "unembed"
+   ],
+   "lines": [
+    62,
+    62
+   ],
+   "quote": "unembed (CVar i) = Var (reify i)"
+  },
+  {
+   "id": "fig2-clam",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "unembed"
+   ],
+   "lines": [
+    63,
+    63
+   ],
+   "quote": "unembed (CLam e) = Lam (unembed (e ProxyTop))"
+  },
+  {
+   "id": "fig2-capp",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "unembed"
+   ],
+   "lines": [
+    64,
+    64
+   ],
+   "quote": "unembed (CApp e1 e2) = App (unembed e1) (unembed e2)"
+  },
+  {
+   "id": "fig2-cstar",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "unembed"
+   ],
+   "lines": [
+    61,
+    61
+   ],
+   "quote": "unembed CStar = Star"
+  },
+  {
+   "id": "fig2-var",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "contextualise"
+   ],
+   "lines": [
+    91,
+    91
+   ],
+   "quote": "contextualise (Var i) = toCVar i"
+  },
+  {
+   "id": "fig2-lam",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "contextualise"
+   ],
+   "lines": [
+    92,
+    92
+   ],
+   "quote": "contextualise (Lam e) = CLam (\\_ -> contextualise e)"
+  },
+  {
+   "id": "fig2-app",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "contextualise"
+   ],
+   "lines": [
+    93,
+    93
+   ],
+   "quote": "contextualise (App e1 e2) = CApp (contextualise e1) (contextualise e2)"
+  },
+  {
+   "id": "fig2-star",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "contextualise"
+   ],
+   "lines": [
+    94,
+    94
+   ],
+   "quote": "contextualise Star = CStar"
+  },
+  {
+   "id": "code-proxyvar",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "ProxyVar"
+   ],
+   "lines": [
+    70,
+    71
+   ],
+   "quote": "data Var ts' t where MkVar :: ReifyIndex ts ts' => ProxyTop ts t -> Var ts' t"
+  },
+  {
+   "id": "code-fromindex-top",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "fromIndex"
+   ],
+   "lines": [
+    84,
+    84
+   ],
+   "quote": "fromIndex Top = varTop"
+  },
+  {
+   "id": "code-vartop",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "varTop"
+   ],
+   "lines": [
+    78,
+    78
+   ],
+   "quote": "varTop = MkVar (ProxyTop :: ProxyTop (ts :/: t) t)"
+  },
+  {
+   "id": "code-fromindex-pop",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "fromIndex"
+   ],
+   "lines": [
+    85,
+    85
+   ],
+   "quote": "fromIndex (Pop i) = weakenCVar (fromIndex i)"
+  },
+  {
+   "id": "code-weaken",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "weakenPVar"
+   ],
+   "lines": [
+    76,
+    76
+   ],
+   "quote": "weakenCVar (MkVar p) = MkVar p"
+  },
+  {
+   "id": "code-fromvar",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "fromVar"
+   ],
+   "lines": [
+    81,
+    81
+   ],
+   "quote": "fromVar (MkVar i) = CVar i"
+  },
+  {
+   "id": "code-tocvar",
+   "section": "3.3",
+   "role": "defines",
+   "lean": [
+    "toCVar"
+   ],
+   "lines": [
+    88,
+    88
+   ],
+   "quote": "toCVar = fromVar . fromIndex"
+  },
+  {
+   "id": "indexIsoL-intuition",
+   "section": "3.3",
+   "role": "explains",
+   "lean": [
+    "indexIsoL"
+   ],
+   "lines": [
+    124,
+    125
+   ],
+   "quote": "Intuitively, for every Pop in the index, fromIndex weakens the ProxyTop by one, which reify then turns back into a Pop."
+  }
+ ],
+ "notes": {
+  "STLC": {
+   "text": "The paper's Haskell calls two constructors Lam and App. The Lean calls them Lambda and Apply.",
+   "because": [
+    "stlc"
+   ]
+  },
+  "ProxyTop": {
+   "text": "The paper's constructor has the same name as its type, ProxyTop. The Lean constructor is PTop.",
+   "because": [
+    "proxytop"
+   ]
+  },
+  "ProxyVar": {
+   "text": "This is the type the paper's Haskell calls Var.",
+   "because": [
+    "existential"
+   ]
+  },
+  "weakenPVar": {
+   "text": "This is the function the paper's Haskell calls weakenCVar.",
+   "because": [
+    "weaken"
+   ]
+  },
+  "instReifyIndexSnoc": {
+   "text": "The Haskell instance leaves the snoc to a type equality so that instance selection cannot see it. The Lean instance writes the snoc directly in its head.",
+   "because": [
+    "defer-snoc"
+   ]
+  },
+  "closedWorld": {
+   "text": "One axiom with two cases, one for each instance of ReifyIndex.",
+   "because": [
+    "closed-world"
+   ]
+  }
+ }
 }

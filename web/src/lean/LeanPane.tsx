@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import type { Declaration, Edition } from "../app/edition";
 import { isType } from "../model/fromEdition";
-import { READING_LINE } from "../paper/PdfPane";
+import { READING_LINE } from "../paper/reading-line";
 import { tokenizeLean } from "./leanTokens";
 
 const KIND_WORDS: Record<string, string> = {
@@ -28,11 +28,15 @@ interface Props {
   reading: string[];
   onSelect(id: string): void;
   onPassage(id: string): void;
+  /** The exact lines the sentence being read describes, when it names them. */
+  exact: [number, number] | null;
+  /** The reader has moved on to a part of the paper with nothing tied to the Lean. */
+  away: boolean;
   /** Present when the reader came here from the map. */
   onBack?(): void;
 }
 
-export function LeanPane({ edition, selected, reading, onSelect, onPassage, onBack }: Props) {
+export function LeanPane({ edition, selected, reading, exact, away, onSelect, onPassage, onBack }: Props) {
   const declaration = edition.declarations.find((d) => d.id === selected) ?? edition.declarations.find((d) => reading.includes(d.id)) ?? null;
   const file = declaration?.file ?? Object.keys(edition.lean.files)[0];
   const lit = useMemo(() => edition.declarations.filter((d) => reading.includes(d.id) && d.file === file), [edition, file, reading]);
@@ -40,16 +44,18 @@ export function LeanPane({ edition, selected, reading, onSelect, onPassage, onBa
     <aside className="leaf" aria-label="Lean">
       <div className="leaf__head">
         {onBack && <button type="button" className="leaf__back" onClick={onBack}>Back to the map</button>}
+        {away && <p className="leaf__away">Nothing near this part of the paper is tied to the Lean. This is the last declaration you passed.</p>}
         {declaration ? <Head edition={edition} d={declaration} onSelect={onSelect} onPassage={onPassage} /> : <h2 className="leaf__name">{file}</h2>}
       </div>
-      <Source text={edition.lean.files[file]} name={file} focus={declaration} lit={lit} known={edition.declarations} onSelect={onSelect} />
+      <Source text={edition.lean.files[file]} name={file} focus={declaration} lit={lit} exact={exact} known={edition.declarations} onSelect={onSelect} />
     </aside>
   );
 }
 
 function Head({ edition, d, onSelect, onPassage }: { edition: Edition; d: Declaration; onSelect(id: string): void; onPassage(id: string): void }) {
   const isProof = d.keyword === "theorem" || d.keyword === "lemma";
-  const pages = d.passages.map((id) => edition.passages.find((p) => p.id === id)).filter((p) => !!p);
+  const passages = d.passages.map((id) => edition.passages.find((p) => p.id === id)).filter((p) => !!p);
+  const pages = passages.filter((p, index) => passages.findIndex((other) => other.page === p.page) === index);
   const severalFiles = Object.keys(edition.lean.files).length > 1;
   return (
     <>
@@ -137,11 +143,12 @@ interface SourceProps {
   text: string;
   focus: Declaration | null;
   lit: Declaration[];
+  exact: [number, number] | null;
   known: Declaration[];
   onSelect(id: string): void;
 }
 
-function Source({ name, text, focus, lit, known, onSelect }: SourceProps) {
+function Source({ name, text, focus, lit, exact, known, onSelect }: SourceProps) {
   const lines = useMemo(() => tokenLines(text), [text]);
   const names = useMemo(() => new Set(known.map((d) => d.id)), [known]);
   const body = useRef<HTMLDivElement>(null);
@@ -151,8 +158,8 @@ function Source({ name, text, focus, lit, known, onSelect }: SourceProps) {
   useEffect(() => {
     if (!focus) return;
     const el = body.current;
-    const row = el?.querySelector<HTMLElement>(`[data-line="${focus.line}"]`);
-    const paper = document.querySelector<HTMLElement>(".pdf");
+    const row = el?.querySelector<HTMLElement>(`[data-line="${exact ? exact[0] : focus.line}"]`);
+    const paper = document.querySelector<HTMLElement>("[data-paper-pane]");
     if (!el || !row || !paper) return;
     const align = (behavior: ScrollBehavior) => {
       const line = paper.getBoundingClientRect().top + paper.clientHeight * READING_LINE;
@@ -169,7 +176,7 @@ function Source({ name, text, focus, lit, known, onSelect }: SourceProps) {
       live = false;
       observer.disconnect();
     };
-  }, [focus]);
+  }, [exact, focus]);
 
   return (
     <div className="source__body" ref={body} tabIndex={0} aria-label={`Lean source, ${name}`}>
@@ -179,21 +186,24 @@ function Source({ name, text, focus, lit, known, onSelect }: SourceProps) {
           const within = (d: Declaration) => line >= d.line && line <= d.end_line;
           const on = lit.some(within) ? " is-on" : "";
           const isFocus = focus && within(focus) ? " is-on" : "";
+          const isExact = exact && line >= exact[0] && line <= exact[1] ? " is-exact" : "";
           return (
-            <span key={line} className={`source__line${on || isFocus}`} data-line={line}>
+            <span key={line} className={`source__line${on || isFocus}${isExact}`} data-line={line}>
               <span className="source__no" aria-hidden="true">{line}</span>
               <span className="source__text">
-                {pieces.map((piece, i) =>
-                  names.has(piece.text) ? (
-                    <button key={i} type="button" className={`source__ref${piece.text === focus?.id ? " is-self" : ""}`} onClick={() => onSelect(piece.text)}>
-                      {piece.text}
-                    </button>
-                  ) : piece.kind === "space" || piece.kind === "punct" ? (
-                    piece.text
-                  ) : (
-                    <span key={i} className={`lk lk--${piece.kind}`}>{piece.text}</span>
-                  ),
-                )}
+                {pieces.map((piece, i) => {
+                  // Types take one colour on both pages, so the same name reads the same.
+                  const typed = piece.kind === "ident" && /^[A-Z]/.test(piece.text);
+                  if (names.has(piece.text)) {
+                    return (
+                      <button key={i} type="button" className={`source__ref${typed ? " lk--type" : ""}${piece.text === focus?.id ? " is-self" : ""}`} onClick={() => onSelect(piece.text)}>
+                        {piece.text}
+                      </button>
+                    );
+                  }
+                  if (piece.kind === "space" || piece.kind === "punct") return piece.text;
+                  return <span key={i} className={`lk lk--${typed ? "type" : piece.kind}`}>{piece.text}</span>;
+                })}
                 {"\n"}
               </span>
             </span>

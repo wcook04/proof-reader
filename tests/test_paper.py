@@ -6,6 +6,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "tools"))
 import paper
+import reading
+import transcribe
 
 
 def words(*texts):
@@ -81,6 +83,127 @@ class Reachable(unittest.TestCase):
     def test_follows_uses_from_the_goals_and_stops(self):
         uses = {"a": {"b": "value"}, "b": {"c": "value"}, "c": {}, "d": {"a": "value"}}
         self.assertEqual(paper.reachable(["a"], uses), {"a", "b", "c"})
+
+
+class WordForWord(unittest.TestCase):
+    """The reading copy may differ from the PDF only where a line end split a word."""
+
+    def differs(self, theirs, ours):
+        return bool(reading.compare(theirs.split(), ours.split())[1])
+
+    def test_the_same_words_pass(self):
+        self.assertFalse(self.differs("one two three", "one two three"))
+
+    def test_a_changed_word_is_caught(self):
+        self.assertTrue(self.differs("this is a straightforward induction", "this is a simple induction"))
+
+    def test_a_changed_symbol_in_code_is_caught(self):
+        self.assertTrue(self.differs("data Ty = Unit | Ty :-> Ty", "data Ty = Unit | Ty :=> Ty"))
+
+    def test_a_dropped_word_is_caught(self):
+        self.assertTrue(self.differs("one two three four", "one two four"))
+
+    def test_an_added_word_is_caught(self):
+        self.assertTrue(self.differs("one two three", "one two extra three"))
+
+    def test_a_word_split_at_a_line_end_passes(self):
+        self.assertFalse(self.differs("type-safe unem- bedding is hard", "type-safe unembedding is hard"))
+
+    def test_a_real_hyphen_broken_at_a_line_end_passes(self):
+        self.assertFalse(self.differs("the co-de- Bruijn form", "the co-de-Bruijn form"))
+
+    def test_a_footnote_moved_up_the_page_passes(self):
+        theirs = "first words of the page then the end 1 a note at the foot of it"
+        ours = "first words of the page 1 a note at the foot of it then the end"
+        self.assertFalse(self.differs(theirs, ours))
+
+    def test_a_formula_spaced_differently_passes(self):
+        self.assertFalse(self.differs("term λx . ( x , x ) drops", "term λx.(x,x) drops"))
+
+    def test_each_of_our_words_learns_its_pdf_word(self):
+        found, _ = reading.compare(["a", "b", "c"], ["a", "b", "c"])
+        self.assertEqual(found, {0: 0, 1: 1, 2: 2})
+
+
+class Setting(unittest.TestCase):
+    def test_blocks_end_words(self):
+        self.assertEqual(reading.parse("<p>one</p><p>two</p>").visible.split(), ["one", "two"])
+
+    def test_tags_do_not_end_words(self):
+        self.assertEqual(reading.parse("<p>un<em>embed</em></p>").visible.split(), ["unembed"])
+
+    def test_entities_read_as_the_reader_sees_them(self):
+        self.assertEqual(reading.parse("<p>a -&gt; b</p>").visible.split(), ["a", "->", "b"])
+
+    def test_a_formula_is_one_piece_with_its_reading(self):
+        page = reading.parse('<p>so <span class="m" data-m="3">λx.x</span> holds</p>')
+        self.assertEqual([p.raw for p in page.parts if p.kind == "math"], ["3"])
+        self.assertEqual(page.visible.split(), ["so", "λx.x", "holds"])
+
+    def test_a_script_cannot_get_in(self):
+        for source in ("<script>x</script>", '<img src=x onerror="y">', '<a href="javascript:z">', "<iframe>"):
+            with self.assertRaises(reading.ReadingError):
+                reading.check_tags(source)
+
+    def test_the_tags_a_paper_needs_pass(self):
+        reading.check_tags('<figure id="fig-1"><figcaption>x</figcaption></figure><div class="code-columns"></div>')
+
+
+class Placing(unittest.TestCase):
+    def test_a_quote_is_found_across_code_and_prose(self):
+        page = reading.parse("<p>We add <code>Star</code>, which introduces it.</p>")
+        spots, errors = reading.locate(page, [{"id": "a", "quote": "We add Star, which"}])
+        self.assertEqual(errors, [])
+        self.assertEqual(page.visible[spots["a"][0]:spots["a"][1]].strip(), "We add Star, which")
+
+    def test_a_quote_that_is_not_there_is_an_error(self):
+        _, errors = reading.locate(reading.parse("<p>one two</p>"), [{"id": "a", "quote": "three"}])
+        self.assertEqual(len(errors), 1)
+
+    def test_a_repeated_quote_needs_telling_apart(self):
+        page = reading.parse("<p>one two</p><p>one two</p>")
+        self.assertEqual(len(reading.locate(page, [{"id": "a", "quote": "one two"}])[1]), 1)
+        self.assertEqual(reading.locate(page, [{"id": "a", "quote": "one two", "nth": 2}])[1], [])
+
+    def test_only_code_counts_as_a_lean_name(self):
+        page = reading.parse("<p>An Index is here, and <code>Index</code> there.</p>")
+        found = reading.names_in(page, ["Index"], [], None)
+        self.assertEqual(len(found), 1)
+        self.assertEqual(page.visible[found[0][0]:found[0][1]], "Index")
+
+    def test_names_keep_to_the_sections_the_lean_covers(self):
+        source = '<h2 id="s-3">T</h2><p><code>Ty</code></p><h2 id="s-4">U</h2><p><code>Ty</code></p>'
+        page = reading.parse(source)
+        ranges = reading.section_ranges(page, [{"id": "s-3"}, {"id": "s-4"}])
+        self.assertEqual(len(reading.names_in(page, ["Ty"], ranges, ["3"])), 1)
+
+    def test_a_mark_crossing_code_stays_well_formed(self):
+        page = reading.parse("<p>We add <code>Star</code> here</p>")
+        spots, _ = reading.locate(page, [{"id": "a", "quote": "add Star here"}])
+        out = reading.weave(page, spots, [], {}, [], "./#/x")
+        self.assertEqual(out.count('<span class="q" data-p="a">'), 3)
+        self.assertEqual(out.count("<code>"), 1)
+
+
+class Drafting(unittest.TestCase):
+    def run_of(self, left, top, text="abcd"):
+        font = transcribe.Font(13, "Inconsolata", "#000000", True, False, False, False, False)
+        return transcribe.Run(1, top, left, len(text) * 6.7, 17, font, text)
+
+    def test_columns_with_rows_out_of_step_come_apart(self):
+        runs = [self.run_of(80, top) for top in (100, 116, 132, 148)] + [self.run_of(114, top, "abcdefghijklmn") for top in (100, 116, 132, 148)]
+        runs += [self.run_of(212, top, "wxyz") for top in (108, 124, 140, 156)]
+        self.assertEqual(len(transcribe.split_columns(runs)), 2)
+
+    def test_code_in_one_column_stays_whole(self):
+        runs = [self.run_of(80, top) for top in (100, 116, 132)] + [self.run_of(120, top) for top in (100, 116, 132)]
+        self.assertEqual(len(transcribe.split_columns(runs)), 1)
+
+    def test_a_citation_bracket_stays_outside_its_link(self):
+        self.assertEqual(transcribe.tidy_links("[de Bruijn \\[1972](#cite-a)\\]"), "[de Bruijn \\[1972\\]](#cite-a)")
+
+    def test_a_section_sign_joins_its_link(self):
+        self.assertEqual(transcribe.tidy_links("(§[3.2](#s-3.2))"), "([§3.2](#s-3.2))")
 
 
 if __name__ == "__main__":

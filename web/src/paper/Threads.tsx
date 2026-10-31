@@ -46,7 +46,8 @@ export function Threads({ root, target }: { root: RefObject<HTMLElement | null>;
       const paths = lines.querySelectorAll("path");
       const dots = lines.querySelectorAll("circle");
       const { passage, line } = latest.current;
-      const paper = el.querySelector<HTMLElement>(".pdf");
+      const sheetEdge = el.querySelector<HTMLElement>(".sheet");
+      const paper = el.querySelector<HTMLElement>("[data-paper-pane]");
       const tie = passage ? el.querySelector<HTMLElement>(`.tie[data-passage="${CSS.escape(passage)}"]`) : null;
       let used = 0;
       let dotted = 0;
@@ -67,7 +68,7 @@ export function Threads({ root, target }: { root: RefObject<HTMLElement | null>;
         const t = tie.getBoundingClientRect();
         const pane = paper.getBoundingClientRect();
         const start = glide("start", {
-          x: t.right - box.left,
+          x: (sheetEdge ? sheetEdge.getBoundingClientRect().right : t.right) - box.left,
           y: Math.max(pane.top + 6, Math.min(pane.bottom - 6, t.top + t.height / 2)) - box.top,
         });
         const row = line ? el.querySelector<HTMLElement>(`.source__line[data-line="${line}"]`) : null;

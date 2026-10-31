@@ -17,3 +17,15 @@ source = ""
 source_name = ""
 licence = ""
 scope = ""
+
+# The reading copy. Delete this part until the paper has a paper.md.
+[reading]
+language = "haskell"          # the language of the paper's code listings
+page_label = "{page}"         # how the paper numbers its pages, such as "191:{page}"
+
+# Plots stay the authors' own: each is cut from the PDF as vector artwork, and the
+# words inside it are left out of the word-for-word check. The box is in PDF points.
+# [[reading.figure]]
+# name = "fig-3.svg"
+# page = 11
+# box = [50, 84, 432, 210]

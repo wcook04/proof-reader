@@ -2,11 +2,13 @@
 """Turn a folder under papers/ into the data the website reads.
 
   extract SLUG   build the Lean project and list its declarations
-  check SLUG     check links.json against the PDF and the Lean; print coverage
+  check SLUG     check links.json against the PDF and the Lean, and paper.md word
+                 for word against the PDF; print coverage
   build [SLUG]   write web/public/papers/ for the website (all papers by default)
   new SLUG       create an empty paper folder
 
-Standard library only. Needs Poppler's pdftotext, and elan for `extract`.
+Standard library only. Needs Poppler, elan for `extract`, and Node with the
+packages in web/ when a paper has a paper.md.
 """
 from __future__ import annotations
 
@@ -22,6 +24,9 @@ import tempfile
 import tomllib
 import unicodedata
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import reading as reading_copy  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 PAPERS = ROOT / "papers"
@@ -159,7 +164,27 @@ def pdf_words(pdf: Path) -> tuple[list[dict], list[tuple[float, float]]]:
             if box[1] < 0.075 * height or box[3] > 0.945 * height:
                 continue
             words.append({"page": len(sizes), "box": box, "text": normal(html.unescape(word[5]))})
-    return words, sizes
+    return drop_running_heads(words, sizes), sizes
+
+
+def drop_running_heads(words: list[dict], sizes: list[tuple[float, float]]) -> list[dict]:
+    """Leave out lines repeated at one height near the edge of many pages."""
+    lines: dict[tuple[int, int], list[dict]] = {}
+    for word in words:
+        lines.setdefault((word["page"], round(word["box"][1])), []).append(word)
+    seen: dict[tuple[str, int], set[int]] = {}
+    for (page, top), row in lines.items():
+        height = sizes[page - 1][1]
+        if top < height * 0.12 or top > height * 0.9:
+            shape = re.sub(r"\d+", "#", " ".join(w["text"] for w in sorted(row, key=lambda w: w["box"][0])))
+            seen.setdefault((shape, top), set()).add(page)
+    repeated = {key for key, pages in seen.items() if len(pages) >= max(3, len(sizes) * 0.3)}
+    drop: set[int] = set()
+    for (page, top), row in lines.items():
+        shape = re.sub(r"\d+", "#", " ".join(w["text"] for w in sorted(row, key=lambda w: w["box"][0])))
+        if (shape, top) in repeated:
+            drop.update(id(w) for w in row)
+    return [word for word in words if id(word) not in drop]
 
 
 def dark_box(image: bytes) -> tuple[int, int, int, int] | None:
@@ -296,6 +321,11 @@ def resolve(slug: str) -> dict:
         for name in item.get("lean", []):
             if name not in written:
                 errors.append(f"passage {pid}: no Lean declaration called {name}")
+        if item.get("lines"):
+            first, last_line = item["lines"]
+            home = written.get(item["lean"][0]) if item.get("lean") else None
+            if not home or first < home["line"] or last_line > home["end_line"] or first > last_line:
+                errors.append(f"passage {pid}: lines {first} to {last_line} are not inside {item.get('lean', ['?'])[0]}")
         if item.get("role") not in ROLES:
             errors.append(f"passage {pid}: role must be one of {ROLES}")
         passages.append({**item, "page": page, "rects": rects, "order": hits[0], "last_page": last})
@@ -361,6 +391,14 @@ def edition(slug: str) -> dict:
             "passages": linked.get(name, []),
             "note": links.get("notes", {}).get(name),
         })
+    names = [d["id"] for d in declarations if d["id"] not in links.get("unlinked_names", [])]
+    setting = None
+    if (data["folder"] / "paper.md").is_file():
+        setting = reading_copy.build(data["folder"], slug, data["passages"], names, data["words"],
+                                     config.get("reading", {}), links)
+        # Blocks move between the PDF and the reading copy, so tie order follows the reader.
+        place = {pid: index for index, pid in enumerate(setting.pop("order"))}
+        data["passages"].sort(key=lambda p: place[p["id"]])
     named_in_paper = [d["id"] for d in declarations if d["passages"]]
     custom = sorted(d["id"] for d in declarations if d["keyword"] == "axiom")
     paper = config["paper"]
@@ -374,8 +412,10 @@ def edition(slug: str) -> dict:
         "credit": config.get("credit", {}),
         "claims": links.get("claims", []),
         "passages": [{k: v for k, v in p.items() if k != "order"} for p in data["passages"]],
-        "mentions": find_mentions(data["words"], [d["id"] for d in declarations if d["id"] not in links.get("unlinked_names", [])]),
+        "mentions": find_mentions(data["words"], names),
         "declarations": declarations,
+        "reading": {k: v for k, v in setting.items() if k != "html"} if setting else None,
+        "reading_html": setting["html"] if setting else None,
         "analytics": {
             "declarations": len(declarations),
             "linked_to_paper": len(named_in_paper),
@@ -393,6 +433,8 @@ def check(slug: str) -> None:
     built = edition(slug)
     stats = built["analytics"]
     print(f"{slug}: every quote found once and every Lean name exists")
+    if built["reading"]:
+        print(f"  reading copy: {built['reading']['words']} words and {built['reading']['formulas']} formulas, none differing from the PDF")
     print(f"  {stats['linked_to_paper']} of {stats['declarations']} declarations tied to the paper, "
           f"on pages {stats['pages_with_links']}")
     if stats["not_linked"]:
@@ -408,12 +450,26 @@ def build(slugs: list[str]) -> None:
         folder = PAPERS / slug
         out = PUBLIC / slug
         out.mkdir(exist_ok=True)
+        page = built.pop("reading_html")
+        if page:
+            (out / "reading.html").write_text(page, encoding="utf-8")
+            crop_figures(folder / built["paper"]["pdf"], built, out, load_paper(slug)[1])
         (out / "edition.json").write_text(json.dumps(built, ensure_ascii=False), encoding="utf-8")
         shutil.copyfile(folder / built["paper"]["pdf"], out / "paper.pdf")
         subprocess.run(["pdftocairo", "-png", "-singlefile", "-f", "1", "-l", "1", "-scale-to", "420",
                         str(folder / built["paper"]["pdf"]), str(out / "first-page")], check=True)
         print(f"built {slug}")
     write_shelf()
+
+
+def crop_figures(pdf: Path, built: dict, out: Path, config: dict) -> None:
+    """Plots stay the authors' own: each is cut from the PDF as vector artwork."""
+    for figure in config.get("reading", {}).get("figure", []):
+        x0, y0, x1, y1 = figure["box"]
+        target = out / figure["name"]
+        subprocess.run(["pdftocairo", "-svg", "-f", str(figure["page"]), "-l", str(figure["page"]), "-x", str(int(x0)), "-y", str(int(y0)),
+                        "-W", str(int(x1 - x0)), "-H", str(int(y1 - y0)), "-paperw", str(int(x1 - x0)), "-paperh", str(int(y1 - y0)), str(pdf), str(target)],
+                       check=True)
 
 
 def write_shelf() -> None:

@@ -17,3 +17,22 @@ source = "https://doi.org/10.5281/zenodo.19081887"
 source_name = "Contextual Embeddings artifact, Lean/CE.lean"
 licence = "CC BY 4.0"
 scope = "This page covers Lean/CE.lean, the proof behind section 3.3. The artifact's two levelled files, behind section 6.3, are separate Lean modules."
+
+[reading]
+language = "haskell"
+page_label = "191:{page}"
+
+[[reading.figure]]
+name = "fig-3.svg"
+page = 11
+box = [50, 84, 432, 210]
+
+[[reading.figure]]
+name = "fig-4.svg"
+page = 11
+box = [50, 245, 432, 371]
+
+[[reading.figure]]
+name = "fig-9.svg"
+page = 24
+box = [143, 109, 340, 240]

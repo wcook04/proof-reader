@@ -1,16 +1,19 @@
 ---
 name: add-paper
-description: Add a Lean-checked paper to Proof Reader. Use when given a paper and its Lean project, to tie each Lean declaration to the passage of the paper it belongs to and write short notes grounded in the paper, so the paper appears on the site beside its Lean.
+description: Add a Lean-checked paper to Proof Reader. Use when given a paper and its Lean project, to set the paper for reading, tie each sentence and line of code to the exact Lean it describes and write short notes grounded in the paper, so the paper appears on the site beside its Lean.
 ---
 
 # Add a paper
 
-A paper page is an open book: the authors' PDF on the left, their Lean on the right,
-each sentence level with the code it describes. The paper is never rewritten. Your job
-is to find which words of the paper belong to which Lean declaration.
+A paper page is an open book: the authors' paper on the left, their Lean on the right,
+each sentence level with the code it describes. The left page is a reading copy set from
+the PDF, with the PDF itself one click away. The paper is never rewritten: a program
+compares every word of the reading copy with the PDF. Your job is to find which words of
+the paper belong to which lines of Lean.
 
-Everything mechanical is done by `tools/paper.py`, including linking every Lean name
-printed in the paper. The only thing you write is `papers/<slug>/links.json`.
+Everything mechanical is done by `tools/transcribe.py` and `tools/paper.py`, including
+linking every Lean name printed in the paper. What you write is `links.json`, and the
+repairs to `paper.md`.
 
 ## 1. Set up the folder
 
@@ -35,14 +38,53 @@ This builds the project on its own toolchain and writes `generated/lean.json`: e
 declaration, its lines, what it uses and the axioms it rests on. If it fails, report
 the Lean error. Do not edit the authors' Lean.
 
-## 2. Read both sides
+## 2. Set the reading copy
+
+```sh
+pip install pypdf
+python3 tools/transcribe.py <slug>
+```
+
+This writes `papers/<slug>/paper.md` from the PDF's own structure: fonts tell code from
+prose, positions tell a heading from a footnote, and the PDF's link targets give each
+citation and cross-reference its destination. Use the reading copy route for any paper
+with an open licence. A paper without a `paper.md` still works, on the PDF alone.
+
+The draft is close, and the check below shows where it is not. Repair `paper.md` by hand:
+
+- **The first page.** The title block, abstract, keywords and the licence box arrive in
+  page order, some of them in the middle of the introduction. Lay them out as Sam
+  Frohlich's paper does at the top of `papers/contextual-embeddings/paper.md`.
+- **Formulas.** Each font change splits a formula. Rejoin it in TeX: `$\lambda x.(x, x)$`.
+  Display rules go in `$$`.
+- **Numbered items** that the PDF numbers by hand.
+- **Code set side by side** whose rows line up. Rows out of step are split for you.
+- **Plots.** Find each plot's box in PDF points, add a `[[reading.figure]]` to
+  `paper.toml`, and describe the plot in the image's alternative text.
+
+Never correct the authors. A typo in the PDF stays in `paper.md`: it is their paper.
+
+```sh
+cd web && npm install && cd ..
+python3 tools/paper.py check <slug>
+```
+
+The check needs `extract` to have run, so do step 1 first. It lists every word that
+differs from the PDF. It stops at zero differences or it stops the build.
+
+**What it cannot see.** Words that are all present but in the wrong place inside a moved
+block pass the check. A figure's `where` once landed in the wrong column and the check
+was content. So read every code listing against the PDF yourself, particularly the
+side-by-side ones.
+
+## 3. Read both sides
 
 Read the paper's sections that discuss the Lean, then the Lean files, including their
 comments. Authors' comments often repeat the paper's wording, which makes a good guide
 to what goes with what. Read the artifact's README: it may say which claim each file
 supports, or that a file is out of date.
 
-## 3. Write links.json
+## 4. Write links.json
 
 ```json
 {
@@ -53,8 +95,11 @@ supports, or that a file is out of date.
   ],
   "passages": [
     {"id": "proven", "section": "3.3", "role": "states", "lean": ["isoL", "isoR"],
-     "quote": "We have proven that unembed and contextualise form an isomorphism in Lean 4"}
+     "quote": "We have proven that unembed and contextualise form an isomorphism in Lean 4"},
+    {"id": "isoR-clam", "section": "3.3", "role": "proves", "lean": ["isoR"], "lines": [217, 221],
+     "quote": "isoR’s CLam case, which requires function extensionality."}
   ],
+  "name_sections": ["2", "3"],
   "notes": {
     "ProxyVar": {"text": "This is the type the paper's Haskell calls Var.", "because": ["existential"]}
   }
@@ -70,12 +115,20 @@ a map, so use the paper's own words for its title and name the theorems that sta
   sentence is usually right.
 - `role` says what the passage does to the declaration: `states`, `defines`, `proves`,
   `explains` or `uses`.
+- `lines` names the exact Lean lines, when the passage is about less than the whole
+  declaration. They must lie inside the first declaration in `lean`. This is the point
+  of the page: "isoR's CLam case" should land on `CLam`'s lines, not on the top of `isoR`.
+- Tie lines of code as well as sentences. When the paper prints a definition, a quote of
+  one Haskell equation tied to the matching Lean line lets a reader walk the two side by
+  side. A quote may run across lines of code.
 - Tie every declaration you can. A passage may tie to several.
-- If a quote occurs twice, add `"page": n` or lengthen it.
+- If a quote occurs twice, lengthen it, or add `"page": n` for the PDF and `"nth": n` for
+  the reading copy.
 
-**Names** need no work: every Lean name printed in the paper is linked for you. If a
-name is also an ordinary word, so that `value` would light up all over the prose, list
-it under `"unlinked_names"`.
+**Names** need no work: every Lean name printed in the paper as code is linked for you.
+If the Lean covers only part of the paper, list those sections under `"name_sections"`,
+so that a later section's own `Ty` does not open a different `Ty`. If a name is also an
+ordinary word, list it under `"unlinked_names"`.
 
 **Notes** are the only words of ours on the page, so they earn their place. Write one
 only when the paper and the Lean differ in a way a careful reader would want to know:
@@ -85,40 +138,47 @@ interpretation of what the authors meant, no claims about the mathematics beyond
 the paper and the Lean say. Lean's own report of axioms and dependencies is computed, so
 never restate it in a note.
 
-## 4. Check it
+## 5. Check it
 
 ```sh
 python3 tools/paper.py check <slug>
 ```
 
-This fails if a quote is not in the PDF exactly once, or if a name is not a Lean
-declaration. It then prints how many declarations are tied and what rests on each
-axiom. Tie the ones still listed where the paper discusses them. Some declarations are
-helpers the paper never mentions: leave those untied.
+This fails if a quote is not found exactly once, if a word differs from the PDF, if
+`lines` fall outside their declaration, or if a name is not a Lean declaration. It then
+prints how many declarations are tied and what rests on each axiom. Tie the ones still
+listed where the paper discusses them. Some declarations are helpers the paper never
+mentions: leave those untied.
 
 Then check the meaning yourself, because the tool cannot. For each passage, read the
 Lean lines it points to and confirm the passage really is about them. For each note,
 confirm it against both sides.
 
-## 5. Look at it
+## 6. Look at it
 
 ```sh
 python3 tools/paper.py build <slug>
 cd web && npm run dev
 ```
 
-Open `#/<slug>`. Scroll the paper and watch the Lean follow. Open the map, click some
-cards and confirm the paper moves to the right words. Look at it at laptop and monitor
-widths. Fix what you find in `links.json`.
+Open `#/<slug>`. Scroll the paper and watch the Lean follow. Click a sentence with exact
+lines and see them lit. Open a citation and a figure in place, switch to the PDF, open
+the map, click some cards and confirm the paper moves to the right words. Look at it at
+laptop and monitor widths. Fix what you find in `links.json` or `paper.md`.
+
+`#/<slug>/@<passage>` opens on one sentence with its Lean lit, which is the link to send
+someone who wants to see one thing.
 
 If Lean is slow to start, check where elan keeps its toolchains. A toolchain on an
 external drive can turn a 15-second extraction into many minutes.
 
 ## What stays true on every page
 
-- The PDF is the authors' file, byte for byte.
-- Every word beside it is a quotation from the paper, Lean's own output, or a note
-  marked as a note.
+- The PDF is the authors' file, byte for byte, and stays one click away.
+- The reading copy says what the PDF says, word for word, and the footer says it was
+  retypeset.
+- Every other word is a quotation from the paper, Lean's own output, or a note marked as
+  a note.
 - The footer says the ties and notes were made with AI and not reviewed by the authors.
   Change that only when an author has reviewed them.
 - Publishing a page is the maintainer's decision. Adding a paper to the repository does

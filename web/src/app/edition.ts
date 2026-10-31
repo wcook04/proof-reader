@@ -12,6 +12,16 @@ export interface Passage {
   page: number;
   last_page: number;
   rects: number[][];
+  /** The exact Lean lines this passage describes, when it is narrower than the declaration. */
+  lines?: [number, number];
+}
+
+export interface OutlineEntry {
+  id: string;
+  number: string;
+  title: string;
+  level: number;
+  ties: number;
 }
 
 /** A Lean name printed in the paper, found by matching words at build time. */
@@ -77,6 +87,8 @@ export interface Edition {
   passages: Passage[];
   mentions: Mention[];
   declarations: Declaration[];
+  /** Present when the paper has a reading copy, which reading.html holds. */
+  reading: { outline: OutlineEntry[]; words: number; formulas: number; pages: number } | null;
   analytics: {
     declarations: number;
     linked_to_paper: number;

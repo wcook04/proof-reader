@@ -38,7 +38,7 @@ function Shelf() {
       <div className="shelf__in">
         <div>
           <h1>Proof Reader</h1>
-          <p className="shelf__lede">Read a paper beside its Lean proof. The authors' own PDF sits on one page and their Lean on the other, with each sentence level with the code it describes.</p>
+          <p className="shelf__lede">Read a paper beside its Lean proof. The paper sits on one page and the authors' Lean on the other, with each sentence level with the lines it describes.</p>
           <ul>
             {papers.map((p) => (
               <li key={p.slug}>

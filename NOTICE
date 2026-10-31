@@ -10,7 +10,8 @@ tools/extract.lean.template adapts lean-exposition's Extract.lean, which adapts
 Comparator/Util.lean, Copyright (c) 2025 Lean FRO, LLC, author Henrik Böving,
 released under Apache 2.0.
 
-The paper rendering uses pdf.js (Apache-2.0).
+The paper rendering uses pdf.js (Apache-2.0), and the reading copy uses KaTeX (MIT) and
+markdown-it (MIT). web/tools/render-paper.mjs adapts lean-exposition's math protection.
 
 Papers and Lean projects under papers/ belong to their authors and keep their own
 licences, named in each folder's paper.toml.

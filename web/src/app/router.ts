@@ -1,5 +1,6 @@
 // Addresses live after the # so the site works from any folder on a static
-// host: #/paper and #/paper/declaration.
+// host: #/paper, #/paper/declaration, and #/paper/@place for a heading, a figure
+// or a page of the PDF.
 
 export type Trace = "rests" | "uses";
 
@@ -16,5 +17,5 @@ export function readRoute(): Route {
 export function routeHref(route: Route): string {
   if (!route.paper) return "./";
   const base = `./#/${encodeURIComponent(route.paper)}`;
-  return route.record ? `${base}/${encodeURIComponent(route.record)}` : base;
+  return route.record ? `${base}/${encodeURIComponent(route.record).replace(/^%40/, "@")}` : base;
 }

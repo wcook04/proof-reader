@@ -10,16 +10,12 @@ import * as pdfjs from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import type { Mention, Passage } from "../app/edition";
+import { READING_LINE, type PaperHandle } from "./reading-line";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
-export const READING_LINE = 0.34;
 /** The space above each page; app.css sets the same 20px. */
 const PAGE_GAP = 20;
-
-export interface PdfHandle {
-  scrollToPassage(id: string, instant?: boolean): void;
-}
 
 interface Props {
   url: string;
@@ -34,14 +30,16 @@ interface Props {
   lit: ReadonlySet<string>;
   /** Where the reader opens. */
   start: string | null;
+  /** A page to open at instead, such as `page-8`. */
+  openAt?: string | null;
   onActive(id: string | null): void;
   onPick(id: string): void;
   onName(name: string): void;
   onUserScroll(): void;
 }
 
-export const PdfPane = forwardRef<PdfHandle, Props>(function PdfPane(props, ref) {
-  const { url, sizes, crop, passages, mentions, active, lit, start, onActive, onPick, onName, onUserScroll } = props;
+export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, ref) {
+  const { url, sizes, crop, passages, mentions, active, lit, start, openAt, onActive, onPick, onName, onUserScroll } = props;
   const scroller = useRef<HTMLDivElement>(null);
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [failed, setFailed] = useState(false);
@@ -124,14 +122,26 @@ export const PdfPane = forwardRef<PdfHandle, Props>(function PdfPane(props, ref)
     [passages, passageTop],
   );
 
-  useImperativeHandle(ref, () => ({ scrollToPassage: go }), [go]);
+  const toPlace = useCallback(
+    (id: string, instant = false) => {
+      const page = /^page-(\d+)$/.exec(id);
+      const el = scroller.current;
+      if (!page || !el) return;
+      programmatic.current = Date.now() + 900;
+      el.scrollTo({ top: PAGE_GAP + (Number(page[1]) - 1) * (pageHeight + PAGE_GAP) - 8, behavior: instant ? "auto" : "smooth" });
+    },
+    [pageHeight],
+  );
+
+  useImperativeHandle(ref, () => ({ scrollToPassage: go, scrollToPlace: toPlace }), [go, toPlace]);
 
   // A new width rescales every page, so keep the reader on their sentence.
   const place = useRef(start);
   place.current = active ?? place.current ?? start;
   useEffect(() => {
-    if (width && place.current) go(place.current, true);
-  }, [go, width]);
+    if (width && openAt) toPlace(openAt, true);
+    else if (width && place.current) go(place.current, true);
+  }, [go, openAt, toPlace, width]);
 
   useEffect(() => {
     const el = scroller.current;
@@ -184,6 +194,7 @@ export const PdfPane = forwardRef<PdfHandle, Props>(function PdfPane(props, ref)
   return (
     <div
       className="pdf"
+      data-paper-pane
       ref={scroller}
       tabIndex={0}
       aria-label="The paper"
