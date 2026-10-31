@@ -1,11 +1,11 @@
 # Proof Reader
 
-Read a paper beside its Lean proof.
+Proof Reader lays a paper and its Lean proof out like an open book, with each sentence
+level with the code it describes. The authors' own PDF is the left page and their Lean
+is the right page, so nobody has to hunt through an artifact to find what a paper
+proved.
 
-Many papers now come with a Lean proof, but the two sit in different places: a PDF
-here, an artifact there, and nothing connecting a sentence to the code that proves it.
-Proof Reader lays them out like an open book. The authors' own PDF is the left page
-and their Lean is the right page, with each sentence level with the code it describes.
+![A paper's page on the left with one sentence highlighted, and on the right the Lean theorem it describes, highlighted and level with that sentence.](web/public/reader.webp)
 
 - Scroll the paper and the Lean follows, with the same highlighter on both pages.
 - Click a highlighted sentence, or any Lean name printed in the paper, to open its
@@ -14,9 +14,10 @@ and their Lean is the right page, with each sentence level with the code it desc
   back to the map.
 - See which results rest on an axiom, as Lean itself reports it.
 
-It writes no explanation of its own. The paper is shown unchanged, the map and axiom
-facts come from Lean, and the only added words are short notes where the paper and the
-Lean differ, each tied to the passage it rests on.
+It writes no explanation of its own. The paper's words are untouched and only its blank
+margins are trimmed on screen, the map and axiom facts come from Lean, and the only
+added words are short notes where the paper and the Lean differ, each tied to the
+passage it rests on.
 
 ## Add a paper
 

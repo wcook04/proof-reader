@@ -1,8 +1,9 @@
-// The authors' PDF, drawn by pdf.js exactly as published. Passages are boxes
-// computed from the PDF's own words at build time, so the page never retypes
-// the paper. The highlight lies under the ink, as a highlighter does, and a bar
-// in the margin marks each sentence tied to the Lean. Scrolling reports the
-// passage at the reading line.
+// The authors' PDF, drawn by pdf.js. Passages are boxes computed from the PDF's
+// own words at build time, so the page never retypes the paper. The highlight
+// lies under the ink, as a highlighter does, and a bar in the margin marks each
+// sentence tied to the Lean. Blank margins are trimmed on screen, so the type
+// is as large as the page allows. Scrolling reports the passage at the reading
+// line.
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as pdfjs from "pdfjs-dist";
@@ -22,9 +23,10 @@ export interface PdfHandle {
 
 interface Props {
   url: string;
+  /** Each page's width and height, in PDF points. */
   sizes: [number, number][];
-  /** Where the printed text starts and ends on each page. */
-  edges: [number, number][];
+  /** The box on every page that holds something printed. */
+  crop: [number, number, number, number];
   passages: Passage[];
   /** Every printed occurrence of a Lean name. */
   mentions: Mention[];
@@ -39,23 +41,39 @@ interface Props {
 }
 
 export const PdfPane = forwardRef<PdfHandle, Props>(function PdfPane(props, ref) {
-  const { url, sizes, edges, passages, mentions, active, lit, start, onActive, onPick, onName, onUserScroll } = props;
+  const { url, sizes, crop, passages, mentions, active, lit, start, onActive, onPick, onName, onUserScroll } = props;
   const scroller = useRef<HTMLDivElement>(null);
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
+  const [failed, setFailed] = useState(false);
   const [width, setWidth] = useState(0);
   const [hover, setHover] = useState<string | null>(null);
   const [hoverName, setHoverName] = useState<string | null>(null);
   const programmatic = useRef(0);
   const arrive = useRef(0);
 
+  const [left, top, right, bottom] = crop;
+  const scale = width / (right - left);
+  const pageHeight = (bottom - top) * scale;
+
   useEffect(() => {
     let live = true;
-    // One plain download: papers are small, and it keeps the page working on hosts without range requests.
-    const task = pdfjs.getDocument({ url, disableRange: true, disableStream: true });
-    task.promise.then((doc) => live && setPdf(doc)).catch(() => undefined);
+    let task: ReturnType<typeof pdfjs.getDocument> | null = null;
+    fetch(url)
+      .then((response) => {
+        if (!response.ok) throw new Error(String(response.status));
+        return response.arrayBuffer();
+      })
+      .then((data) => {
+        if (!live) return;
+        task = pdfjs.getDocument({ data });
+        return task.promise.then((doc) => {
+          if (live) setPdf(doc);
+        });
+      })
+      .catch(() => live && setFailed(true));
     return () => {
       live = false;
-      void task.destroy();
+      void task?.destroy();
     };
   }, [url]);
 
@@ -63,7 +81,7 @@ export const PdfPane = forwardRef<PdfHandle, Props>(function PdfPane(props, ref)
   useLayoutEffect(() => {
     const el = scroller.current;
     if (!el) return;
-    const measure = () => setWidth(Math.min(el.clientWidth - 20, 980));
+    const measure = () => setWidth(el.clientWidth - PAGE_GAP);
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(el);
@@ -83,13 +101,9 @@ export const PdfPane = forwardRef<PdfHandle, Props>(function PdfPane(props, ref)
   }, [mentions]);
 
   const passageTop = useCallback(
-    (p: Passage) => {
-      // From the page sizes, not the DOM, so it holds while the layout settles.
-      let top = PAGE_GAP;
-      for (let i = 0; i < p.page - 1; i++) top += sizes[i][1] * (width / sizes[i][0]) + PAGE_GAP;
-      return top + p.rects[0][1] * (width / sizes[p.page - 1][0]);
-    },
-    [sizes, width],
+    // From the page sizes, not the DOM, so it holds while the layout settles.
+    (p: Passage) => PAGE_GAP + (p.page - 1) * (pageHeight + PAGE_GAP) + (p.rects[0][1] - top) * scale,
+    [pageHeight, scale, top],
   );
 
   const go = useCallback(
@@ -99,12 +113,12 @@ export const PdfPane = forwardRef<PdfHandle, Props>(function PdfPane(props, ref)
       if (!passage || !el) return;
       programmatic.current = Date.now() + 900;
       const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const top = passageTop(passage) - el.clientHeight * READING_LINE;
-      el.scrollTo({ top, behavior: reduced || instant ? "auto" : "smooth" });
+      const target = passageTop(passage) - el.clientHeight * READING_LINE;
+      el.scrollTo({ top: target, behavior: reduced || instant ? "auto" : "smooth" });
       // A background tab may never run the animation, so arrive regardless.
       window.clearTimeout(arrive.current);
       arrive.current = window.setTimeout(() => {
-        if (Math.abs(el.scrollTop - top) > 40) el.scrollTo({ top, behavior: "auto" });
+        if (Math.abs(el.scrollTop - target) > 40) el.scrollTo({ top: target, behavior: "auto" });
       }, 950);
     },
     [passages, passageTop],
@@ -148,19 +162,19 @@ export const PdfPane = forwardRef<PdfHandle, Props>(function PdfPane(props, ref)
     };
   }, [passages, passageTop, width, onActive]);
 
-  const point = (event: React.MouseEvent<HTMLDivElement>, page: number) => {
+  /** A pointer position in PDF points. */
+  const point = (event: React.MouseEvent<HTMLDivElement>) => {
     const box = event.currentTarget.getBoundingClientRect();
-    const scale = sizes[page - 1][0] / box.width;
-    return { x: (event.clientX - box.left) * scale, y: (event.clientY - box.top) * scale };
+    return { x: (event.clientX - box.left) / scale + left, y: (event.clientY - box.top) / scale + top };
   };
 
   const nameAt = (event: React.MouseEvent<HTMLDivElement>, page: number): Mention | null => {
-    const { x, y } = point(event, page);
+    const { x, y } = point(event);
     return (namesByPage.get(page) ?? []).find(({ rect: [x0, y0, x1, y1] }) => x >= x0 && x <= x1 && y >= y0 && y <= y1) ?? null;
   };
 
   const hit = (event: React.MouseEvent<HTMLDivElement>, page: number): string | null => {
-    const { x, y } = point(event, page);
+    const { x, y } = point(event);
     for (const p of byPage.get(page) ?? []) {
       if (p.rects.some(([x0, y0, x1, y1]) => x >= x0 - 2 && x <= x1 + 2 && y >= y0 - 1 && y <= y1 + 1)) return p.id;
     }
@@ -179,15 +193,15 @@ export const PdfPane = forwardRef<PdfHandle, Props>(function PdfPane(props, ref)
         if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "Home", "End"].includes(e.key)) onUserScroll();
       }}
     >
-      {sizes.map(([w, h], index) => {
+      {failed && <p className="pdf__failed">The PDF could not be loaded. Use the link to the published paper above.</p>}
+      {width > 0 && sizes.map(([w, h], index) => {
         const page = index + 1;
-        const scale = width / w;
         return (
           <div
             key={page}
             className={`pdf__page${hover || hoverName ? " has-hover" : ""}`}
             data-page={page}
-            style={{ width, height: h * scale }}
+            style={{ width, height: pageHeight }}
             onMouseMove={(e) => {
               const name = nameAt(e, page);
               setHoverName(name ? `${page}:${name.rect[0]}:${name.rect[1]}` : null);
@@ -205,28 +219,30 @@ export const PdfPane = forwardRef<PdfHandle, Props>(function PdfPane(props, ref)
               if (id) onPick(id);
             }}
           >
-            {(namesByPage.get(page) ?? []).map((m) => {
-              const key = `${page}:${m.rect[0]}:${m.rect[1]}`;
-              const [x0, y0, x1, y1] = m.rect;
-              return <span key={key} className={`mention${hoverName === key ? " is-hover" : ""}`} style={{ left: x0 * scale, top: y0 * scale, width: (x1 - x0) * scale, height: (y1 - y0) * scale }} />;
-            })}
-            {(byPage.get(page) ?? []).flatMap((p) => {
-              const state = `${p.id === active ? " is-active" : ""}${p.id === hover ? " is-hover" : ""}${lit.has(p.id) ? " is-lit" : ""}`;
-              const top = p.rects[0][1];
-              const bottom = p.rects[p.rects.length - 1][3];
-              return [
-                <span key={`${p.id}-tie`} data-passage={p.id} className={`tie${state}`} style={{ left: (edges[page - 1][1] + 11) * scale, top: top * scale, height: (bottom - top) * scale }} />,
-                ...p.rects.map(([x0, y0, x1, y1], i) => (
-                  <span
-                    key={`${p.id}${i}`}
-                    data-passage={p.id}
-                    className={`mark${state}`}
-                    style={{ left: (x0 - 1.5) * scale, top: (y0 - 0.5) * scale, width: (x1 - x0 + 3) * scale, height: (y1 - y0 + 1) * scale }}
-                  />
-                )),
-              ];
-            })}
-            {pdf && width > 0 && <PageCanvas pdf={pdf} page={page} width={width} root={scroller} />}
+            <div className="pdf__whole" style={{ left: -left * scale, top: -top * scale, width: w * scale, height: h * scale }}>
+              {(namesByPage.get(page) ?? []).map((m) => {
+                const key = `${page}:${m.rect[0]}:${m.rect[1]}`;
+                const [x0, y0, x1, y1] = m.rect;
+                return <span key={key} className={`mention${hoverName === key ? " is-hover" : ""}`} style={{ left: x0 * scale, top: y0 * scale, width: (x1 - x0) * scale, height: (y1 - y0) * scale }} />;
+              })}
+              {(byPage.get(page) ?? []).flatMap((p) => {
+                const state = `${p.id === active ? " is-active" : ""}${p.id === hover ? " is-hover" : ""}${lit.has(p.id) ? " is-lit" : ""}`;
+                const first = p.rects[0][1];
+                const last = p.rects[p.rects.length - 1][3];
+                return [
+                  <span key={`${p.id}-tie`} data-passage={p.id} className={`tie${state}`} style={{ left: (right - 6) * scale, top: first * scale, height: (last - first) * scale }} />,
+                  ...p.rects.map(([x0, y0, x1, y1], i) => (
+                    <span
+                      key={`${p.id}${i}`}
+                      data-passage={p.id}
+                      className={`mark${state}`}
+                      style={{ left: (x0 - 1.5) * scale, top: (y0 - 0.5) * scale, width: (x1 - x0 + 3) * scale, height: (y1 - y0 + 1) * scale }}
+                    />
+                  )),
+                ];
+              })}
+              {pdf && <PageCanvas pdf={pdf} page={page} width={w * scale} root={scroller} />}
+            </div>
           </div>
         );
       })}

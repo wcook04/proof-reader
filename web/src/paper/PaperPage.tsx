@@ -42,8 +42,13 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
 
   const activePassage = active ? passages.get(active) : undefined;
   const reading = useMemo(() => activePassage?.lean ?? [], [activePassage]);
-  const selected = pinned ?? reading[0] ?? null;
+  // Past the last tie on a page the Lean stays where it was, so it never jumps.
+  const held = useRef<string | null>(null);
+  const selected = pinned ?? reading[0] ?? held.current;
+  held.current = selected;
   const order = active ? edition.passages.findIndex((p) => p.id === active) : -1;
+  const at = useRef(0);
+  if (order >= 0) at.current = order;
 
   const litIds = useMemo(() => {
     if (axiom) return new Set([axiom, ...(edition.analytics.resting_on_axioms[axiom] ?? [])]);
@@ -113,8 +118,9 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
 
   const step = useCallback(
     (by: number) => {
-      const now = edition.passages.findIndex((p) => p.id === activeRef.current);
-      const next = edition.passages[Math.max(0, Math.min(edition.passages.length - 1, (now < 0 ? 0 : now) + by))];
+      // Between ties, Previous goes back to the last one passed.
+      const onTie = edition.passages.some((p) => p.id === activeRef.current);
+      const next = edition.passages[Math.max(0, Math.min(edition.passages.length - 1, at.current + (onTie || by > 0 ? by : 0)))];
       if (!next) return;
       setPinned(null);
       setAxiom(null);
@@ -127,7 +133,7 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
   // The left and right arrows walk through the links.
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (event.metaKey || event.ctrlKey || event.altKey || (event.target as HTMLElement).closest?.("input, textarea")) return;
+      if (event.metaKey || event.ctrlKey || event.altKey || (event.target as HTMLElement).closest?.("input, textarea, .map-canvas")) return;
       if (event.key === "ArrowRight") step(1);
       if (event.key === "ArrowLeft") step(-1);
     };
@@ -147,18 +153,18 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
     <div className="page">
       <button type="button" className="skip" onClick={() => document.querySelector<HTMLElement>(".pdf")?.focus()}>Skip to the paper</button>
       <header className="bar">
-        <a className="bar__home" href={routeHref({})}>
+        <a className="bar__home" href={routeHref({})} aria-label="Proof Reader, all papers">
           <img src={`${import.meta.env.BASE_URL}plectis.svg`} alt="" />
-          Proof Reader
+          <span className="bar__name">Proof Reader</span>
         </a>
         <div className="bar__title">
           <h1>{paper.short_title}</h1>
           <p>{paper.authors.join(", ")}</p>
         </div>
         <div className="stepper">
-          <button type="button" onClick={() => step(-1)} disabled={order <= 0}>Previous</button>
-          <span>Link {order >= 0 ? order + 1 : 0} of {edition.passages.length}</span>
-          <button type="button" onClick={() => step(1)} disabled={order >= edition.passages.length - 1}>Next</button>
+          <button type="button" onClick={() => step(-1)} disabled={order === 0}>Previous</button>
+          <span>{order >= 0 ? `Link ${order + 1} of ${edition.passages.length}` : `${edition.passages.length} links`}</span>
+          <button type="button" onClick={() => step(1)} disabled={at.current >= edition.passages.length - 1}>Next</button>
         </div>
         <div className="switch" role="group" aria-label="The right-hand page">
           <button type="button" aria-pressed={view === "lean"} onClick={() => show("lean")}>Lean</button>
@@ -172,7 +178,7 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
           ref={pdf}
           url={paperFile(edition.slug, "paper.pdf")}
           sizes={paper.sizes}
-          edges={paper.text_edges}
+          crop={paper.crop}
           passages={edition.passages}
           mentions={edition.mentions}
           active={active}
@@ -200,8 +206,8 @@ export function PaperPage({ edition, record }: { edition: Edition; record?: stri
       </main>
       <footer className="foot">
         <p>
-          Paper © its authors, <a href={paper.licence_url}>{paper.licence}</a>, shown unchanged. Lean from the authors' artifact, checked on Lean {lean.version}. Links
-          and notes made with AI, not reviewed by the authors.
+          Paper © its authors, <a href={paper.licence_url}>{paper.licence}</a>, with only its blank margins trimmed. Lean from the authors' artifact, built here on Lean{" "}
+          {lean.version}. Links and notes made with AI, not reviewed by the authors.
         </p>
       </footer>
     </div>
@@ -221,8 +227,11 @@ interface MapProps {
 function ProofMap({ edition, graph, selected, litIds, axiom, onAxiom, onSelect }: MapProps) {
   const map = useRef<MapViewHandle>(null);
   const canvas = useRef<HTMLDivElement>(null);
-  const { analytics, lean } = edition;
+  const { analytics, lean, claims } = edition;
   const types = useMemo(() => edition.declarations.filter(isType), [edition]);
+  // A map draws one claim's proof. A paper with several gets a switch.
+  const [goal, setGoal] = useState(claims[0]?.id);
+  const claim = claims.find((c) => c.id === goal) ?? claims[0];
 
   useEffect(() => {
     const timers = [
@@ -232,7 +241,7 @@ function ProofMap({ edition, graph, selected, litIds, axiom, onAxiom, onSelect }
       window.setTimeout(() => map.current?.fitAll(false), 1100),
     ];
     return () => timers.forEach((t) => window.clearTimeout(t));
-  }, [graph]);
+  }, [graph, goal]);
 
   useEffect(() => {
     const el = canvas.current;
@@ -252,7 +261,7 @@ function ProofMap({ edition, graph, selected, litIds, axiom, onAxiom, onSelect }
   return (
     <aside className="leaf leaf--map" aria-label="Map of the Lean proof">
       <div className="facts">
-        <p>A map of the proof in {Object.keys(lean.files).join(", ")}. Each card is a Lean declaration, resting on the ones below it.</p>
+        <p>Each card is a Lean declaration, resting on the ones below it. {lean.scope}</p>
         {analytics.axioms.map((name) => (
           <p key={name}>
             <button type="button" className="fact" aria-pressed={axiom === name} onClick={() => onAxiom(axiom === name ? null : name)}>{name}</button>{" "}
@@ -261,19 +270,27 @@ function ProofMap({ edition, graph, selected, litIds, axiom, onAxiom, onSelect }
           </p>
         ))}
       </div>
+      {claims.length > 1 && (
+        <div className="claims" role="group" aria-label="Which claim's proof to show">
+          {claims.map((c) => (
+            <button key={c.id} type="button" aria-pressed={c.id === claim?.id} onClick={() => setGoal(c.id)}>{c.title}</button>
+          ))}
+        </div>
+      )}
       <div className="map-canvas" ref={canvas}>
         <ArgumentTree
+          key={goal}
           ref={map}
           graph={graph}
-          goal={edition.claims[0]?.id}
+          goal={goal}
           insets={INSETS}
           persist={false}
           compact
           mode="overview"
           selected={selected ?? undefined}
           litIds={litIds}
-          rootContent={<p className="plate-quote">{edition.claims[0]?.title}</p>}
-          rootExcerpt={<span>{edition.claims[0]?.title}</span>}
+          rootContent={<p className="plate-quote">{claim?.title}</p>}
+          rootExcerpt={<span>{claim?.title}</span>}
           onSelect={onSelect}
           onTrace={(id) => onSelect(id)}
         />

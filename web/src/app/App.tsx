@@ -36,22 +36,31 @@ function Shelf() {
   return (
     <main className="shelf">
       <div className="shelf__in">
-        <h1>Proof Reader</h1>
-        <p className="shelf__lede">Read a paper beside its Lean proof. The authors' own PDF sits on one page and their Lean on the other, with each sentence level with the code it describes.</p>
-        <ul>
-          {papers.map((p) => (
-            <li key={p.slug}>
-              <a href={routeHref({ paper: p.slug })}>
-                <img src={paperFile(p.slug, "first-page.png")} alt="" width={148} height={219} />
-                <span>
-                  <span className="shelf__title">{p.title}</span>
-                  <span className="shelf__by">{p.authors.join(", ")}</span>
-                  <span className="shelf__by">{p.venue}</span>
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
+        <div>
+          <h1>Proof Reader</h1>
+          <p className="shelf__lede">Read a paper beside its Lean proof. The authors' own PDF sits on one page and their Lean on the other, with each sentence level with the code it describes.</p>
+          <ul>
+            {papers.map((p) => (
+              <li key={p.slug}>
+                <a href={routeHref({ paper: p.slug })}>
+                  <img src={paperFile(p.slug, "first-page.png")} alt="" width={96} height={142} />
+                  <span>
+                    <span className="shelf__title">{p.title}</span>
+                    <span className="shelf__by">{p.authors.join(", ")}</span>
+                    <span className="shelf__by">{p.venue}</span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <img
+          className="shelf__picture"
+          src={`${import.meta.env.BASE_URL}reader.webp`}
+          alt="A paper's page on the left with one sentence highlighted, and on the right the Lean theorem it describes, highlighted and level with that sentence."
+          width={1600}
+          height={877}
+        />
       </div>
     </main>
   );

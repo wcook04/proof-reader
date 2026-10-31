@@ -4,6 +4,7 @@
 
 import { useEffect, useMemo, useRef } from "react";
 import type { Declaration, Edition } from "../app/edition";
+import { isType } from "../model/fromEdition";
 import { READING_LINE } from "../paper/PdfPane";
 import { tokenizeLean } from "./leanTokens";
 
@@ -49,11 +50,12 @@ export function LeanPane({ edition, selected, reading, onSelect, onPassage, onBa
 function Head({ edition, d, onSelect, onPassage }: { edition: Edition; d: Declaration; onSelect(id: string): void; onPassage(id: string): void }) {
   const isProof = d.keyword === "theorem" || d.keyword === "lemma";
   const pages = d.passages.map((id) => edition.passages.find((p) => p.id === id)).filter((p) => !!p);
+  const severalFiles = Object.keys(edition.lean.files).length > 1;
   return (
     <>
       <h2 className="leaf__name">
         {d.id}
-        <span>{KIND_WORDS[d.keyword] ?? d.keyword}, lines {d.line} to {d.end_line}</span>
+        <span>{KIND_WORDS[d.keyword] ?? d.keyword}, {severalFiles ? `${d.file.split("/").pop()}, ` : ""}lines {d.line} to {d.end_line}</span>
       </h2>
       {d.keyword === "axiom" && <p className="leaf__line leaf__axiom">Assumed, not proved. Lean takes this as given.</p>}
       {isProof && (
@@ -71,11 +73,19 @@ function Head({ edition, d, onSelect, onPassage }: { edition: Edition; d: Declar
         </p>
       )}
       {d.note && <p className="leaf__note">{d.note.text}</p>}
+      {!isType(d) && d.used_by.length > 0 && (
+        <p className="leaf__line">
+          Used by{" "}
+          {d.used_by.map((name) => (
+            <button key={name} type="button" className="jump" onClick={() => onSelect(name)}><code>{name}</code></button>
+          ))}
+        </p>
+      )}
       {pages.length > 1 && (
         <p className="leaf__line">
-          {pages.length} places in the paper, on page{" "}
+          In the paper at{" "}
           {pages.map((p) => (
-            <button key={p.id} type="button" className="jump" onClick={() => onPassage(p.id)}>{p.page}</button>
+            <button key={p.id} type="button" className="jump" onClick={() => onPassage(p.id)}>page {p.page}</button>
           ))}
         </p>
       )}

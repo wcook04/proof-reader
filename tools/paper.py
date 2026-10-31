@@ -39,6 +39,11 @@ WRITTEN = re.compile(
     r"\s*([^\s:({\[]*)"
 )
 STANDARD_AXIOMS = {"propext", "Quot.sound", "Classical.choice"}
+# Reading the ink off a rendered page: how sharply, how dark counts as ink, and
+# how much blank margin to leave round it, in points.
+INK_DPI = 40
+INK = 200
+MARGIN = 14
 ROLES = ("states", "defines", "proves", "explains", "uses")
 
 
@@ -157,13 +162,40 @@ def pdf_words(pdf: Path) -> tuple[list[dict], list[tuple[float, float]]]:
     return words, sizes
 
 
-def text_edges(words: list[dict], sizes: list[tuple[float, float]]) -> list[list[float]]:
-    """Where the printed text starts and ends on each page, for the margin marks."""
-    edges = []
-    for number, (width, _) in enumerate(sizes, start=1):
-        boxes = [w["box"] for w in words if w["page"] == number]
-        edges.append([round(min(b[0] for b in boxes), 1), round(max(b[2] for b in boxes), 1)] if boxes else [0.0, width])
-    return edges
+def dark_box(image: bytes) -> tuple[int, int, int, int] | None:
+    """The box of pixels with ink in them, in a binary greyscale PGM image."""
+    header = re.match(rb"P5\s+(\d+)\s+(\d+)\s+255\s", image)
+    if not header:
+        raise PaperError("pdftoppm did not write a greyscale image")
+    width, height = int(header[1]), int(header[2])
+    raster = image[header.end():]
+    columns: set[int] = set()
+    rows = []
+    for row in range(height):
+        dark = [x for x, value in enumerate(raster[row * width:(row + 1) * width]) if value < INK]
+        if dark:
+            rows.append(row)
+            columns.update((dark[0], dark[-1]))
+    return (min(columns), rows[0], max(columns) + 1, rows[-1] + 1) if rows else None
+
+
+def ink_box(pdf: Path, sizes: list[tuple[float, float]]) -> list[float]:
+    """The box holding everything printed on any page, in PDF points.
+
+    Read from a rendering, so figures that stick out past the text are kept.
+    """
+    with tempfile.TemporaryDirectory(prefix="proof-reader-") as scratch:
+        subprocess.run(["pdftoppm", "-r", str(INK_DPI), "-gray", str(pdf), f"{scratch}/page"], check=True)
+        boxes = [dark_box(image.read_bytes()) for image in sorted(Path(scratch).glob("page-*.pgm"))]
+    boxes = [box for box in boxes if box]
+    if not boxes:
+        raise PaperError(f"{pdf} has no ink on any page")
+    point = 72 / INK_DPI
+    width, height = sizes[0]
+    return [round(max(0.0, min(b[0] for b in boxes) * point - MARGIN), 1),
+            round(max(0.0, min(b[1] for b in boxes) * point - MARGIN), 1),
+            round(min(width, max(b[2] for b in boxes) * point + MARGIN), 1),
+            round(min(height, max(b[3] for b in boxes) * point + MARGIN), 1)]
 
 
 def find_mentions(words: list[dict], names: list[str]) -> list[dict]:
@@ -269,6 +301,8 @@ def resolve(slug: str) -> dict:
         passages.append({**item, "page": page, "rects": rects, "order": hits[0], "last_page": last})
     passages.sort(key=lambda p: p["order"])
     claims = links.get("claims", [])
+    if not claims:
+        errors.append("links.json needs at least one claim: each claim is the top of a map")
     for claim in claims:
         for name in claim.get("lean", []):
             if name not in written:
@@ -301,8 +335,7 @@ def edition(slug: str) -> dict:
     data = resolve(slug)
     config, shard_info, links = data["config"], data["shards"], data["links"]
     written, uses, texts = shard_info["written"], shard_info["uses"], shard_info["texts"]
-    goals = [name for claim in links.get("claims", []) for name in claim.get("lean", [])] or config["lean"].get("goals", [])
-    keep = reachable(goals, uses) if goals else set(written)
+    keep = reachable([name for claim in links["claims"] for name in claim.get("lean", [])], uses)
     used_by: dict[str, list[str]] = {name: [] for name in keep}
     for name in keep:
         for target in uses[name]:
@@ -333,7 +366,7 @@ def edition(slug: str) -> dict:
     paper = config["paper"]
     return {
         "schema": 1, "slug": slug,
-        "paper": {**paper, "pages": len(data["sizes"]), "sizes": data["sizes"], "text_edges": text_edges(data["words"], data["sizes"])},
+        "paper": {**paper, "pages": len(data["sizes"]), "sizes": data["sizes"], "crop": ink_box(data["folder"] / config["paper"]["pdf"], data["sizes"])},
         "lean": {**{k: v for k, v in config["lean"].items() if k != "project"},
                  "toolchain": (lean_project(data["folder"], config) / "lean-toolchain").read_text().strip(),
                  "version": shard_info["lean_version"],
@@ -341,7 +374,7 @@ def edition(slug: str) -> dict:
         "credit": config.get("credit", {}),
         "claims": links.get("claims", []),
         "passages": [{k: v for k, v in p.items() if k != "order"} for p in data["passages"]],
-        "mentions": find_mentions(data["words"], [d["id"] for d in declarations]),
+        "mentions": find_mentions(data["words"], [d["id"] for d in declarations if d["id"] not in links.get("unlinked_names", [])]),
         "declarations": declarations,
         "analytics": {
             "declarations": len(declarations),
@@ -370,7 +403,6 @@ def check(slug: str) -> None:
 
 def build(slugs: list[str]) -> None:
     PUBLIC.mkdir(parents=True, exist_ok=True)
-    shelf = []
     for slug in slugs:
         built = edition(slug)
         folder = PAPERS / slug
@@ -380,11 +412,30 @@ def build(slugs: list[str]) -> None:
         shutil.copyfile(folder / built["paper"]["pdf"], out / "paper.pdf")
         subprocess.run(["pdftocairo", "-png", "-singlefile", "-f", "1", "-l", "1", "-scale-to", "420",
                         str(folder / built["paper"]["pdf"]), str(out / "first-page")], check=True)
+        print(f"built {slug}")
+    write_shelf()
+
+
+def write_shelf() -> None:
+    """List every built paper, and remove any whose folder has gone."""
+    known = all_papers()
+    for built in PUBLIC.iterdir():
+        if built.is_dir() and built.name not in known:
+            shutil.rmtree(built)
+    shelf = []
+    for slug in known:
+        path = PUBLIC / slug / "edition.json"
+        if not path.is_file():
+            continue
+        built = json.loads(path.read_text(encoding="utf-8"))
         paper = built["paper"]
         shelf.append({"slug": slug, "title": paper["title"], "authors": paper["authors"], "venue": paper.get("venue", ""),
                       "declarations": built["analytics"]["declarations"]})
-        print(f"built {slug}")
     (PUBLIC / "index.json").write_text(json.dumps({"papers": shelf}, ensure_ascii=False), encoding="utf-8")
+
+
+def all_papers() -> list[str]:
+    return sorted(p.parent.name for p in PAPERS.glob("*/paper.toml"))
 
 
 def new(slug: str) -> None:
@@ -403,7 +454,7 @@ def main() -> int:
     args = parser.parse_args()
     try:
         if args.command == "build":
-            build([args.slug] if args.slug else sorted(p.parent.name for p in PAPERS.glob("*/paper.toml")))
+            build([args.slug] if args.slug else all_papers())
         elif not args.slug:
             parser.error("this command needs a paper name")
         else:

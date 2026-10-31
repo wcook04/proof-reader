@@ -73,6 +73,10 @@ a map, so use the paper's own words for its title and name the theorems that sta
 - Tie every declaration you can. A passage may tie to several.
 - If a quote occurs twice, add `"page": n` or lengthen it.
 
+**Names** need no work: every Lean name printed in the paper is linked for you. If a
+name is also an ordinary word, so that `value` would light up all over the prose, list
+it under `"unlinked_names"`.
+
 **Notes** are the only words of ours on the page, so they earn their place. Write one
 only when the paper and the Lean differ in a way a careful reader would want to know:
 a renamed object, a different encoding, a step the Lean does differently. Every note

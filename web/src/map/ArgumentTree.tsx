@@ -151,7 +151,7 @@ const PEEK_OUT_MS = 200;
 
 /** World widths. Narrow enough that a goal's first row usually reads at k = 1 on a laptop. */
 function widthOf(node: ArgNode, isRoot: boolean, compact: boolean, rootW: number): number {
-  if (isRoot) return compact ? 380 : rootW;
+  if (isRoot) return compact ? 460 : rootW;
   if (compact) return 184;
   if (node.kind === "declaration") return 196;
   return 176;
@@ -174,7 +174,7 @@ function lidsOf(l: Layout, record: string): string[] {
 }
 
 function guessHeight(node: ArgNode, isRoot: boolean, compact: boolean): number {
-  if (isRoot) return compact ? 104 : 300;
+  if (isRoot) return compact ? 150 : 300;
   if (compact) return 62;
   return node.kind === "declaration" ? 112 : 124;
 }

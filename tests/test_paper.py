@@ -42,6 +42,17 @@ class Mentions(unittest.TestCase):
         self.assertEqual([m["name"] for m in found], ["STLCCtx"])
 
 
+class Ink(unittest.TestCase):
+    def test_finds_the_box_of_dark_pixels(self):
+        white, black = 255, 0
+        rows = [[white] * 4, [white, black, white, white], [white, white, black, white]]
+        image = b"P5\n4 3\n255\n" + bytes(sum(rows, []))
+        self.assertEqual(paper.dark_box(image), (1, 1, 3, 3))
+
+    def test_a_blank_page_has_no_box(self):
+        self.assertIsNone(paper.dark_box(b"P5\n2 2\n255\n" + bytes([255] * 4)))
+
+
 class Rects(unittest.TestCase):
     def test_one_rectangle_per_printed_line(self):
         row = words("one", "two")

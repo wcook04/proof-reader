@@ -61,7 +61,7 @@ export interface Edition {
     licence_url: string;
     pages: number;
     sizes: [number, number][];
-    text_edges: [number, number][];
+    crop: [number, number, number, number];
   };
   lean: {
     modules: string[];

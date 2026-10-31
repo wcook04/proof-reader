@@ -14,7 +14,7 @@ export function readRoute(): Route {
 }
 
 export function routeHref(route: Route): string {
-  if (!route.paper) return "#/";
+  if (!route.paper) return "./";
   const base = `#/${encodeURIComponent(route.paper)}`;
   return route.record ? `${base}/${encodeURIComponent(route.record)}` : base;
 }
