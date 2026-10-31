@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { mkdtempSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { test } from "node:test";
@@ -91,8 +91,34 @@ test("rejects removal of the reader entry", (t) => {
   assert.deepEqual(checkSource(root), ["Missing source entry: src/main.tsx"]);
 });
 
-test("fails clearly without Git", (t) => {
-  const { root } = fixture(t);
+test("checks a source archive without Git while keeping --index Git-only", (t) => {
+  const { root, write } = fixture(t);
   rmSync(join(root, ".git"), { recursive: true });
-  assert.throws(() => checkSource(root), /git rev-parse/);
+  write("src/main.tsx", 'import "./active";');
+  write("src/active.ts");
+  write("dist/unused.ts");
+  write("node_modules/package/unused.ts");
+  assert.deepEqual(checkSource(root), []);
+  assert.throws(() => checkSource(root, { index: true }), /requires a Git checkout and Git/);
+  write("src/retired.ts");
+  assert.deepEqual(checkSource(root), ["Unused source file: src/retired.ts"]);
+});
+
+test("does not follow directory links out of an archive's maintained source", (t) => {
+  const { root, write } = fixture(t);
+  rmSync(join(root, ".git"), { recursive: true });
+  write("outside/unused.ts");
+  symlinkSync(join(root, "outside"), join(root, "src", "external"), "dir");
+  assert.deepEqual(checkSource(root), []);
+});
+
+
+test("an archive nested in an unrelated Git checkout does not inherit its ignores or index", (t) => {
+  const { root, write } = fixture(t);
+  write(".gitignore", "/archive/\n");
+  write("archive/web/src/main.tsx");
+  write("archive/web/src/map/engine/audit.ts");
+  const web = join(root, "archive", "web");
+  assert.deepEqual(checkSource(web), []);
+  assert.throws(() => checkSource(web, { index: true }), /requires a Git checkout and Git/);
 });

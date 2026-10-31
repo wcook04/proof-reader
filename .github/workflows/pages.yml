@@ -40,6 +40,18 @@ jobs:
         working-directory: web
         env:
           VITE_BASE_PATH: /proof-reader/
+      - name: Build the same site from a source archive
+        env:
+          VITE_BASE_PATH: /proof-reader/
+        run: |
+          archive="$RUNNER_TEMP/proof-reader-source"
+          mkdir -p "$archive"
+          git archive HEAD | tar -x -C "$archive"
+          test ! -e "$archive/.git"
+          npm ci --prefix "$archive/web"
+          python "$archive/tools/paper.py" build
+          npm run build --prefix "$archive/web"
+          diff -qr web/dist "$archive/web/dist"
       - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9
         with:
           path: web/dist

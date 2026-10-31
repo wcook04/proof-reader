@@ -3,7 +3,7 @@
 // Follow literal module imports and local CSS references. Extend this check and
 // its fixtures before introducing computed imports or import.meta.glob.
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, posix, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import ts from "typescript";
@@ -15,13 +15,33 @@ const ENTRIES = [
   "src/map/engine/audit.ts",
 ];
 
-/** Inspect Git candidates, or staged contents when checking the proposed commit. */
+// Source archives have no Git inventory. The maintained source lives entirely
+// under src/; generated papers, bundles and dependencies are outside that tree.
+function sourceFiles(web, folder = "src") {
+  if (!existsSync(resolve(web, folder))) return [];
+  return readdirSync(resolve(web, folder), { withFileTypes: true }).flatMap((entry) => {
+    const file = posix.join(folder, entry.name);
+    if (entry.isDirectory()) return sourceFiles(web, file);
+    return entry.isFile() ? [file] : [];
+  });
+}
+
+/** Inspect source files; use Git's exact staged contents only with --index. */
 export function checkSource(web = WEB, { index = false } = {}) {
   const git = (...args) => execFileSync("git", args, { cwd: web, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] });
-  const prefix = git("rev-parse", "--show-prefix").trim();
+  let prefix;
+  // Do not borrow an unrelated ancestor's index when an archive is unpacked
+  // inside another checkout. This project's .git is beside web/, or at a test root.
+  const checkout = existsSync(resolve(web, "..", ".git")) || existsSync(resolve(web, ".git"));
+  try {
+    if (!checkout) throw new Error("No project Git metadata");
+    prefix = git("rev-parse", "--show-prefix").trim();
+  } catch (error) {
+    if (index) throw new Error("Staged source checking requires a Git checkout and Git.", { cause: error });
+  }
   const args = ["ls-files", "-z", "--cached"];
   if (!index) args.push("--others", "--exclude-standard");
-  const candidates = new Set(git(...args, "--", "src/").split("\0").filter((file) => file.startsWith("src/")));
+  const candidates = new Set(prefix === undefined ? sourceFiles(web) : git(...args, "--", "src/").split("\0").filter((file) => file.startsWith("src/")));
   const source = new Map();
   for (const file of candidates) {
     // A tracked deletion is absent from the working tree but may still be in the index.
