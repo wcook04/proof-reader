@@ -1,0 +1,19 @@
+[paper]
+title = ""
+short_title = ""
+authors = []
+venue = ""
+doi = ""
+url = ""
+pdf = "paper.pdf"
+pdf_source = ""
+licence = ""
+licence_url = ""
+
+[lean]
+project = "lean"
+modules = []
+source = ""
+source_name = ""
+licence = ""
+scope = ""

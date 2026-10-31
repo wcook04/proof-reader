@@ -1,0 +1,70 @@
+/-
+Lists every declaration a project defines: its kind, source lines, what it uses
+and the axioms it rests on. Adapted from lean-exposition's Extract.lean
+(Apache-2.0), which adapts the structural cases of Lean FRO's Comparator
+(Apache-2.0). It runs inside the project's own toolchain and uses only API that
+has been stable since at least Lean 4.16.
+-/
+import Lean
+__IMPORTS__
+
+open Lean
+
+namespace ProofReader
+
+private def kindOf : ConstantInfo → String
+  | .axiomInfo _ => "axiom"
+  | .defnInfo _ => "definition"
+  | .thmInfo _ => "theorem"
+  | .opaqueInfo _ => "opaque"
+  | .quotInfo _ => "quotient_primitive"
+  | .inductInfo _ => "inductive"
+  | .ctorInfo _ => "constructor"
+  | .recInfo _ => "recursor"
+
+private def moduleOf (env : Environment) (n : Name) : Name :=
+  match env.getModuleIdxFor? n with
+  | some idx => env.header.moduleNames[idx.toNat]!
+  | none => env.mainModule
+
+private def namesJson (ns : Array Name) : Json :=
+  toJson (ns.map Name.toString)
+
+private def structural : ConstantInfo → Array Name
+  | .inductInfo v => v.ctors.toArray ++ v.all.toArray
+  | .ctorInfo v => #[v.induct]
+  | _ => #[]
+
+def report (mods : Array Name) : Meta.MetaM Json := do
+  let env ← getEnv
+  let mine := env.constants.fold (init := (#[] : Array (Name × ConstantInfo))) fun acc n ci =>
+    if mods.contains (moduleOf env n) then acc.push (n, ci) else acc
+  let mut out : Array Json := #[]
+  for (n, ci) in mine do
+    let typeDeps := ci.type.getUsedConstants
+    let valueDeps := (ci.value?.map Expr.getUsedConstants).getD #[]
+    let axioms ← collectAxioms n
+    let ranges? ← findDeclarationRanges? n
+    let shown ← try pure (toString (← Meta.ppExpr ci.type)) catch _ => pure ""
+    out := out.push <| Json.mkObj [
+      ("name", toJson n.toString),
+      ("kind", toJson (kindOf ci)),
+      ("module", toJson (moduleOf env n).toString),
+      ("type", toJson shown),
+      ("type_dependencies", namesJson typeDeps),
+      ("value_dependencies", namesJson valueDeps),
+      ("structural_dependencies", namesJson (structural ci)),
+      ("axioms", namesJson axioms),
+      ("is_class", toJson (isClass env n)),
+      ("line", ranges?.map (fun r => toJson r.range.pos.line) |>.getD Json.null),
+      ("end_line", ranges?.map (fun r => toJson r.range.endPos.line) |>.getD Json.null)]
+  return Json.mkObj [
+    ("lean_version", toJson Lean.versionString),
+    ("modules", namesJson mods),
+    ("declarations", toJson out)]
+
+end ProofReader
+
+#eval show Meta.MetaM Unit from do
+  let j ← ProofReader.report #[__MODULES__]
+  IO.println ("PROOF_READER_JSON:" ++ j.compress)

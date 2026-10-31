@@ -1,0 +1,6 @@
+name = "ce"
+version = "0.1.0"
+defaultTargets = ["CE"]
+
+[[lean_lib]]
+name = "CE"

@@ -1,0 +1,16 @@
+Proof Reader
+Copyright 2026 Will Cook
+
+The map in web/src/map, the graph model in web/src/model/graph.ts, the styles in
+web/src/styles and web/src/lean/leanTokens.ts are copied from lean-exposition
+(https://github.com/wcook04/lean-exposition, Apache-2.0). Its layout and routing
+code adapts MIT-licensed projects: see web/THIRD_PARTY_NOTICES.md.
+
+tools/extract.lean.template adapts lean-exposition's Extract.lean, which adapts
+Comparator/Util.lean, Copyright (c) 2025 Lean FRO, LLC, author Henrik Böving,
+released under Apache 2.0.
+
+The paper rendering uses pdf.js (Apache-2.0).
+
+Papers and Lean projects under papers/ belong to their authors and keep their own
+licences, named in each folder's paper.toml.

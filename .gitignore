@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.lake/
+__pycache__/
+*.pyc
+.DS_Store
+web/public/papers/

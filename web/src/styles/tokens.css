@@ -1,0 +1,261 @@
+/* Design tokens. DESIGN.md explains each group and the rules for using it.
+   Colours were chosen in OKLCH and checked for WCAG contrast against the
+   ground in both schemes. Night is the day theme with the lights off: the
+   same hues, lightness inverted. The neutrals (ground, surfaces, rules and
+   inks) are the family palette that Will Cook's websites share
+   (https://github.com/wcook04/wcook04.github.io/blob/main/docs/family.md):
+   warm paper and violet ink by day, violet ground and bone ink at night. */
+
+:root {
+  color-scheme: light;
+
+  /* Three voices: mathematics and titles, controls, Lean. */
+  --font-serif: "STIX Two Text", "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-sans: "Source Sans 3 Variable", "Source Sans 3", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Type scale. Nothing a reader must read renders below --fs-sm on screen. */
+  --fs-micro: 0.6875rem; /* 11px: small-caps kind words, never sentences */
+  --fs-xs: 0.75rem; /* 12px */
+  --fs-sm: 0.8125rem; /* 13px: metadata */
+  --fs-ui: 0.875rem; /* 14px: controls */
+  --fs-base: 1rem; /* 16px */
+  --fs-card: 1.0625rem; /* 17px: a record's title on a card */
+  --fs-read: 1.125rem; /* 18px: paper prose */
+  --fs-h4: 1.0625rem;
+  --fs-h3: 1.25rem; /* 20px */
+  --fs-h2: 1.5rem; /* 24px */
+  --fs-title: 1.625rem; /* 26px: the inspector's title */
+  --fs-h1: 2.125rem; /* 34px */
+  --fs-plate: clamp(1.75rem, 1.3rem + 1.1vw, 2.25rem); /* the goal's title */
+  --fs-display: clamp(2rem, 1.35rem + 1.9vw, 3rem);
+  --lh-tight: 1.16;
+  --lh-snug: 1.32;
+  --lh-ui: 1.45;
+  --lh-read: 1.62;
+  --tracking-caps: 0.075em;
+  --measure: 40rem;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 72px;
+
+  --radius-s: 4px;
+  --radius-card: 7px;
+  --radius-m: 8px;
+  --radius-l: 12px;
+
+  /* Motion: each change says where something came from, then stops. */
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --ease-move: cubic-bezier(0.45, 0, 0.2, 1);
+  --ease-exit: cubic-bezier(0.3, 0, 1, 1);
+  --t-press: 120ms; /* press and hover feedback */
+  --t-hover: 120ms;
+  --t-state: 160ms; /* colour or label changes; account switches */
+  --t-reveal: 180ms; /* a panel, popover or sheet appears */
+  --t-panel: 200ms;
+  --t-camera: 320ms; /* camera travel that accompanies a change */
+  --t-unfold: 360ms; /* the map adds or removes records */
+  --t-trace: 520ms; /* lighting a route, start to finish */
+
+  /* Layout. */
+  --topbar-h: 56px;
+  --bar-h: 52px;
+  --panel-w: clamp(440px, 34vw, 560px);
+  --dock-h: 152px;
+  --dock-bar-h: 44px;
+  --target: 44px; /* primary touch targets */
+  --reader-measure: 42.5rem; /* 680px */
+  --reader-outline: 208px;
+  --reader-inspector: 336px;
+  --reader-gap: 32px;
+
+  /* Day: the family's warm paper and violet ink. */
+  --ground: #f8f0e2;
+  --surface: #fffdf7;
+  --raised: #fffefa;
+  --sunk: #f1e7d4;
+  --rule: #eaddc9;
+  --rule-strong: #d9c7ae;
+  --ink: #191520;
+  --ink-2: #544d5d;
+  --ink-3: #6d6473;
+  /* The hairline that alone marks a quiet control (a ghost button, a field): 3:1 or
+     more against every surface it sits on (WCAG 1.4.11). Decorative rules stay
+     --rule and --rule-strong. Adapted from the Plectis site's --rule-control. */
+  --rule-control: #938067;
+
+  /* Amber is the reader's lamp: what you are attending to. Nothing else uses it.
+     Deepened from #ac5b00 on the warm paper so amber words keep 4.5:1 on the
+     ground and on sunk wells. */
+  --lit: #a25200;
+  --lit-wash: #fae4c7;
+  --lit-line: #c9761a;
+  --lit-glow: rgb(201 118 26 / 0);
+  --focus-ring: 2px solid var(--lit);
+
+  /* A recorded failed outcome, and only that. */
+  --fail: #a04034;
+
+  /* Connectors. Each relation type has its own colour, at rest and lit, and its
+     own pattern; every rest colour keeps at least 3:1 against the ground.
+     A lit support route is amber (attention); lit assumptions and Lean
+     correspondences keep their own hue, brightened. */
+  --rel-supports: #7c858f;
+  --rel-supports-lit: #b8650c;
+  --rel-assumes: #8a6cc8;
+  --rel-assumes-lit: #6d3fd4;
+  --rel-formalizes: #3f8aa0;
+  --rel-formalizes-lit: #0b6f86;
+  --edge-rest: var(--rel-supports);
+  --edge-strong: #47505b;
+  --edge-lit: var(--rel-supports-lit);
+  --edge-casing: var(--ground);
+  --edge-w: 1.5px;
+  --edge-w-lit: 2.25px;
+
+  /* Cards on the map. */
+  --card: var(--raised);
+  --card-border: #d4c7b4;
+  --card-shadow: 0 1px 0 rgb(25 21 32 / 0.03), 0 2px 6px -2px rgb(25 21 32 / 0.08);
+  --card-shadow-lift: 0 1px 0 rgb(25 21 32 / 0.04), 0 10px 24px -10px rgb(25 21 32 / 0.22);
+  --grid-dot: rgb(25 21 32 / 0.085);
+
+  /* Regions of the argument: marks, then territories. */
+  --region-support: #396791;
+  --region-scalar: #30715d;
+  --region-circuit: #7e517a;
+  --field-support: #e0ebf5;
+  --field-scalar: #deeee8;
+  --field-circuit: #f1e5ef;
+  --formal: #46496d;
+
+  /* Where a step comes from: validated colour-blind safe as a set, both schemes.
+     A small named square at reading size; the fill of a record's mark in overview. */
+  --src-1: #2a78d6;
+  --src-2: #e87ba4;
+  --src-3: #008300;
+  --src-0: #8a929b;
+  --mark-mix: 64%;
+
+  --shadow-sheet: 0 1px 0 rgb(25 21 32 / 0.04), 0 8px 28px -12px rgb(25 21 32 / 0.22);
+  --shadow-panel: -1px 0 0 var(--rule), -18px 0 40px -28px rgb(25 21 32 / 0.28);
+  --scrim: rgb(248 240 226 / 0.86);
+
+  /* The family's shared parts (styles/family.css) read these names. Links on this
+     site are ink, so a family link under the pointer turns ink; keyboard focus is
+     amber here as everywhere on the site. A held film frame takes the quiet ink. */
+  --fam-page: var(--ground);
+  --fam-surface: var(--surface);
+  --fam-ink: var(--ink);
+  --fam-ink-soft: var(--ink-2);
+  --fam-muted: var(--ink-2);
+  --fam-faint: var(--ink-3);
+  --fam-rule: var(--rule);
+  --fam-rule-strong: var(--rule-strong);
+  --fam-accent: var(--ink);
+  --fam-film-ink: var(--ink-2);
+  --fam-serif: var(--font-serif);
+  --fam-sans: var(--font-sans);
+}
+
+:focus-visible {
+  --fam-accent: var(--lit);
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --ground: #1c1526;
+  --surface: #272132;
+  --raised: #2f2839;
+  --sunk: #150f1e;
+  --rule: #363040;
+  --rule-strong: #484251;
+  --ink: #f2e6d4;
+  --ink-2: #bcb8c6;
+  --ink-3: #a6a2b1;
+  --rule-control: #787383;
+  --lit: #fab250;
+  --lit-wash: #3d290e;
+  --lit-line: #f3a43a;
+  --lit-glow: rgb(243 164 58 / 0.28);
+  --fail: #ea8470;
+  --rel-supports: #6a7581;
+  --rel-supports-lit: #f3a43a;
+  --rel-assumes: #7d68b8;
+  --rel-assumes-lit: #b49bff;
+  --rel-formalizes: #3f8698;
+  --rel-formalizes-lit: #55c7df;
+  --edge-strong: #a7b0ba;
+  --card-border: #413b4b;
+  --card-shadow: 0 1px 0 rgb(0 0 0 / 0.25), 0 2px 8px -2px rgb(0 0 0 / 0.45);
+  --card-shadow-lift: 0 1px 0 rgb(0 0 0 / 0.3), 0 14px 30px -12px rgb(0 0 0 / 0.75);
+  --grid-dot: rgb(242 230 212 / 0.06);
+  --region-support: #80b0de;
+  --region-scalar: #79bba4;
+  --region-circuit: #ca98c5;
+  --field-support: #101d29;
+  --field-scalar: #0d201a;
+  --field-circuit: #241722;
+  --formal: #a9aed7;
+  --src-1: #3987e5;
+  --src-2: #d55181;
+  --src-3: #008300;
+  --src-0: #6b737c;
+  --mark-mix: 60%;
+  --shadow-sheet: 0 1px 0 rgb(0 0 0 / 0.3), 0 12px 32px -14px rgb(0 0 0 / 0.7);
+  --shadow-panel: -1px 0 0 var(--rule), -24px 0 48px -30px rgb(0 0 0 / 0.8);
+  --scrim: rgb(28 21 38 / 0.86);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --ground: #1c1526;
+    --surface: #272132;
+    --raised: #2f2839;
+    --sunk: #150f1e;
+    --rule: #363040;
+    --rule-strong: #484251;
+    --ink: #f2e6d4;
+    --ink-2: #bcb8c6;
+    --ink-3: #a6a2b1;
+    --rule-control: #787383;
+    --lit: #fab250;
+    --lit-wash: #3d290e;
+    --lit-line: #f3a43a;
+    --lit-glow: rgb(243 164 58 / 0.28);
+    --fail: #ea8470;
+    --rel-supports: #6a7581;
+    --rel-supports-lit: #f3a43a;
+    --rel-assumes: #7d68b8;
+    --rel-assumes-lit: #b49bff;
+    --rel-formalizes: #3f8698;
+    --rel-formalizes-lit: #55c7df;
+    --edge-strong: #a7b0ba;
+    --card-border: #413b4b;
+    --card-shadow: 0 1px 0 rgb(0 0 0 / 0.25), 0 2px 8px -2px rgb(0 0 0 / 0.45);
+    --card-shadow-lift: 0 1px 0 rgb(0 0 0 / 0.3), 0 14px 30px -12px rgb(0 0 0 / 0.75);
+    --grid-dot: rgb(242 230 212 / 0.06);
+    --region-support: #80b0de;
+    --region-scalar: #79bba4;
+    --region-circuit: #ca98c5;
+    --field-support: #101d29;
+    --field-scalar: #0d201a;
+    --field-circuit: #241722;
+    --formal: #a9aed7;
+    --src-1: #3987e5;
+    --src-2: #d55181;
+    --src-3: #008300;
+    --src-0: #6b737c;
+    --mark-mix: 60%;
+    --shadow-sheet: 0 1px 0 rgb(0 0 0 / 0.3), 0 12px 32px -14px rgb(0 0 0 / 0.7);
+    --shadow-panel: -1px 0 0 var(--rule), -24px 0 48px -30px rgb(0 0 0 / 0.8);
+    --scrim: rgb(28 21 38 / 0.86);
+  }
+}

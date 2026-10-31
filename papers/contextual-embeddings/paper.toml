@@ -1,0 +1,19 @@
+[paper]
+title = "Contextual Embeddings: Implementing Bound Variables Through Instance Resolution"
+short_title = "Contextual Embeddings"
+authors = ["Samantha Frohlich", "Jessica Foster", "G. A. Kavvos", "Meng Wang"]
+venue = "Proc. ACM Program. Lang. 10, PLDI, Article 191 (June 2026)"
+doi = "10.1145/3808269"
+url = "https://doi.org/10.1145/3808269"
+pdf = "paper.pdf"
+pdf_source = "https://mengwangoxf.github.io/Papers/PLDI26.pdf"
+licence = "CC BY 4.0"
+licence_url = "https://creativecommons.org/licenses/by/4.0/"
+
+[lean]
+project = "lean"
+modules = ["CE"]
+source = "https://doi.org/10.5281/zenodo.19081887"
+source_name = "Contextual Embeddings artifact, Lean/CE.lean"
+licence = "CC BY 4.0"
+scope = "This page covers Lean/CE.lean, the proof behind section 3.3. The artifact's two levelled files, behind section 6.3, are separate Lean modules."
