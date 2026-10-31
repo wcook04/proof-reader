@@ -38,6 +38,8 @@ export interface PaperHandle {
   top(): number;
   width(): number;
   where(): Where;
+  /** A place for the address where no tied statement is near: the block at the line. */
+  block(): string | null;
   /** Move keyboard focus to a statement, without scrolling. */
   focusPassage(id: string): void;
   /** Hold the highlighter on a statement until the reader scrolls. */

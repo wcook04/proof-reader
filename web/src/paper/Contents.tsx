@@ -9,7 +9,6 @@ import type { Declaration, OutlineEntry } from "../app/edition";
 interface Props {
   outline: OutlineEntry[];
   current: string | null;
-  words: number;
   /** On a narrow screen the list opens over the page. */
   open: boolean;
   declarations: Declaration[];
@@ -78,7 +77,7 @@ function Snippet({ text, at, length }: { text: string; at: number; length: numbe
   );
 }
 
-export function Contents({ outline, current, words, open, declarations, files, html, copy, onJump, onTop, onName, onPage, onBlock, onIndex, onClose }: Props) {
+export function Contents({ outline, current, open, declarations, files, html, copy, onJump, onTop, onName, onPage, onBlock, onIndex, onClose }: Props) {
   const list = useRef<HTMLOListElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const blocks = useRef<Block[]>([]);
@@ -223,8 +222,7 @@ export function Contents({ outline, current, words, open, declarations, files, h
       )}
       <p className="rail__key">
         <button type="button" className="rail__index" onClick={onIndex}>All {declarations.length} declarations and their axioms</button>
-        <span>The numbers count statements tied to the Lean. <kbd>j</kbd> and <kbd>k</kbd> step through them, <kbd>Enter</kbd> pins, <kbd>Esc</kbd> unpins, <kbd>[</kbd> goes back.</span>
-        <span>A program matched all {words.toLocaleString("en-GB")} words of the reading copy against the authors’ PDF.</span>
+        <span>Numbers count tied statements. <kbd>j</kbd> and <kbd>k</kbd> step through them, <kbd>Enter</kbd> pins, <kbd>Esc</kbd> unpins, <kbd>[</kbd> goes back.</span>
       </p>
     </nav>
   );

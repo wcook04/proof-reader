@@ -113,6 +113,14 @@ function paperPage(html: string, paper: ShelfItem, base: string): string {
 function publicFiles(base: string): Plugin {
   return {
     name: "public-files",
+    transformIndexHtml: {
+      order: "post",
+      handler(html, context) {
+        // Keep the fonts of the first screen from swapping in late.
+        const fonts = Object.keys(context.bundle ?? {}).filter((name) => /stix-two-text-latin-400-normal.*\.woff2$|source-sans-3-latin-wght-normal.*\.woff2$/.test(name));
+        return html.replace("</head>", `${fonts.map((name) => `<link rel="preload" href="${base}${name}" as="font" type="font/woff2" crossorigin />`).join("")}</head>`);
+      },
+    },
     closeBundle() {
       const out = resolve("dist");
       if (!existsSync(out)) return;

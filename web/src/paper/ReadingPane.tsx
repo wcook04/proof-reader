@@ -44,6 +44,9 @@ interface Bar {
   height: number;
 }
 
+/** The blocks of the paper, in reading order: an address can name any of them. */
+const BLOCKS = ".sheet__text p, .sheet__text li, .sheet__text pre, .sheet__text figure, .sheet__text h2, .sheet__text h3, .sheet__text .ref";
+
 const prefersReduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /** Set once. Everything that changes afterwards is a class on what is already there. */
@@ -70,6 +73,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
   const goal = useRef<number | null>(null);
   const arrive = useRef(0);
   const lastTarget = useRef<Target | null>(null);
+  const placedAt = useRef(0);
   const userMoved = useRef(false);
   const lastScroll = useRef(0);
   const line = useRef<string | null>(null);
@@ -211,12 +215,19 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
     }, 950);
   }, [read]);
 
-  const elementFor = useCallback((id: string) => sheet.current?.querySelector<HTMLElement>(`[id="${CSS.escape(id)}"]`) ?? null, []);
+  const blocks = useCallback(() => [...(sheet.current?.querySelectorAll<HTMLElement>(BLOCKS) ?? [])].filter((b) => !b.closest(".inset")), []);
+
+  const elementFor = useCallback((id: string) => {
+    const block = /^b-(\d+)$/.exec(id);
+    if (block) return blocks()[Number(block[1])] ?? null;
+    return sheet.current?.querySelector<HTMLElement>(`[id="${CSS.escape(id)}"]`) ?? null;
+  }, [blocks]);
 
   const place = useCallback(
     (target: Target, instant = false): boolean => {
       const el = scroller.current;
       if (!el) return false;
+      if (lastTarget.current !== target && !("fallback" in (lastTarget.current ?? {}))) placedAt.current = Date.now();
       lastTarget.current = target;
       userMoved.current = false;
       const origin = el.getBoundingClientRect().top - el.scrollTop;
@@ -225,7 +236,12 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
         return true;
       }
       if ("top" in target) {
-        if (target.fallback && Math.abs(target.width - el.clientWidth) > 1) return place(target.fallback, instant);
+        if (target.fallback && Math.abs(target.width - el.clientWidth) > 1) {
+          // The width may still be settling, so a later pass tries the exact place again.
+          const placed = place(target.fallback, instant);
+          lastTarget.current = target;
+          return placed;
+        }
         scrollTo(target.top, true, true);
         return true;
       }
@@ -248,11 +264,15 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
       }
       const element = "element" in target ? target.element : elementFor(target.place);
       if (!element) return false;
-      scrollTo(element.getBoundingClientRect().top - origin - ("element" in target ? el.clientHeight * READING_LINE : 24), instant, true);
+      const atLine = "element" in target || target.place.startsWith("b-");
+      scrollTo(element.getBoundingClientRect().top - origin - (atLine ? el.clientHeight * READING_LINE - 2 : 24), instant, true);
       return true;
     },
     [elementFor, followSoon, paintLine, scrollTo],
   );
+
+  const placeRef = useRef(place);
+  placeRef.current = place;
 
   /** A key for each reference opened in place: which link opened it. */
   const links = useCallback(() => [...(sheet.current?.querySelectorAll<HTMLAnchorElement>(".sheet__text a") ?? [])].filter((a) => !a.closest(".inset")), []);
@@ -303,6 +323,20 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
     top: () => scroller.current?.scrollTop ?? 0,
     width: () => scroller.current?.clientWidth ?? 0,
     where: whereNow,
+    block: () => {
+      const el = scroller.current;
+      if (!el) return null;
+      const at = el.getBoundingClientRect().top + el.clientHeight * READING_LINE;
+      const all = blocks();
+      let low = 0;
+      let high = all.length - 1;
+      while (low < high) {
+        const middle = Math.ceil((low + high) / 2);
+        if (all[middle].getBoundingClientRect().top <= at) low = middle;
+        else high = middle - 1;
+      }
+      return all.length ? `b-${low}` : null;
+    },
     focusPassage: (id) => marks.current.get(id)?.[0]?.focus({ preventScroll: true }),
     mark: (id) => paintLine(id),
     insets: () => [...(sheet.current?.querySelectorAll<HTMLElement>(".inset") ?? [])].map((i) => `${i.dataset.link}:${i.dataset.for}`),
@@ -324,7 +358,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
       if (open.length) measure();
       return open.length > 0;
     },
-  }), [links, measure, openInset, paintLine, place, removeInset, whereNow]);
+  }), [blocks, links, measure, openInset, paintLine, place, removeInset, whereNow]);
 
   // Index the marks once, then keep their positions as the layout changes.
   useLayoutEffect(() => {
@@ -374,7 +408,11 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
       }
       measuredWidth.current = width;
       window.clearTimeout(timer);
-      timer = window.setTimeout(measure, 60);
+      timer = window.setTimeout(() => {
+        measure();
+        // Fonts can arrive after the page has been placed: put it back where it was asked to be.
+        if (lastTarget.current && !userMoved.current && Date.now() - placedAt.current < 5000 && Date.now() >= lock.current) placeRef.current(lastTarget.current, true);
+      }, 60);
     });
     observer.observe(page);
     return () => {
@@ -492,6 +530,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
   const onClick = (event: React.MouseEvent<HTMLDivElement>) => {
     const target = event.target as HTMLElement;
     window.clearTimeout(dwell.current);
+    lastTarget.current = null;
     if (target.closest(".inset__close")) {
       const inset = target.closest<HTMLElement>(".inset");
       if (inset) removeInset(inset);

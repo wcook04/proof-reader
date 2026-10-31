@@ -125,7 +125,14 @@ def wheel_to(page: Page, wanted: float) -> None:
             break
         page.mouse.wheel(0, max(-1800, min(1800, gap)))
         page.wait_for_timeout(50)
-    page.wait_for_timeout(420)
+    # Some browsers animate the wheel: wait for the page to come to rest.
+    last = None
+    for _ in range(25):
+        if last == top(page):
+            break
+        last = top(page)
+        page.wait_for_timeout(180)
+    page.wait_for_timeout(320)
 
 
 def visible_mark(page: Page, offset: int = 0) -> str | None:
@@ -149,9 +156,31 @@ def mark(page: Page, passage: str):
     return page.locator(f'.sheet__text .q[data-p~="{passage}"]').first
 
 
+def reload(page: Page) -> None:
+    """The reader's own reload, which is what the page has to answer."""
+    with page.expect_navigation(wait_until="load"):
+        page.evaluate("location.reload()")
+
+
 def shot(page: Page, folder: Path | None, name: str) -> None:
     if folder:
         page.screenshot(path=str(folder / f"{name}.png"))
+
+
+def tablet(page: Page, url: str, shots: Path | None) -> None:
+    print("Under 1280px")
+    page.goto("about:blank")
+    page.goto(f"{url}#/{SLUG}/@isoL-statement", wait_until="load")
+    page.wait_for_selector(".sheet__text .q", state="attached")
+    page.wait_for_timeout(800)
+    check(page.locator(".proof").count() == 0, "the right page waits to be asked for")
+    page.locator(".bar__open").click()
+    wait_until(page, lambda: page.locator(".proof").count() == 1, "the strip opens it")
+    page.wait_for_timeout(1200)
+    check(address(page).endswith("@isoL-statement") or "@" in address(page), "the address stays on the paper")
+    shot(page, shots, "22-tablet")
+    page.go_back()
+    wait_until(page, lambda: page.locator(".proof").count() == 0, "Back closes it")
 
 
 def journey(page: Page, url: str, shots: Path | None) -> None:
@@ -187,7 +216,7 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     shot(page, shots, "02-following")
     before = top(page)
     held = address(page)
-    page.reload(wait_until="load")
+    reload(page)
     page.wait_for_selector(".sheet__text .q", state="attached")
     wait_until(page, lambda: abs(top(page) - before) <= 1, f"a reload lands on the same pixel, {before:.0f}")
     check(address(page) == held, "and the same address")
@@ -298,10 +327,13 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     )
     check(figure_link, f"a citation is on screen: {figure_link}")
     citation = page.locator('a[data-journey="cite"]')
-    citation.hover()
-    wait_until(page, lambda: figure_link[:6] in page.locator(".proof__reading").inner_text(), "pointing at a citation previews it on the right page")
+    page.wait_for_timeout(250)
+    spot = citation.evaluate("(a) => { const b = a.getClientRects()[0]; return [b.left + b.width / 2, b.top + b.height / 2]; }")
+    page.mouse.move(spot[0] - 3, spot[1])
+    page.mouse.move(spot[0], spot[1])
+    wait_until(page, lambda: figure_link[:4] in page.locator(".proof__reading").inner_text(), "pointing at a citation previews it on the right page")
     was_top = top(page)
-    citation.click()
+    page.mouse.click(spot[0], spot[1])
     wait_until(page, lambda: page.locator(".inset").count() == 1, "a click opens it under the paragraph")
     check(abs(top(page) - was_top) <= 1, "and the paper stays put")
     check(page.locator(".inset__go").is_visible(), "the inset offers to go there")
@@ -372,11 +404,12 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     page.keyboard.type("evidently type-safe")
     page.wait_for_timeout(250)
     was_top = top(page)
+    jumped_from = address(page)
     page.keyboard.press("Enter")
     wait_until(page, lambda: abs(top(page) - was_top) > 200, "Enter jumps to the match")
-    page.wait_for_timeout(1000)
+    wait_until(page, lambda: address(page) != jumped_from and "@b-" in address(page), f"the address follows the search, from {jumped_from}", timeout=3)
     moved_to = address(page)
-    check(moved_to.count("@") == 1, f"the address follows the search: {moved_to}")
+    page.wait_for_timeout(300)
     page.locator(".rail__search input").fill("")
     page.locator(".rail__search input").press("Escape")
     page.wait_for_timeout(250)
@@ -420,7 +453,7 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     same(page, stack[-2][1], "[ goes back")
     page.keyboard.press("Alt+ArrowLeft")
     same(page, stack[-3][1], "Alt-Left goes back")
-    page.reload(wait_until="load")
+    reload(page)
     page.wait_for_selector(".sheet__text .q", state="attached")
     page.wait_for_selector(".card")
     page.wait_for_timeout(600)
@@ -429,8 +462,8 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     same(page, stack[-2][1], "Forward still works after a reload")
 
     print("Keyboard")
+    page.goto("about:blank")
     page.goto(f"{url}#/{SLUG}/@s-2", wait_until="load")
-    page.reload(wait_until="load")
     page.wait_for_selector(".sheet__text .q", state="attached")
     page.wait_for_selector(".card")
     page.wait_for_timeout(500)
@@ -456,8 +489,8 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check(tied >= 60, f"{tied} tied statements take keyboard focus")
 
     print("Exact lines")
+    page.goto("about:blank")
     page.goto(f"{url}#/{SLUG}/@isoR-clam", wait_until="load")
-    page.reload(wait_until="load")
     page.wait_for_selector(".sheet__text .q", state="attached")
     wait_until(page, lambda: page.locator(".source__line.is-exact").count() == 5, "a sentence about isoR's CLam case lights its five lines")
     wait_until(page, lambda: page.evaluate("""() => { const pane = document.querySelector('.leaf__body').getBoundingClientRect(); const row = document.querySelector('.source__line.is-exact').getBoundingClientRect(); return row.top >= pane.top && row.bottom <= pane.bottom; }"""), "and the Lean page scrolls to them")
@@ -481,23 +514,27 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     wait_until(fresh, lambda: fresh.locator(".sheet__text .q.is-active").count() > 0 and address(fresh).endswith("@isoL-statement"), "changing only the hash in the same tab moves the page")
     fresh.go_back()
     wait_until(fresh, lambda: lean_head(fresh) == "closedWorld", "and Back undoes it")
+    fresh.goto("about:blank")
+    fresh.goto(f"{url}#/{SLUG}/@b-200", wait_until="load")
+    fresh.wait_for_selector(".sheet__text .q", state="attached")
+    wait_until(fresh, lambda: top(fresh) > 500, "an address can name any block of the paper")
+    fresh.goto("about:blank")
     fresh.goto(f"{url}#/{SLUG}/noSuchThing", wait_until="load")
-    fresh.reload(wait_until="load")
     fresh.wait_for_selector(".badline")
     check("noSuchThing" in fresh.locator(".badline").inner_text(), "a bad address says so plainly")
+    fresh.goto("about:blank")
     fresh.goto(f"{url}#/{SLUG}/@nowhere", wait_until="load")
-    fresh.reload(wait_until="load")
     fresh.wait_for_selector(".badline")
     check("@nowhere" in fresh.locator(".badline").inner_text() or "nowhere" in fresh.locator(".badline").inner_text(), "so does a bad place")
+    fresh.goto("about:blank")
     fresh.goto(f"{url}#/no-such-paper", wait_until="load")
-    fresh.reload(wait_until="load")
     fresh.wait_for_selector(".lost")
     check("no paper" in fresh.locator(".lost").inner_text(), "and a bad paper")
     fresh.close()
 
     print("Every declaration")
+    page.goto("about:blank")
     page.goto(f"{url}#/{SLUG}/@declarations", wait_until="load")
-    page.reload(wait_until="load")
     page.wait_for_selector(".index table")
     rows = page.locator(".index tbody tr").count()
     check(rows == 22, f"the index lists {rows} declarations")
@@ -505,8 +542,8 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     shot(page, shots, "09-index")
 
     print("The handle and the choices")
+    page.goto("about:blank")
     page.goto(f"{url}#/{SLUG}", wait_until="load")
-    page.reload(wait_until="load")
     page.wait_for_selector(".card")
     page.wait_for_timeout(400)
     if not page.locator(".proof[data-side]").count():
@@ -521,7 +558,7 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
         check(now > was + 40, f"dragging the handle gives the graph more room: {was:.0f} to {now:.0f}")
     page.locator(".proof__show button", has_text="Graph").click()
     check(not page.locator(".proof__graph").is_visible(), "the graph can be closed")
-    page.reload(wait_until="load")
+    reload(page)
     page.wait_for_selector(".decl")
     check(not page.locator(".proof__graph").is_visible(), "and stays closed")
     page.locator(".proof__show button", has_text="Graph").click()
@@ -532,7 +569,7 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check(page.evaluate("document.documentElement.getAttribute('data-theme')") == "dark" or page.evaluate("matchMedia('(prefers-color-scheme: dark)').matches"), "night is chosen")
     background = page.evaluate("getComputedStyle(document.querySelector('.reading')).backgroundColor")
     check(background != "rgb(255, 253, 248)", f"the reading copy is dark: {background}")
-    page.reload(wait_until="load")
+    reload(page)
     page.wait_for_selector(".sheet__text .q", state="attached")
     check(page.evaluate("getComputedStyle(document.querySelector('.reading')).backgroundColor") == background, "and remembered")
     page.wait_for_timeout(500)
@@ -546,17 +583,19 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
 
 def phone(page: Page, url: str, shots: Path | None) -> None:
     print("Phone")
+    page.goto("about:blank")
     page.goto(f"{url}#/{SLUG}/@isoR-clam", wait_until="load")
-    page.reload(wait_until="load")
     page.wait_for_selector(".sheet__text .q", state="attached")
     page.wait_for_timeout(1000)
     check(page.locator(".proof").count() == 0, "the paper fills the screen")
     check(page.evaluate("document.documentElement.scrollWidth <= innerWidth"), "with no sideways scroll")
     shot(page, shots, "20-phone")
-    mark(page, "isoR-clam").tap()
+    page.locator('.sheet__text .q[data-p~="isoR-clam"]:not(:has(a))').last.tap()
     wait_until(page, lambda: page.locator(".proof").count() == 1, "tapping a tie opens the sheet")
     wait_until(page, lambda: lean_head(page) == "isoR", "with the same contents")
-    page.wait_for_timeout(500)
+    page.wait_for_timeout(1200)
+    check(page.evaluate("""() => { const pane = document.querySelector('[data-paper-pane]').getBoundingClientRect(); const b = document.querySelector('.q.is-pinned').getBoundingClientRect(); return b.top >= pane.top && b.bottom <= pane.bottom; }"""), "and the statement stays in view above it")
+    check(page.locator(".decl__code").first.bounding_box()["height"] > 20, "the Lean fills the sheet")
     shot(page, shots, "21-phone-sheet")
     page.go_back()
     wait_until(page, lambda: page.locator(".proof").count() == 0, "Back closes it")
@@ -565,8 +604,8 @@ def phone(page: Page, url: str, shots: Path | None) -> None:
 def monitors(page: Page, url: str, shots: Path | None, size: tuple[int, int]) -> None:
     w, h = size
     print(f"At {w}x{h}")
+    page.goto("about:blank")
     page.goto(f"{url}#/{SLUG}/isoR", wait_until="load")
-    page.reload(wait_until="load")
     page.wait_for_selector(".decl")
     page.wait_for_timeout(1400)
     check(page.evaluate("document.documentElement.scrollWidth <= innerWidth"), "no sideways scroll")
@@ -574,6 +613,14 @@ def monitors(page: Page, url: str, shots: Path | None, size: tuple[int, int]) ->
     box = page.locator(".proof").bounding_box()
     check(box["width"] >= 500, f"the right page is {box['width']:.0f}px wide")
     shot(page, shots, f"30-{w}")
+
+
+class Server(socketserver.ThreadingTCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+    def handle_error(self, request, client_address) -> None:
+        pass  # the browser drops connections it no longer needs
 
 
 class Quiet(http.server.SimpleHTTPRequestHandler):
@@ -602,8 +649,7 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
 
 def serve(dist: Path) -> tuple[str, socketserver.TCPServer]:
     handler = partial(Quiet, directory=str(dist))
-    socketserver.TCPServer.allow_reuse_address = True
-    server = socketserver.ThreadingTCPServer(("127.0.0.1", 0), handler)
+    server = Server(("127.0.0.1", 0), handler)
     threading.Thread(target=server.serve_forever, daemon=True).start()
     return f"http://127.0.0.1:{server.server_address[1]}/proof-reader/", server
 
@@ -626,6 +672,7 @@ def main() -> int:
     parser.add_argument("--dist", type=Path, default=ROOT / "web" / "dist")
     parser.add_argument("--shots", type=Path)
     parser.add_argument("--only", choices=("journey", "sizes"))
+    parser.add_argument("--browser", choices=("chromium", "firefox", "webkit"), default="chromium")
     args = parser.parse_args()
     if args.shots:
         args.shots.mkdir(parents=True, exist_ok=True)
@@ -636,7 +683,7 @@ def main() -> int:
     started = time.time()
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch()
+            browser = getattr(playwright, args.browser).launch()
             if args.only != "sizes":
                 context = browser.new_context(viewport={"width": 1440, "height": 790})
                 journey(context.new_page(), url, args.shots)
@@ -646,7 +693,10 @@ def main() -> int:
                     context = browser.new_context(viewport={"width": size[0], "height": size[1]})
                     monitors(context.new_page(), url, args.shots, size)
                     context.close()
-                context = browser.new_context(viewport={"width": PHONE[0], "height": PHONE[1]}, has_touch=True, is_mobile=True)
+                context = browser.new_context(viewport={"width": 1024, "height": 768})
+                tablet(context.new_page(), url, args.shots)
+                context.close()
+                context = browser.new_context(viewport={"width": PHONE[0], "height": PHONE[1]}, has_touch=True, is_mobile=args.browser != "firefox")
                 phone(context.new_page(), url, args.shots)
                 context.close()
                 if server:

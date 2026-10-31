@@ -231,6 +231,7 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
     top: () => scroller.current?.scrollTop ?? 0,
     width: () => scroller.current?.clientWidth ?? 0,
     where: whereNow,
+    block: () => null,
     focusPassage: () => scroller.current?.focus({ preventScroll: true }),
     mark: (id) => {
       line.current = id;

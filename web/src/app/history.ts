@@ -66,15 +66,44 @@ export function newEntryId(): string {
   return `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 }
 
-/** The entry the browser holds for this page, if it is one of ours for this paper. */
-export function readEntry(paper: string): Entry | null {
+const storeKey = () => `proof-reader-entry:${window.location.hash}`;
+
+/** A second copy, because a browser may drop history.state on a reload. */
+function keep(entry: Entry): void {
+  try {
+    sessionStorage.setItem(storeKey(), JSON.stringify(entry));
+  } catch {
+    /* storage unavailable: history.state alone carries the entry */
+  }
+}
+
+/**
+ * The entry the browser holds for this page, if it is one of ours for this paper. With
+ * `kept`, an entry written earlier in this tab for this address also counts: on a reload
+ * or a return, not on a fresh visit.
+ */
+export function readEntry(paper: string, kept = false): Entry | null {
   const state = window.history.state as Partial<Entry> | null;
-  return state && typeof state === "object" && state.id && state.paper === paper ? (state as Entry) : null;
+  if (state && typeof state === "object" && state.id && state.paper === paper) return state as Entry;
+  if (!kept) return null;
+  try {
+    const stored = JSON.parse(sessionStorage.getItem(storeKey()) ?? "null") as Entry | null;
+    return stored?.paper === paper ? stored : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Whether this page load came from Reload, Back or Forward. */
+export function returning(): boolean {
+  const navigation = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming | undefined;
+  return navigation?.type === "reload" || navigation?.type === "back_forward";
 }
 
 export function replaceEntry(entry: Entry, href?: string): void {
   try {
     window.history.replaceState(entry, "", href);
+    keep(entry);
   } catch {
     /* a sandboxed frame, or too many writes: the next write carries the same facts */
   }
@@ -82,4 +111,5 @@ export function replaceEntry(entry: Entry, href?: string): void {
 
 export function pushEntry(entry: Entry, href: string): void {
   window.history.pushState(entry, "", href);
+  keep(entry);
 }

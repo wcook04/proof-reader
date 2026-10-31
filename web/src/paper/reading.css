@@ -30,7 +30,7 @@
   }
 }
 
-.reading { position: relative; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; scrollbar-width: thin; outline-offset: -2px; background: var(--sheet); }
+.reading { position: relative; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; scrollbar-width: thin; outline-offset: -2px; background: var(--sheet); overflow-anchor: none; }
 .sheet { --code-cap: 0.8125rem; position: relative; background: var(--sheet); container-type: inline-size; }
 .firstline { box-sizing: border-box; margin: 0 auto; width: min(36rem, 100cqi - 2 * clamp(20px, 7cqi, 60px)); padding: 12px 0 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--ink-2); }
 .firstline button { min-height: 24px; color: var(--lit); text-decoration: underline; text-underline-offset: 3px; }

@@ -139,6 +139,10 @@ export interface TreeProps {
   coverage?: ReadonlySet<string> | null;
   /** The dense layout's tile width, for a narrower canvas that should hold the whole argument. */
   tileWidth?: number;
+  /** The largest scale the overview fits to. */
+  fitMax?: number;
+  /** Draw a shared record once, with every use, instead of once under each use. */
+  oneCardEach?: boolean;
   /** Remember unfolded branches for the session (default). Off for a map that follows something else. */
   persist?: boolean;
   /** The reader moved the map themselves: a pan, a zoom, an unfold or an edge chip. */
@@ -410,7 +414,8 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
     // Assumptions are premise tags on their consumers, not nodes; a shared record
     // with nothing drawn below it is drawn under each of its consumers (a clone).
     const scope = layoutScope(goal, visible, skel.edges, (id) => graph.nodes.get(id)?.kind === "assumption");
-    const split = splitSharedLeaves(goal, scope.nodes, scope.edges);
+    // Proof Reader: Lean readers expect one node for each declaration, as in a blueprint.
+    const split = props.oneCardEach ? { nodes: [...scope.nodes], edges: [...scope.edges], shared: new Map<string, number>() } : splitSharedLeaves(goal, scope.nodes, scope.edges);
     const size = (lid: string): Size => {
       const id = recordOf(lid);
       const node = graph.nodes.get(id) ?? fullGraph.nodes.get(id)!;
@@ -1207,12 +1212,14 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
     [graph, goal, within, compact, echo, boundsOf, floor],
   );
 
+  const fitMaxRef = useRef(1.15);
+  fitMaxRef.current = props.fitMax ?? 1.15;
   const overviewView = useCallback(
     (l: Layout): View => {
       const b = layoutBounds(l);
       const box = { x0: b.x0 - 16, y0: b.y0 - 16, x1: b.x1 + 16, y1: b.y1 + 16 };
       // As large as fits, never below the 11px floor: what does not fit then pans.
-      if (denseRef.current) return frameBox(box, viewport(), { min: DENSE_MIN_K, max: 1.15, anchor: boxOf(l, goalRef.current), top: true });
+      if (denseRef.current) return frameBox(box, viewport(), { min: DENSE_MIN_K, max: fitMaxRef.current, anchor: boxOf(l, goalRef.current), top: true });
       return fitBounds(box, viewport(), { max: 1, min: floorK(false, compact) });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -96,7 +96,12 @@ export const LeanPage = memo(function LeanPage({ ref, edition, step, tab, onTab,
           <WholeFile edition={edition} step={step} act={act} names={names} scroller={body} />
         ) : (
           <>
-            {step.untied && <Untied edition={edition} untied={step.untied} onPassage={onPassage} onIndex={() => onTab("index")} />}
+            {step.untied && (
+              <>
+                <Untied edition={edition} untied={step.untied} onPassage={onPassage} />
+                <AllDeclarations edition={edition} act={act} />
+              </>
+            )}
             {step.passage && (
               <header className="stepline">
                 {step.title && <p className="stepline__title">{step.title}</p>}
@@ -135,7 +140,7 @@ function foldOpen(d: Edition["declarations"][number], exact: [number, number] | 
   return d.end_line - d.statement_end <= SHORT_PROOF;
 }
 
-function Untied({ edition, untied, onPassage, onIndex }: { edition: Edition; untied: NonNullable<Step["untied"]>; onPassage(id: string): void; onIndex(): void }) {
+function Untied({ edition, untied, onPassage }: { edition: Edition; untied: NonNullable<Step["untied"]>; onPassage(id: string): void }) {
   const tied = edition.coverage.sections.map(sectionLabel);
   const last = untied.last;
   return (
@@ -144,7 +149,6 @@ function Untied({ edition, untied, onPassage, onIndex }: { edition: Edition; unt
       <p>The {edition.coverage.ties} ties on this page are in {list(tied)}. {edition.lean.scope}</p>
       <p className="untied__go">
         {last && <button type="button" onClick={() => onPassage(last.id)}>Go to the last tie, in {sectionLabel(last.section)}</button>}
-        <button type="button" onClick={onIndex}>See every declaration</button>
       </p>
     </div>
   );

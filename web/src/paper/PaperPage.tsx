@@ -7,7 +7,7 @@
 // own Back, named on the page, which restores everything an entry remembers.
 
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { blankEntry, newEntryId, pushEntry, readEntry, replaceEntry, type Copy, type Entry, type Pin, type Tab } from "../app/history";
+import { blankEntry, newEntryId, pushEntry, readEntry, replaceEntry, returning, type Copy, type Entry, type Pin, type Tab } from "../app/history";
 import { paperFile, type Edition, type Passage } from "../app/edition";
 import { readRoute, routeHref } from "../app/router";
 import { setScheme, useScheme } from "../app/theme";
@@ -84,9 +84,10 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const started = useRef<{ entry: Entry; target: Target | null; record: string | undefined } | null>(null);
   if (!started.current) {
     const route = readRoute();
-    const saved = readEntry(slug);
+    const saved = readEntry(slug, returning());
     const meaning = resolve(edition, route.record, route.extra);
     if (saved) {
+      replaceEntry(saved);
       started.current = { entry: saved, target: saved.top !== null ? { top: saved.top, width: saved.width, fallback: meaning.target ?? undefined } : meaning.target, record: route.record };
     } else {
       const entry: Entry = { ...blankEntry(slug, homeCopy), ...meaning.entry, bad: meaning.bad };
@@ -197,7 +198,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
     const where = handle?.where();
     if (entryRef.current.copy === "pdf") return `page ${where?.page ?? 1}`;
     const heading = outline.find((e) => e.id === where?.section);
-    return heading ? (heading.number ? sectionLabel(heading.number) : heading.title) : "the start of the paper";
+    return heading ? (heading.number ? sectionLabel(heading.number) : heading.title) : "the start";
   }, [outline, pane]);
 
   const pinLabel = (pin: Pin) => pin.decl ?? passages.get(pin.passage ?? "")?.lean[0] ?? null;
@@ -245,7 +246,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const sync = useCallback(() => {
     const route = readRoute();
     if (route.paper !== slug) return;
-    const saved = readEntry(slug);
+    const saved = readEntry(slug, true);
     const cur = entryRef.current;
     if (saved?.id === cur.id) return;
     const meaning = resolve(edition, route.record, route.extra);
@@ -293,20 +294,27 @@ export function PaperPage({ edition }: { edition: Edition }) {
     };
   }, [saveNow, sync]);
 
+  /** The address of the nearest sentence, or of the block at the line where none is tied. */
+  const hereRecord = useCallback((): string | undefined => {
+    const handle = pane();
+    if (!handle) return undefined;
+    const where = handle.where();
+    if (entryRef.current.copy === "pdf") return `@page-${where.page}`;
+    if (handle.top() < 4) return undefined;
+    if (where.passage) return `@${where.passage}`;
+    const block = handle.block();
+    return block ? `@${block}` : where.section ? `@${where.section}` : undefined;
+  }, [pane]);
+
   /** The paper stopped: remember the pixel, and keep the address on the nearest sentence. */
   const settled = useCallback(() => {
     const handle = pane();
     if (!handle || pending.current) return;
     const cur = snapshot();
     entryRef.current = cur;
-    let href: string | undefined;
-    if (!cur.pin && cur.tab === "step") {
-      const where = handle.where();
-      const record = cur.copy === "pdf" ? `@page-${where.page}` : handle.top() < 4 ? undefined : where.passage ? `@${where.passage}` : where.section ? `@${where.section}` : undefined;
-      href = routeHref({ paper: slug, record });
-    }
+    const href = !cur.pin && cur.tab === "step" ? routeHref({ paper: slug, record: hereRecord() }) : undefined;
     replaceEntry(cur, href);
-  }, [pane, slug, snapshot]);
+  }, [hereRecord, pane, slug, snapshot]);
 
   const release = useCallback(() => {
     if (!entryRef.current.pin) return;
@@ -328,8 +336,10 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const pinPassage = useCallback((id: string) => {
     const cur = entryRef.current;
     if (cur.pin?.passage === id && !cur.pin.decl) return;
-    open({ record: `@${id}`, pin: { passage: id, decl: null, at: null } });
-  }, [open]);
+    // The sheet takes the lower part of a small screen: keep the statement above it.
+    const target = !wide && !cur.sheet ? { passage: id } : null;
+    open({ record: `@${id}`, pin: { passage: id, decl: null, at: null }, target });
+  }, [open, wide]);
 
   /** A Lean name: the Lean page walks there and the paper stays put. */
   const walk = useCallback((name: string, from: "paper" | "right" = "right") => {
@@ -383,8 +393,10 @@ export function PaperPage({ edition }: { edition: Edition }) {
 
   const onTab = useCallback((tab: Tab) => {
     if (entryRef.current.tab === tab) return;
-    open({ record: tab === "index" ? "@declarations" : tab === "file" ? "@file" : undefined, tab, from: "right", stay: true });
-  }, [open]);
+    const pin = entryRef.current.pin;
+    const record = tab === "index" ? "@declarations" : tab === "file" ? "@file" : pin ? (pin.decl ?? `@${pin.passage}`) : hereRecord();
+    open({ record, tab, from: "right", stay: true });
+  }, [hereRecord, open]);
 
   const onPinLeft = release;
 
@@ -560,6 +572,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
     <p>
       Paper © its authors, <a href={paper.licence_url}>{paper.licence}</a>
       {copy === "reading" ? ". Reading copy retypeset from the PDF, with the same words and the plots cut from it; the layout is ours" : ", with only its blank margins trimmed"}.
+      {" "}A program matched {edition.reading ? `all ${edition.reading.words.toLocaleString("en-GB")} words of the reading copy` : "each quotation"} against the authors’ PDF.
       {" "}Lean from the authors’ artifact, built here on Lean {lean.version}. Ties and notes were made with AI and have not been reviewed by the authors.
     </p>
   );
@@ -570,7 +583,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
 
   return (
     <div className="page" data-copy={copy}>
-      <a className="skip" href={routeHref({ paper: slug })} onClick={(event) => {
+      <a className="skip" href="#the-paper" onClick={(event) => {
         event.preventDefault();
         document.querySelector<HTMLElement>("[data-paper-pane]")?.focus();
       }}>Skip to the paper</a>
@@ -580,7 +593,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
           <span className="bar__name">Proof Reader</span>
         </a>
         <div className="bar__title">
-          <h1 className="bar__paper">{paper.short_title}</h1>
+          {copy === "reading" && edition.reading ? <p className="bar__paper">{paper.short_title}</p> : <h1 className="bar__paper">{paper.short_title}</h1>}
           {hereLabel && copy === "reading" && <p className="bar__where">{hereLabel}{here?.number ? ` ${here.title}` : ""}</p>}
         </div>
         {edition.reading && !wide && <button type="button" className="bar__contents" aria-expanded={rail} onClick={() => setRail(!rail)}>Contents</button>}
@@ -596,7 +609,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
             <button type="button" aria-pressed={copy === "pdf"} onClick={() => switchCopy("pdf")}>PDF</button>
           </div>
         )}
-        {!wide && !entry.sheet && <button type="button" className="bar__open" onClick={() => open({ sheet: true, record: pin?.decl ?? undefined })}>Lean</button>}
+        {!wide && !entry.sheet && <button type="button" className="bar__open" onClick={() => open({ sheet: true, record: readRoute().record, tab: entry.tab })}>Lean</button>}
         <button type="button" className="bar__theme" aria-label={scheme === "dark" ? "Use the day theme" : "Use the night theme"} onClick={() => setScheme(scheme === "dark" ? "light" : "dark")}>{scheme === "dark" ? "Day" : "Night"}</button>
         <a className="bar__link" href={paper.url}>Published paper</a>
         <a className="bar__link" href={lean.source}>Lean artifact</a>
@@ -614,7 +627,6 @@ export function PaperPage({ edition }: { edition: Edition }) {
           <Contents
             outline={edition.reading.outline}
             current={copy === "reading" ? section : outline.find((e) => e.number === shown.passage?.section)?.id ?? null}
-            words={edition.reading.words}
             open={rail}
             declarations={edition.declarations}
             files={edition.lean.files}

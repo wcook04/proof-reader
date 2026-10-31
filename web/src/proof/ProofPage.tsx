@@ -19,7 +19,7 @@ interface Layout {
 }
 
 function readLayout(narrow: boolean): Layout {
-  const fallback = { graph: !narrow, lean: true, share: 0.5, sideShare: 0.6 };
+  const fallback = { graph: !narrow, lean: true, share: 0.5, sideShare: 0.56 };
   try {
     const stored = JSON.parse(localStorage.getItem(KEY) ?? "null") as Partial<Layout> | null;
     if (!stored) return fallback;

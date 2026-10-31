@@ -26,6 +26,19 @@
         var stored = localStorage.getItem("proof-reader-theme");
         if (stored === "light" || stored === "dark") document.documentElement.setAttribute("data-theme", stored);
       } catch (error) {}
+      // A paper's data starts with its page, not after the code has arrived.
+      (function () {
+        var slug = /^#\/([^/]+)/.exec(location.hash);
+        if (!slug) return;
+        ["edition.json", "reading.html"].forEach(function (name) {
+          var link = document.createElement("link");
+          link.rel = "preload";
+          link.as = "fetch";
+          link.crossOrigin = "anonymous";
+          link.href = "%BASE_URL%papers/" + slug[1] + "/" + name;
+          document.head.appendChild(link);
+        });
+      })();
     </script>
   </head>
   <body>

@@ -54,7 +54,7 @@ export interface TileBox {
 export const TILE: TileBox = { padTop: 10, padBottom: 7, padX: 8, border: 1 };
 
 /** The dense tile's box: thin at top and foot, with the source square in the left padding. */
-export const DENSE_TILE: TileBox = { padTop: 4, padBottom: 4, padX: 10, border: 1 };
+export const DENSE_TILE: TileBox = { padTop: 4, padBottom: 4, padX: 6, border: 1 };
 
 
 export type TitleKind = "card" | "lean" | "root";

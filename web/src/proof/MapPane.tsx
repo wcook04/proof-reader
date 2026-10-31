@@ -13,7 +13,7 @@ import type { ArgGraph } from "../model/graph";
 
 const INSETS: Insets = { top: 10, right: 12, bottom: 10, left: 12 };
 /** Narrow tiles, so that at the 11px floor the proof fits half a laptop's window. */
-const TILE_W = 112;
+const TILE_W = 122;
 
 export interface MapPaneHandle {
   scene(): MapScene | null;
@@ -179,6 +179,8 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
         persist={false}
         mode="overview"
         tileWidth={TILE_W}
+        oneCardEach
+        fitMax={1.4}
         selected={selected ?? undefined}
         litIds={litIds}
         previewIds={pointed}
@@ -210,21 +212,22 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
       <div className="graph__canvas" ref={body}>{map}</div>
       {types.length > 0 && (
         <div className="vocab" aria-label="Types the proof is written in">
-          <span>Types</span>
+          <span className="vocab__name">Types</span>
           {types.map((d) => (
             <button key={d.id} type="button" data-vocab={d.id} className={lit.includes(d.id) ? "is-lit" : ""} onClick={() => onSelect(d.id)} onMouseEnter={() => onHover(d.id)} onMouseLeave={() => onHover(null)} onFocus={() => onHover(d.id)} onBlur={() => onHover(null)}>
-              {d.id}
+              <code>{d.id}</code>
             </button>
           ))}
+          <span className="vocab__reached">Reached {reached} of {edition.declarations.length}</span>
         </div>
       )}
-      <GraphKey reached={reached} total={edition.declarations.length} />
+      <GraphKey />
     </section>
   );
 });
 
 /** What a card's shape and a line's pattern say, for someone who has not seen a blueprint. */
-function GraphKey({ reached, total }: { reached: number; total: number }) {
+function GraphKey() {
   return (
     <p className="graph__key" aria-label="Key to the graph">
       <span><i className="key-shape key-shape--definition" aria-hidden="true" />Definition</span>
@@ -233,7 +236,7 @@ function GraphKey({ reached, total }: { reached: number; total: number }) {
       <span><svg width="18" height="8" aria-hidden="true"><path d="M0 4h18" className="key-line" /></svg>Proof use</span>
       <span><svg width="18" height="8" aria-hidden="true"><path d="M0 4h18" className="key-line key-line--statement" /></svg>Statement use</span>
       <span><i className="key-trail key-trail--here" aria-hidden="true" />Here</span>
-      <span><i className="key-trail key-trail--passed" aria-hidden="true" />Reached {reached} of {total}</span>
+      <span><i className="key-trail key-trail--passed" aria-hidden="true" />Passed</span>
     </p>
   );
 }

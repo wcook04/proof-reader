@@ -51,7 +51,11 @@ function Shelf() {
     void loadShelf().then((s) => setPapers(s.papers));
   }, []);
   return (
-    <main className="shelf">
+    <main className="shelf" id="papers" tabIndex={-1}>
+      <a className="skip" href="#papers" onClick={(event) => {
+        event.preventDefault();
+        document.querySelector<HTMLElement>(".shelf li a")?.focus();
+      }}>Skip to the papers</a>
       <div className="shelf__in">
         <div>
           <h1>Proof Reader</h1>
@@ -76,7 +80,7 @@ function Shelf() {
           src={`${import.meta.env.BASE_URL}reader.webp`}
           alt="A paper on the left page with one sentence highlighted, and on the right the graph of its Lean proof above the Lean theorem the sentence describes."
           width={1600}
-          height={877}
+          height={840}
         />
       </div>
     </main>
