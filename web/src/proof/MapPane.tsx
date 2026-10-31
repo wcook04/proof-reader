@@ -8,7 +8,7 @@
 import { memo, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type Ref } from "react";
 import type { Edition } from "../app/edition";
 import { ArgumentTree, type Insets, type MapViewHandle } from "../map/ArgumentTree";
-import type { MapScene } from "../map/scene";
+import type { MapScene } from "../map/canvas/scene";
 import { isType } from "../model/fromEdition";
 import type { ArgGraph } from "../model/graph";
 

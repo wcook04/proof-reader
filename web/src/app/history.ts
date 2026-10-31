@@ -4,7 +4,7 @@
 // Opening something pushes an entry. Following and pointing only rewrite the
 // entry they are in.
 
-import type { MapScene } from "../map/scene";
+import type { MapScene } from "../map/canvas/scene";
 
 export type Copy = "reading" | "pdf";
 export type Tab = "step" | "index" | "file";

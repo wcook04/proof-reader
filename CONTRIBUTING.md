@@ -20,7 +20,15 @@ Data flows one way: `papers/<slug>/` to `tools/paper.py` to `web/public/papers/`
 python3 -m unittest discover -s tests
 python3 tools/paper.py check contextual-embeddings
 python3 tools/paper.py build
-cd web && npm ci && npm run build
+cd web && npm ci && npm run test:source && npm run build
 ```
+
+`npm run check:source` checks that each reader source file has an entry point.
+The copied map engine's drawing diagnostics are a separate developer entry.
+Use `npm run check:source -- --index` to check staged source before committing.
+Ordinary checks also work in a source ZIP or archive: without Git, they inspect
+only `web/src/`. The `--index` option requires a Git checkout.
+The check follows literal module imports and local CSS references; extend it with
+a fixture before introducing computed imports or `import.meta.glob`.
 
 Look at any visual change in a browser at laptop and monitor widths.

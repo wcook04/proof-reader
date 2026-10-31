@@ -35,7 +35,7 @@ Before committing a change, run:
 ```sh
 python3 -m unittest discover -s tests
 python3 tools/paper.py check contextual-embeddings
-cd web && VITE_BASE_PATH=/proof-reader/ npm run build && cd ..
+cd web && npm run test:source && VITE_BASE_PATH=/proof-reader/ npm run build && cd ..
 python3 tests/journey.py
 ```
 
