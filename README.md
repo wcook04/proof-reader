@@ -1,5 +1,7 @@
 # Proof Reader
 
+[Will Cook’s home page: all projects and videos](https://wcook04.github.io/)
+
 Proof Reader displays a research paper beside its proof in
 [Lean](https://lean-lang.org), a language for writing mathematical statements
 and proofs that a computer can check. Click a linked statement in the paper to
