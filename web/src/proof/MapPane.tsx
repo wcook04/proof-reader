@@ -14,8 +14,8 @@ import type { ArgGraph } from "../model/graph";
 
 const INSETS: Insets = { top: 10, right: 12, bottom: 10, left: 12 };
 /** Narrow tiles, so that at the 11px floor the proof fits half a laptop's window. */
-const TILE_W = 148;
-const TILE_H = 58;
+const TILE_W = 134;
+const TILE_H = 64;
 
 export interface MapPaneHandle {
   scene(): MapScene | null;

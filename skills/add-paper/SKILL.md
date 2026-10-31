@@ -1,15 +1,15 @@
 ---
 name: add-paper
-description: Add a Lean-checked paper to Proof Reader. Use when given a paper and its Lean project, to set the paper for reading, tie each sentence and line of code to the exact Lean it describes and write short notes grounded in the paper, so the paper appears on the site beside its Lean.
+description: Add a Lean-checked paper to Proof Reader. Use when given a paper and its Lean project, to set the paper for reading, tie each sentence and line of code to the exact Lean it describes, give each declaration a plain title and write short notes grounded in the paper, so the paper appears on the site beside its Lean.
 ---
 
 # Add a paper
 
-A paper page is an open book: the authors' paper on the left, their Lean on the right,
-each sentence level with the code it describes. The left page is a reading copy set from
-the PDF, with the PDF itself one click away. The paper is never rewritten: a program
-compares every word of the reading copy with the PDF. Your job is to find which words of
-the paper belong to which lines of Lean.
+A paper page is an open book: the authors' paper on the left, read as any paper is, and
+on the right a graph of the proof that follows the reader, with the authors' Lean one click
+away. The left page is a reading copy set from the PDF, with the PDF itself one click away.
+The paper is never rewritten: a program compares every word of the reading copy with the
+PDF. Your job is to find which words of the paper belong to which lines of Lean.
 
 Everything mechanical is done by `tools/transcribe.py` and `tools/paper.py`, including
 linking every Lean name printed in the paper. What you write is `links.json`, and the
@@ -100,6 +100,7 @@ supports, or that a file is out of date.
      "quote": "isoR’s CLam case, which requires function extensionality."}
   ],
   "name_sections": ["2", "3"],
+  "plain": {"isoR": "Contextual round trip"},
   "notes": {
     "ProxyVar": {"text": "This is the type the paper's Haskell calls Var.", "because": ["existential"]}
   }
@@ -130,7 +131,14 @@ If the Lean covers only part of the paper, list those sections under `"name_sect
 so that a later section's own `Ty` does not open a different `Ty`. If a name is also an
 ordinary word, list it under `"unlinked_names"`.
 
-**Notes** are the only words of ours on the page, so they earn their place. Write one
+**Plain titles.** Nobody knows what a declaration does from its name. After reading both
+sides, give every declaration in the proof a short title under `"plain"`, in the paper's own
+terms: at most 40 characters, words a newcomer can read, never the name again. These are what
+a reader sees on cards, in Back labels and in headings, with the raw name small beside them.
+The check stops if one is missing, and the title is yours to keep honest: it must say what the
+Lean does and no more.
+
+**Notes** are the only sentences of ours on the page, so they earn their place. Write one
 only when the paper and the Lean differ in a way a careful reader would want to know:
 a renamed object, a different encoding, a step the Lean does differently. Every note
 names the passages it rests on in `because`. Plain sentences, one or two. No praise, no
@@ -161,13 +169,14 @@ python3 tools/paper.py build <slug>
 cd web && npm run dev
 ```
 
-Open `#/<slug>`. Scroll the paper and watch the Lean follow. Click a sentence with exact
-lines and see them lit. Open a citation and a figure in place, switch to the PDF, open
-the map, click some cards and confirm the paper moves to the right words. Look at it at
-laptop and monitor widths. Fix what you find in `links.json` or `paper.md`.
+Open `#/<slug>`. Scroll the paper and watch the graph follow. Click a sentence with exact
+lines and see them lit. Open a citation and a figure in place, switch to the PDF, click some
+cards and confirm the paper moves to the right words. Look at it at laptop and monitor
+widths. Fix what you find in `links.json` or `paper.md`.
 
 `#/<slug>/@<passage>` opens on one sentence with its Lean lit, which is the link to send
-someone who wants to see one thing.
+someone who wants to see one thing. `#/<slug>/<declaration>` opens a declaration, and
+`#/<slug>/@declarations` the index at the back.
 
 If Lean is slow to start, check where elan keeps its toolchains. A toolchain on an
 external drive can turn a 15-second extraction into many minutes.
@@ -177,9 +186,10 @@ external drive can turn a 15-second extraction into many minutes.
 - The PDF is the authors' file, byte for byte, and stays one click away.
 - The reading copy says what the PDF says, word for word, and the footer says it was
   retypeset.
-- Every other word is a quotation from the paper, Lean's own output, or a note marked as
-  a note.
-- The footer says the ties and notes were made with AI and not reviewed by the authors.
+- Every other word is a quotation from the paper, Lean's own output, a note marked as a
+  note, or a declaration's plain title.
+- The footer says the ties, notes and plain titles were made with AI and not reviewed by the
+  authors.
   Change that only when an author has reviewed them.
 - Publishing a page is the maintainer's decision. Adding a paper to the repository does
   not make it public, and it is best to show the authors first.
