@@ -16,11 +16,16 @@ author of a paper here and want it changed or removed, say so and it will be.
 Data flows one way: `papers/<slug>/` to `tools/paper.py` to `web/public/papers/` to
 `web/`. Keep the code free of knowledge of any one paper.
 
+Install the [prerequisites in the README](README.md#run-the-site), then run
+these commands from the repository root. Install the website dependencies
+before checking a paper: the paper checker uses its Markdown and maths renderer.
+
 ```sh
+npm ci --prefix web
 python3 -m unittest discover -s tests
 python3 tools/paper.py check contextual-embeddings
 python3 tools/paper.py build
-cd web && npm ci && npm run test:source && npm run build
+cd web && npm run test:source && npm run build
 ```
 
 `npm run check:source` checks that each reader source file has an entry point.
