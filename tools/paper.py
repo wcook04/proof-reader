@@ -50,6 +50,8 @@ INK_DPI = 40
 INK = 200
 MARGIN = 14
 ROLES = ("states", "defines", "proves", "explains", "uses")
+# A type is read whole: its constructors or fields are its statement.
+READ_WHOLE = ("inductive", "structure", "class", "axiom")
 
 
 class PaperError(Exception):
@@ -123,18 +125,60 @@ def shards(folder: Path, config: dict) -> tuple[dict, dict]:
             probe = probe.rpartition(".")[0]
         return None
 
+    # What a declaration's statement mentions, and what only its proof or body
+    # needs. A proof term repeats its binders' types, so a name in the type is a
+    # statement use even when the value mentions it as well.
     uses: dict[str, dict[str, str]] = {name: {} for name in written}
     for name, row in rows.items():
         home = owner(name)
         if home is None:
             continue
-        for kind, field in (("value", "value_dependencies"), ("structural", "structural_dependencies"),
-                            ("type", "type_dependencies")):
+        whole = written[home]["keyword"] in READ_WHOLE and row["kind"] == "constructor"
+        for field in ("type_dependencies", "value_dependencies", "structural_dependencies"):
+            in_statement = field == "type_dependencies" and (name == home or whole)
             for dep in row[field]:
                 target = owner(dep)
                 if target and target != home:
-                    uses[home][target] = kind
+                    if in_statement:
+                        uses[home][target] = "statement"
+                    else:
+                        uses[home].setdefault(target, "proof")
     return {"written": written, "uses": uses, "texts": texts, "lean_version": report["lean_version"]}, rows
+
+
+def statement_end(lines: list[str], first: int, last: int, keyword: str) -> int:
+    """The last line of a declaration's statement: what comes before its proof or body."""
+    if keyword in READ_WHOLE:
+        return last
+    depth = 0
+    for number in range(first, last + 1):
+        text = lines[number - 1].split("--")[0]
+        if number > first and depth == 0 and text.lstrip().startswith("|"):
+            return number - 1
+        for match in re.finditer(r":=|[(\[{⟨]|[)\]}⟩]", text):
+            if match[0] == ":=":
+                if depth == 0:
+                    return number if text[:match.start()].strip() else number - 1
+            elif match[0] in "([{⟨":
+                depth += 1
+            else:
+                depth = max(0, depth - 1)
+        if depth == 0 and re.search(r"\bwhere\s*$", text):
+            return number
+    return last
+
+
+def comment_above(lines: list[str], first: int) -> list[int] | None:
+    """The block comment that sits directly above a declaration, if there is one."""
+    line = first - 1
+    while line > 0 and not lines[line - 1].strip():
+        line -= 1
+    if line < 1 or not lines[line - 1].rstrip().endswith("-/"):
+        return None
+    end = line
+    while line > 0 and not lines[line - 1].lstrip().startswith("/-"):
+        line -= 1
+    return [line, end] if line > 0 else None
 
 
 def normal(word: str) -> str:
@@ -371,6 +415,10 @@ def edition(slug: str) -> dict:
         for target in uses[name]:
             if target in keep:
                 used_by[target].append(name)
+
+    def split(names: list[str], statement: bool, kind_of) -> list[str]:
+        return sorted(n for n in names if (kind_of(n) == "statement") == statement)
+
     linked: dict[str, list[str]] = {name: [] for name in keep}
     for passage in data["passages"]:
         for name in passage.get("lean", []):
@@ -380,13 +428,20 @@ def edition(slug: str) -> dict:
     for name in sorted(keep, key=lambda n: (written[n]["module"], written[n]["line"])):
         row = written[name]
         axioms = row["axioms"]
+        lines = texts[row["module"]].splitlines()
         declarations.append({
             "id": name, "keyword": row["keyword"], "kind": row["kind"], "type": row["type"],
             "file": f"{project_root}/{row['module'].replace('.', '/')}.lean", "line": row["line"], "end_line": row["end_line"],
             "lines": row["end_line"] - row["line"] + 1,
+            "statement_end": statement_end(lines, row["line"], row["end_line"], row["keyword"]),
+            "comment": comment_above(lines, row["line"]),
             "uses": sorted(t for t in uses[name] if t in keep),
+            "uses_statement": split([t for t in uses[name] if t in keep], True, lambda t: uses[name][t]),
+            "uses_proof": split([t for t in uses[name] if t in keep], False, lambda t: uses[name][t]),
             "used_by": sorted(used_by[name]),
-            "axioms": sorted(a for a in axioms if a not in STANDARD_AXIOMS and a != name),
+            "used_by_statement": split(used_by[name], True, lambda user: uses[user][name]),
+            "used_by_proof": split(used_by[name], False, lambda user: uses[user][name]),
+            "axioms": sorted(a for a in axioms if a not in STANDARD_AXIOMS and a not in ("sorryAx", name)),
             "standard_axioms": sorted(a for a in axioms if a in STANDARD_AXIOMS),
             "passages": linked.get(name, []),
             "note": links.get("notes", {}).get(name),
@@ -402,6 +457,8 @@ def edition(slug: str) -> dict:
     named_in_paper = [d["id"] for d in declarations if d["passages"]]
     custom = sorted(d["id"] for d in declarations if d["keyword"] == "axiom")
     paper = config["paper"]
+    # In reading order, so a page can say plainly where the ties begin and stop.
+    tied_sections = list(dict.fromkeys(p["section"] for p in data["passages"]))
     return {
         "schema": 1, "slug": slug,
         "paper": {**paper, "pages": len(data["sizes"]), "sizes": data["sizes"], "crop": ink_box(data["folder"] / config["paper"]["pdf"], data["sizes"])},
@@ -414,6 +471,7 @@ def edition(slug: str) -> dict:
         "passages": [{k: v for k, v in p.items() if k != "order"} for p in data["passages"]],
         "mentions": find_mentions(data["words"], names),
         "declarations": declarations,
+        "coverage": {"sections": tied_sections, "ties": len(data["passages"])},
         "reading": {k: v for k, v in setting.items() if k != "html"} if setting else None,
         "reading_html": setting["html"] if setting else None,
         "analytics": {
@@ -423,6 +481,8 @@ def edition(slug: str) -> dict:
             "axioms": custom,
             "resting_on_axioms": {a: sorted(d["id"] for d in declarations if a in d["axioms"]) for a in custom},
             "free_of_axioms": sorted(d["id"] for d in declarations if d["keyword"] in ("theorem", "lemma") and not d["axioms"]),
+            "standard_axioms": {a: sorted(d["id"] for d in declarations if a in d["standard_axioms"]) for a in sorted(STANDARD_AXIOMS)},
+            "sorry": sorted(name for name in keep if "sorryAx" in written[name]["axioms"]),
             "proof_lines": sum(d["lines"] for d in declarations if d["keyword"] in ("theorem", "lemma")),
             "pages_with_links": sorted({p["page"] for p in data["passages"]}),
         },

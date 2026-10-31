@@ -34,6 +34,38 @@ class FindQuote(unittest.TestCase):
         self.assertEqual(paper.find_quote("the foxes", words("the", "fox")), [])
 
 
+class Statements(unittest.TestCase):
+    def test_a_theorem_ends_at_its_assignment(self):
+        lines = ["theorem a {x : Nat}", "  : x = x := by", "  rfl"]
+        self.assertEqual(paper.statement_end(lines, 1, 3, "theorem"), 2)
+
+    def test_an_assignment_on_its_own_line_is_not_the_statement(self):
+        lines = ["def a : Nat -> Nat", "  := fun x => x"]
+        self.assertEqual(paper.statement_end(lines, 1, 2, "def"), 1)
+
+    def test_equations_are_the_body(self):
+        lines = ["def a : Nat -> Nat", "  | 0 => 0", "  | n => n"]
+        self.assertEqual(paper.statement_end(lines, 1, 3, "def"), 1)
+
+    def test_a_named_argument_inside_brackets_does_not_end_it(self):
+        lines = ["theorem a (h : f (x := 1) = 2) : True := by", "  trivial"]
+        self.assertEqual(paper.statement_end(lines, 1, 2, "theorem"), 1)
+
+    def test_an_instance_ends_at_where(self):
+        lines = ["instance a : B where", "  c := 1"]
+        self.assertEqual(paper.statement_end(lines, 1, 2, "instance"), 1)
+
+    def test_a_type_is_read_whole(self):
+        self.assertEqual(paper.statement_end(["inductive A where", "  | b : A"], 1, 2, "inductive"), 2)
+
+    def test_finds_the_comment_directly_above(self):
+        lines = ["/-", "why", "-/", "", "theorem a : True := trivial"]
+        self.assertEqual(paper.comment_above(lines, 5), [1, 3])
+
+    def test_code_above_is_no_comment(self):
+        self.assertIsNone(paper.comment_above(["def b := 1", "theorem a : True := trivial"], 2))
+
+
 class Mentions(unittest.TestCase):
     def test_finds_names_inside_punctuation(self):
         found = paper.find_mentions(words("the", "(unembed),", "unembedded"), ["unembed"])
