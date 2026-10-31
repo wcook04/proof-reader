@@ -10,6 +10,9 @@ You do not have to search the authors' files to find the Lean for a sentence.
 
 [![A paper on the left page with one sentence highlighted, and on the right the graph of its Lean proof above the exact Lean lines the sentence describes.](web/public/reader.webp)](https://wcook04.github.io/proof-reader/#/contextual-embeddings)
 
+For a specific example, [open the paper at isoR's CLam case](https://wcook04.github.io/proof-reader/#/contextual-embeddings/@isoR-clam),
+linked to Lean lines 217 to 221.
+
 - As you scroll, the statement a third of the way down the page is highlighted, and its card
   on the graph is outlined. Cards carry plain titles, with the Lean name small beneath.
 - The right pane has two modes, Graph and Lean, with a toggle at its top. Click a statement or
@@ -62,21 +65,35 @@ trust before extracting it.
 
 ## Run the site
 
+Use Python 3.11 or later, Node 20.19 or later, and [Poppler](https://poppler.freedesktop.org/)
+(`brew install poppler` on macOS; `sudo apt-get install poppler-utils` on Ubuntu).
+From a fresh clone:
+
 ```sh
+git clone https://github.com/wcook04/proof-reader.git
+cd proof-reader
 cd web
-npm install
+npm ci
+cd ..
+python3 tools/paper.py build
+cd web
 npm run dev
 ```
 
-Open the address it prints. `npm run build` writes a static site to `web/dist`; set
-`VITE_BASE_PATH` to the folder it will be served from.
+Open the address it prints and choose *Contextual Embeddings*. The paper build creates
+the data the site needs; it uses the checked-in Lean extraction, so running the existing
+paper does not require Lean. After changing a paper's files, run `python3 tools/paper.py build`
+again from the repository root.
+
+From `web/`, `npm run build` writes a static site to `web/dist`; set `VITE_BASE_PATH`
+to the folder it will be served from. `npm run preview` serves that built site locally.
 
 To walk a reader's whole visit in a real browser, build for the public path and run the
 journey. It needs Playwright for Python, and takes `--browser firefox` or `webkit` as well:
 
 ```sh
 cd web && VITE_BASE_PATH=/proof-reader/ npm run build && cd ..
-python tests/journey.py --shots /tmp/journey
+python3 tests/journey.py --shots /tmp/journey
 ```
 
 `tests/speed.py` measures a paper's first screen on a home connection.
@@ -101,25 +118,39 @@ has reviewed them.
 
 ## Repository map
 
-| Path | What it holds |
+Authored paper files and the checked-in Lean extraction live under `papers/`.
+`tools/paper.py build` turns them into `web/public/papers/`; Vite then packages those
+files with the website in `web/dist/`. Both output directories are ignored by Git:
+change their sources and rebuild them.
+
+| Source | What it holds |
 | --- | --- |
-| `papers/` | One folder for each paper |
-| `skills/add-paper/` | How to fill in a new paper |
-| `tools/paper.py` | Extract the Lean, compare with the PDF and build the data |
-| `tools/transcribe.py` | Draft a paper's reading text from its PDF |
-| `tools/reading.py` | Compare the reading copy with the PDF and mark its linked statements |
-| `web/tools/render-paper.mjs` | Typeset `paper.md` with Markdown and KaTeX |
-| `tools/extract.lean.template` | The Lean program that lists a project's declarations |
-| `web/` | The website |
-| `web/src/map/` | The map, copied from [lean-exposition](https://github.com/wcook04/lean-exposition) |
-| `web/src/app/history.ts` | What one history entry remembers |
-| `web/src/proof/` | The right page: graph, Lean, handle |
-| `tests/journey.py` | A reader's whole visit, in a real browser |
+| [papers/](papers/) | One folder for each paper |
+| [skills/add-paper/](skills/add-paper/) | How to fill in a new paper |
+| [tools/paper.py](tools/paper.py) | Extract the Lean, compare with the PDF and build the data |
+| [tools/transcribe.py](tools/transcribe.py) | Draft a paper's reading text from its PDF |
+| [tools/reading.py](tools/reading.py) | Compare the reading copy with the PDF and mark its linked statements |
+| [render-paper.mjs](web/tools/render-paper.mjs) | Typeset `paper.md` with Markdown and KaTeX |
+| [extract.lean.template](tools/extract.lean.template) | The Lean program that lists a project's declarations |
+| [web/](web/) | The website |
+| [web/src/map/](web/src/map/) | The map, copied from [lean-exposition](https://github.com/wcook04/lean-exposition) |
+| [history.ts](web/src/app/history.ts) | What one history entry remembers |
+| [web/src/proof/](web/src/proof/) | The right page: graph, Lean, handle |
+| [tests/](tests/) | Python unit tests and the browser [journey](tests/journey.py) |
+| [Pages workflow](.github/workflows/pages.yml) | Check every paper, build the site and publish to GitHub Pages |
+
+## Related work and videos
+
+[Lean Exposition](https://github.com/wcook04/lean-exposition) provides a tool and writing
+methods for preparing three explanations of a Lean result. Its
+[reading website](https://wcook04.github.io/lean-exposition-site/) presents those draft
+explanations beside the graph; [this video walks through that site](https://www.youtube.com/watch?v=sYMDcT7vyng).
+Proof Reader's reading copy keeps the original paper's wording.
 
 ## Licence
 
 Code is Apache-2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). Each paper and Lean
 project keeps its own licence and credit, named in its `paper.toml` and on its page.
 
-Proof Reader is one of Will Cook's sites. All websites, code and videos are on
-[my home page](https://wcook04.github.io/).
+Proof Reader is one of Will Cook's sites. Find the other websites and code on
+[my home page](https://wcook04.github.io/), and the [project videos](https://wcook04.github.io/#videos).
