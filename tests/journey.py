@@ -122,7 +122,7 @@ def same(page: Page, want: dict, label: str) -> None:
     have = snapshot(page)
     check(matches(), f"{label}: back at {want['hash'] or 'the start'}, paper at {want['top']:.0f} (have {have['top']:.0f}, {have['hash']}, {have['lean']}, {have['tab']})")
     check(have["caption"] == want["caption"], f"{label}: says the same thing on the right ({have['caption']!r})")
-    check(have["camera"] == want["camera"], f"{label}: the graph's camera is where it was")
+    wait_until(page, lambda: camera(page) == want["camera"], f"{label}: the graph's camera is where it was")
 
 
 def wheel_to(page: Page, wanted: float) -> None:

@@ -137,6 +137,7 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
   litRef.current = lit;
   const opened = useRef(false);
   useEffect(() => {
+    let again = 0;
     const open = window.setTimeout(() => tree.current?.expandAll(), 0);
     const frame = window.setTimeout(() => {
       // A reload or a return to this entry finds the camera the reader left.
@@ -146,8 +147,14 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
         pausedRef.current = true;
         setPaused(true);
       }
-      if (saved?.scene) tree.current?.restoreScene(saved.scene);
-      else {
+      if (saved?.scene) {
+        const scene = saved.scene;
+        tree.current?.restoreScene(scene);
+        // A slow first layout can frame the map after this: put the camera back once more.
+        again = window.setTimeout(() => {
+          if (!pausedRef.current && !leanRef.current) tree.current?.restoreScene(scene);
+        }, 400);
+      } else {
         tree.current?.fitAll(false);
         if (!pausedRef.current && litRef.current.length && !inView(litRef.current)) tree.current?.panTo(litRef.current);
       }
@@ -155,6 +162,7 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
     return () => {
       window.clearTimeout(open);
       window.clearTimeout(frame);
+      window.clearTimeout(again);
     };
   }, [goal, inView]);
 

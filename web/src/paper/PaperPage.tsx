@@ -641,7 +641,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
     edition.passages.slice(0, Math.max(0, reached - 1)).forEach((p) => p.lean.forEach((id) => out.add(id)));
     return out;
   }, [edition, reached]);
-  const reachedDecls = useMemo(() => new Set([...passed, ...lit]).size, [lit, passed]);
+  const reachedDecls = useMemo(() => (reached === 0 ? 0 : new Set([...passed, ...lit]).size), [lit, passed, reached]);
 
   const back = useCallback(() => window.history.back(), []);
   const firstTie = edition.coverage.sections[0];
