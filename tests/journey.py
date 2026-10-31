@@ -377,8 +377,9 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     citation = page.locator('a[data-journey="cite"]')
     page.wait_for_timeout(250)
     spot = citation.evaluate("(a) => { const b = a.getClientRects()[0]; return [b.left + b.width / 2, b.top + b.height / 2]; }")
-    page.mouse.move(spot[0] - 3, spot[1])
-    page.mouse.move(spot[0], spot[1])
+    for nudge in (6, 3, 0):
+        page.mouse.move(spot[0] - nudge, spot[1])
+        page.wait_for_timeout(100)
     wait_until(page, lambda: figure_link[:4] in page.locator(".proof__reading").inner_text(), "pointing at a citation previews it on the right page")
     was_top = top(page)
     page.mouse.click(spot[0], spot[1])

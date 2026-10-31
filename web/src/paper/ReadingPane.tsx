@@ -670,6 +670,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
         ref={sheet}
         onClick={onClick}
         onMouseOver={(event) => point(event.target as Element)}
+        onMouseMove={(event) => point(event.target as Element)}
         onMouseLeave={stopPointing}
         onFocus={(event) => point(event.target as Element)}
         onBlur={stopPointing}

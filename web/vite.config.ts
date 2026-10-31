@@ -111,8 +111,12 @@ function paperPage(html: string, paper: ShelfItem, base: string): string {
 
 /** What a static host needs beside the app, written after the bundle. */
 function publicFiles(base: string): Plugin {
+  let out = resolve("dist");
   return {
     name: "public-files",
+    configResolved(config) {
+      out = resolve(config.root, config.build.outDir);
+    },
     transformIndexHtml: {
       order: "post",
       handler(html, context) {
@@ -122,7 +126,6 @@ function publicFiles(base: string): Plugin {
       },
     },
     closeBundle() {
-      const out = resolve("dist");
       if (!existsSync(out)) return;
       const papers = shelf();
       const html = readFileSync(resolve(out, "index.html"), "utf8");
