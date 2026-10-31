@@ -5,7 +5,9 @@ beside it. The paper is the left page, set for reading on a screen. The right pa
 the proof that follows you as you scroll, and any marked statement opens into the authors' own
 Lean, so nobody has to hunt through an artifact to find what a paper proved.
 
-![A paper on the left page with one sentence highlighted, and on the right the graph of its Lean proof above the exact Lean lines the sentence describes.](web/public/reader.webp)
+**[Read a paper in it](https://wcook04.github.io/proof-reader/#/contextual-embeddings)**: *Contextual Embeddings* by Frohlich, Foster, Kavvos and Wang (PLDI 2026), shown with the authors' Lean under CC BY 4.0. The links between the paper and the Lean were made with AI and have not been reviewed by the authors.
+
+[![A paper on the left page with one sentence highlighted, and on the right the graph of its Lean proof above the exact Lean lines the sentence describes.](web/public/reader.webp)](https://wcook04.github.io/proof-reader/#/contextual-embeddings)
 
 - Read the paper. The statement under the reading line takes the highlighter and its card
   lights on the graph, named in plain words.
