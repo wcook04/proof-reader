@@ -573,7 +573,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   }, [cardPoint, declarations, pin, pointedClaim, pointedName]);
 
   const order = line.id ? edition.passages.findIndex((p) => p.id === line.id) : -1;
-  const reached = line.zone === "after" ? edition.passages.length : order >= 0 ? order + 1 : Math.max(0, stepAt.current + 1);
+  const reached = line.zone === "after" ? edition.passages.length : line.zone === "before" ? 0 : order >= 0 ? order + 1 : Math.max(0, stepAt.current + 1);
   const passed = useMemo(() => {
     const out = new Set<string>();
     edition.passages.slice(0, Math.max(0, reached - 1)).forEach((p) => p.lean.forEach((id) => out.add(id)));
@@ -676,7 +676,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
         {edition.reading && (
           <Contents
             outline={edition.reading.outline}
-            current={copy === "reading" ? section : outline.find((e) => e.number === shown.passage?.section)?.id ?? null}
+            current={copy === "reading" ? section : outline.find((e) => e.number === passages.get(line.id ?? "")?.section)?.id ?? null}
             open={rail}
             declarations={edition.declarations}
             files={edition.lean.files}
