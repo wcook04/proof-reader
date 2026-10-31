@@ -113,6 +113,9 @@ class Rects(unittest.TestCase):
 
 
 class DeclarationLine(unittest.TestCase):
+    def test_a_docstring_above_an_attribute_is_still_its_comment(self):
+        self.assertEqual(paper.comment_above(["/-- Adding zero. -/", "@[simp]", "theorem a : True := trivial"], 3), [1, 1])
+
     def test_a_plain_declaration_stays_where_it_is(self):
         self.assertEqual(paper.declaration_line(["theorem a : True := trivial"], 1, 1), 1)
 

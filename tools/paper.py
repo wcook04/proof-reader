@@ -185,7 +185,7 @@ def statement_end(lines: list[str], first: int, last: int, keyword: str) -> int:
 def comment_above(lines: list[str], first: int) -> list[int] | None:
     """The block comment that sits directly above a declaration, if there is one."""
     line = first - 1
-    while line > 0 and not lines[line - 1].strip():
+    while line > 0 and (not lines[line - 1].strip() or lines[line - 1].lstrip().startswith("@[")):
         line -= 1
     if line < 1 or not lines[line - 1].rstrip().endswith("-/"):
         return None
