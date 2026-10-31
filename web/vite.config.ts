@@ -38,6 +38,7 @@ All data is static under ${SITE_URL}papers/.
 
 - [papers/index.json](${SITE_URL}papers/index.json): every paper, with its title, authors and venue
 - papers/<slug>/edition.json: one paper's data. \`paper\` holds its metadata and licence; \`lean\` holds the toolchain and the authors' source files; \`claims\` the results the paper says the Lean establishes; \`passages\` each tied statement, with its verbatim \`quote\`, its \`role\`, the Lean names it is tied to and, where given, the exact \`lines\`; \`declarations\` each Lean declaration with its kind, lines, \`uses_statement\`, \`uses_proof\`, \`used_by_statement\`, \`used_by_proof\` and axioms; \`coverage\` the sections that hold ties; \`analytics\` the axiom summary
+- papers/<slug>/source.json: the authors' Lean files, and where each Lean name is printed in the PDF
 - papers/<slug>/reading.html: the paper's reading copy as HTML, with its ties, Lean names and page marks in place
 - papers/<slug>/paper.pdf: the authors' PDF, unchanged
 
@@ -149,5 +150,6 @@ function publicFiles(base: string): Plugin {
 // VITE_BASE_PATH is the folder the site is served from, such as /proof-reader/.
 export default defineConfig(({ mode }) => {
   const base = loadEnv(mode, process.cwd(), "VITE_").VITE_BASE_PATH ?? process.env.VITE_BASE_PATH ?? "/";
-  return { base, plugins: [react(), publicFiles(base)] };
+  // Nothing inlined: small font subsets in the stylesheet would load whether used or not.
+  return { base, build: { assetsInlineLimit: 0 }, plugins: [react(), publicFiles(base)] };
 });

@@ -139,5 +139,11 @@ async function json<T>(url: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-export const loadEdition = (slug: string) => json<Edition>(paperFile(slug, "edition.json"));
+export async function loadEdition(slug: string): Promise<Edition> {
+  const edition = await json<Edition>(paperFile(slug, "edition.json"));
+  return { ...edition, mentions: [], lean: { ...edition.lean, files: {} } };
+}
+
+/** What only the Lean page, the PDF and a search need, kept out of the first screen. */
+export const loadSource = (slug: string) => json<{ files: Record<string, string>; mentions: Mention[] }>(paperFile(slug, "source.json"));
 export const loadShelf = () => json<{ papers: ShelfItem[] }>(`${base}papers/index.json`);

@@ -35,6 +35,8 @@ interface Props {
   step: Step;
   /** Open on the right page; a closed page keeps its folds. */
   open: boolean;
+  /** Where a reload found this page. It loads on demand, so it is told on arrival. */
+  startTop: number;
   tab: Tab;
   onTab(tab: Tab): void;
   onPassage(id: string): void;
@@ -43,7 +45,7 @@ interface Props {
 
 const SHORT_PROOF = 8;
 
-export const LeanPage = memo(function LeanPage({ ref, edition, step, open, tab, onTab, onPassage, act }: Props) {
+export const LeanPage = memo(function LeanPage({ ref, edition, step, open, startTop, tab, onTab, onPassage, act }: Props) {
   const body = useRef<HTMLDivElement>(null);
   const names = useMemo(() => new Set(edition.declarations.map((d) => d.id)), [edition]);
   // The reader's own folds outlast the step that showed them.
@@ -71,6 +73,7 @@ export const LeanPage = memo(function LeanPage({ ref, edition, step, open, tab, 
   // A step's Lean comes level with the paper's reading line where that falls inside this
   // pane; a step come back to keeps its place.
   const shownOpen = useRef(false);
+  const arriving = useRef(true);
   useLayoutEffect(() => {
     const el = body.current;
     if (!el || !open) {
@@ -82,6 +85,13 @@ export const LeanPage = memo(function LeanPage({ ref, edition, step, open, tab, 
     if (was !== step.key && shownOpen.current) tops.current.set(was, el.scrollTop);
     shownKey.current = step.key;
     shownOpen.current = true;
+    if (arriving.current) {
+      arriving.current = false;
+      if (startTop > 0) {
+        el.scrollTop = startTop;
+        return;
+      }
+    }
     const kept = tops.current.get(step.key);
     if (kept !== undefined) {
       el.scrollTop = kept;
@@ -95,6 +105,7 @@ export const LeanPage = memo(function LeanPage({ ref, edition, step, open, tab, 
     const line = paper.getBoundingClientRect().top + paper.clientHeight * READING_LINE - box.top;
     const room = Math.max(64, Math.min(line, el.clientHeight * 0.6));
     el.scrollTop = Math.max(0, row.getBoundingClientRect().top - box.top - room);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, step]);
 
   return (

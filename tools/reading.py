@@ -307,7 +307,7 @@ def build(folder: Path, slug: str, passages: list[dict], names: list[str], pdf_w
     for figure in reading_config.get("figure", []):
         x0, y0, x1, y1 = figure["box"]
         source = source.replace(f'class="zoom" data-figure="{figure["name"]}"', f'class="zoom" style="--natural:{round(x1 - x0)}" data-figure="{figure["name"]}"')
-        source = source.replace(f'{figure["name"]}" alt=', f'{figure["name"]}" width="{round(x1 - x0)}" height="{round(y1 - y0)}" alt=')
+        source = source.replace(f'{figure["name"]}" alt=', f'{figure["name"]}" width="{round(x1 - x0)}" height="{round(y1 - y0)}" loading="lazy" decoding="async" alt=')
     page = parse(source)
 
     # A list's bullets are drawn by the page, so they are not words on either side.

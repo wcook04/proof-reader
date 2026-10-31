@@ -108,7 +108,7 @@ def snapshot(page: Page) -> dict:
         "camera": camera(page),
         "copy": page.get_attribute(".page", "data-copy"),
         "lean": lean_head(page),
-        "tab": page.evaluate("document.querySelector('.leaf__tabs button[aria-pressed=true]')?.textContent ?? ''"),
+        "tab": page.evaluate("document.querySelector('.proof__lean:not([hidden]) .leaf__tabs button[aria-pressed=true]')?.textContent ?? ''"),
     }
 
 
@@ -301,7 +301,7 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     page.mouse.click(box["x"] + 8, box["y"] + 6)
     wait_until(page, lambda: address(page).endswith(f"@{other}"), f"the sentence has an address: {other}")
     check("Pinned" in caption(page), "the caption says it is pinned")
-    check(lean_open(page) and lean_head(page), "the click expands it into the raw Lean")
+    wait_until(page, lambda: lean_open(page) and lean_head(page), "the click expands it into the raw Lean")
     check(page.locator(".proof__graph").bounding_box()["height"] < 2, "the Lean has the whole pane")
     check(page.locator('.mode-toggle button[aria-pressed="true"]').inner_text() == "Lean", "and the toggle says Lean")
     check(page.locator(".crumbs a").count() > 0, "breadcrumbs say where the paper has it")

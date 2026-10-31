@@ -26,6 +26,8 @@ interface Props {
   /** The list of every declaration. */
   onIndex(): void;
   onClose(): void;
+  /** A search is starting: it reads the Lean as well as the paper. */
+  onSearch(): void;
 }
 
 interface Block {
@@ -77,7 +79,7 @@ function Snippet({ text, at, length }: { text: string; at: number; length: numbe
   );
 }
 
-export function Contents({ outline, current, open, declarations, files, html, copy, onJump, onTop, onName, onPage, onBlock, onIndex, onClose }: Props) {
+export function Contents({ outline, current, open, declarations, files, html, copy, onJump, onTop, onName, onPage, onBlock, onIndex, onClose, onSearch }: Props) {
   const list = useRef<HTMLOListElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const blocks = useRef<Block[]>([]);
@@ -160,6 +162,7 @@ export function Contents({ outline, current, open, declarations, files, html, co
           value={query}
           placeholder="Search the paper  ( / )"
           aria-label="Search the paper and the Lean names"
+          onFocus={onSearch}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
             if (event.key === "Enter") openFirst();

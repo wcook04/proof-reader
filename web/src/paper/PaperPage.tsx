@@ -9,14 +9,14 @@
 
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { blankEntry, newEntryId, pushEntry, readEntry, replaceEntry, returning, type Copy, type Entry, type Pin, type Tab } from "../app/history";
-import { paperFile, type Edition, type Passage } from "../app/edition";
+import { loadSource, paperFile, type Edition, type Passage } from "../app/edition";
 import { Lockup, SisterSites } from "../app/Family";
 import { readRoute, routeHref } from "../app/router";
 import { setScheme, useScheme } from "../app/theme";
 import type { LeanActions } from "../lean/code";
 import { editionGraph, sectionLabel } from "../model/fromEdition";
-import { LeanPage, type LeanPageHandle, type Step } from "../proof/LeanPage";
-import { MapPane, type MapPaneHandle } from "../proof/MapPane";
+import type { LeanPageHandle, Step } from "../proof/LeanPage";
+import type { MapPaneHandle } from "../proof/MapPane";
 import type { PaneMode } from "../proof/ModeToggle";
 import { ProofPage, readLayout, saveLayout, type Layout } from "../proof/ProofPage";
 import { Contents } from "./Contents";
@@ -24,7 +24,11 @@ import { ReadingPane } from "./ReadingPane";
 import { Threads } from "./Threads";
 import { DWELL_MS, type Follow, type PaperHandle, type Pointed, type Target, type Zone } from "./reading-line";
 
+// The paper comes first. The PDF, the map and the Lean page each load when they are wanted.
 const PdfPane = lazy(() => import("./PdfPane").then((module) => ({ default: module.PdfPane })));
+const leanCode = () => import("../proof/LeanPage").then((module) => ({ default: module.LeanPage }));
+const LeanPage = lazy(leanCode);
+const MapPane = lazy(() => import("../proof/MapPane").then((module) => ({ default: module.MapPane })));
 
 interface Opened {
   entry: Partial<Entry>;
@@ -122,6 +126,31 @@ export function PaperPage({ edition }: { edition: Edition }) {
     saveLayout(next);
   }, []);
   const scheme = useScheme();
+
+  // The Lean's text and the names on the PDF, once something has asked for them.
+  const [source, setSource] = useState<Awaited<ReturnType<typeof loadSource>> | null>(null);
+  const sourceAsked = useRef(false);
+  const askSource = useCallback(() => {
+    if (sourceAsked.current) return;
+    sourceAsked.current = true;
+    loadSource(slug).then(setSource, () => {
+      sourceAsked.current = false;
+    });
+  }, [slug]);
+  const withSource = useMemo(() => (source ? { ...edition, mentions: source.mentions, lean: { ...edition.lean, files: source.files } } : edition), [edition, source]);
+  const [leanSeen, setLeanSeen] = useState(entry.lean);
+  useEffect(() => {
+    if (entry.lean) setLeanSeen(true);
+    if (entry.lean || pdfSeen) askSource();
+  }, [askSource, entry.lean, pdfSeen]);
+  // Fetch the Lean while the reader reads, so that the first click answers at once.
+  useEffect(() => {
+    const later = window.setTimeout(() => {
+      askSource();
+      void leanCode();
+    }, 2500);
+    return () => window.clearTimeout(later);
+  }, [askSource]);
 
   const reading = useRef<PaperHandle>(null);
   const pdf = useRef<PaperHandle>(null);
@@ -714,7 +743,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
             current={copy === "reading" ? section : outline.find((e) => e.number === passages.get(line.id ?? "")?.section)?.id ?? null}
             open={rail}
             declarations={edition.declarations}
-            files={edition.lean.files}
+            files={withSource.lean.files}
             html={html}
             copy={copy}
             onJump={jumpTo}
@@ -724,6 +753,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
             onBlock={jumpBlock}
             onIndex={() => onTab("index")}
             onClose={() => setRail(false)}
+            onSearch={askSource}
           />
         )}
         <div className="left" id="the-paper">
@@ -769,7 +799,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
                 sizes={paper.sizes}
                 crop={paper.crop}
                 passages={edition.passages}
-                mentions={edition.mentions}
+                mentions={withSource.mentions}
                 hidden={copy !== "pdf"}
                 pin={pin}
                 lit={litPassages}
@@ -794,6 +824,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
             reading={readingStrip}
             onClose={wide ? (entry.lean ? undefined : closePage) : closeSheet}
             graph={(
+              <Suspense fallback={null}>
               <MapPane
                 ref={map}
                 edition={edition}
@@ -809,8 +840,13 @@ export function PaperPage({ edition }: { edition: Edition }) {
                 onHover={onCardHover}
                 onPauseChange={onPauseChange}
               />
+              </Suspense>
             )}
-            lean={<LeanPage ref={leanPage} edition={edition} step={stepView} open={entry.lean} tab={entry.tab} onTab={onTab} onPassage={goToPassage} act={act} />}
+            lean={leanSeen && source && (
+              <Suspense fallback={null}>
+                <LeanPage ref={leanPage} edition={withSource} step={stepView} open={entry.lean} startTop={entry.leanTop} tab={entry.tab} onTab={onTab} onPassage={goToPassage} act={act} />
+              </Suspense>
+            )}
           />
         )}
         {wide && showRight && <Threads root={spread} target={{ passage: pin?.passage ?? line.id, line: threadLine }} />}

@@ -539,6 +539,9 @@ def build(slugs: list[str]) -> None:
         if page:
             (out / "reading.html").write_text(page, encoding="utf-8")
             crop_figures(folder / built["paper"]["pdf"], built, out, load_paper(slug)[1])
+        # The first screen needs neither: the Lean's text and the names on the PDF come on demand.
+        source = {"files": built["lean"].pop("files"), "mentions": built.pop("mentions")}
+        (out / "source.json").write_text(json.dumps(source, ensure_ascii=False), encoding="utf-8")
         (out / "edition.json").write_text(json.dumps(built, ensure_ascii=False), encoding="utf-8")
         shutil.copyfile(folder / built["paper"]["pdf"], out / "paper.pdf")
         subprocess.run(["pdftocairo", "-png", "-singlefile", "-f", "1", "-l", "1", "-scale-to", "420",
