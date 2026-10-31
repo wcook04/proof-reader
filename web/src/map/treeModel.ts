@@ -10,7 +10,8 @@
 import { argumentProjection, type ArgEdge, type ArgGraph } from "../model/graph";
 import type { EngineEdge } from "./engine/types";
 
-export const TREE_KINDS = new Set(["supports", "formalizes", "assumes"]);
+// Proof Reader adds statement uses, drawn apart from proof uses as blueprints draw them.
+export const TREE_KINDS = new Set(["supports", "formalizes", "assumes", "lean_type_dependency"]);
 
 type Within = ReadonlySet<string> | null | undefined;
 
@@ -150,6 +151,53 @@ export function scopedGraph(graph: ArgGraph, goal: string): ArgGraph {
 }
 
 /**
+ * The goal's argument seen through a paper: only the records `keep` holds (and the
+ * goal), each joined directly to the nearest kept records below it. A paper skips
+ * records the long record spells out, so without this most of what it uses would
+ * hang from nothing. A line that passes over left-out records carries them in
+ * `through`; it is a reading aid and never a recorded relation.
+ */
+export interface ThroughEdge extends ArgEdge {
+  through?: string[];
+}
+
+export function lensArgument(graph: ArgGraph, goal: string, keep: ReadonlySet<string>): ArgGraph {
+  const kept = (id: string) => id === goal || keep.has(id);
+  const uses = (id: string) => (graph.out.get(id) ?? []).filter((e) => TREE_KINDS.has(e.kind));
+  const added: ThroughEdge[] = [];
+  const seen = new Set([goal]);
+  const queue = [goal];
+  while (queue.length) {
+    const from = queue.shift()!;
+    const reached = new Set<string>();
+    const walk = (at: string, via: string[]) => {
+      for (const e of uses(at)) {
+        if (via.includes(e.to)) continue;
+        if (kept(e.to)) {
+          if (!via.length || reached.has(e.to) || uses(from).some((d) => d.to === e.to)) continue;
+          reached.add(e.to);
+          added.push({ ...e, key: `${from}→${e.to}→${e.kind}→through`, from, to: e.to, through: via });
+        } else walk(e.to, [...via, e.to]);
+      }
+    };
+    walk(from, []);
+    for (const e of [...uses(from), ...added.filter((a) => a.from === from)]) {
+      if (kept(e.to) && !seen.has(e.to)) {
+        seen.add(e.to);
+        queue.push(e.to);
+      }
+    }
+  }
+  const out = new Map(graph.out);
+  const into = new Map(graph.in);
+  for (const e of added) {
+    out.set(e.from, [...(out.get(e.from) ?? []), e]);
+    into.set(e.to, [...(into.get(e.to) ?? []), e]);
+  }
+  return { ...graph, edges: [...graph.edges, ...added], out, in: into };
+}
+
+/**
  * Exactly the unfolded set that draws `targets` from the goal: every record on
  * the map's own route (pathFromGoal) to each target, short of the target
  * itself. An assumption is drawn as a tag on a record that assumes it, so for
@@ -207,8 +255,8 @@ export function lineageOf(graph: ArgGraph, id: string, within?: Within): Set<str
   return seen;
 }
 
-/** What is unfolded while `id`'s lineage is previewed: what is open now, plus `id` and every record in its lineage that has inputs. */
-export function peekExpansion(graph: ArgGraph, id: string, expanded: ReadonlySet<string>, within?: Within): Set<string> {
+/** The unfolding that also draws everything below `id`: what is open now, plus `id` and every record in its lineage that has inputs. */
+export function openBelow(graph: ArgGraph, id: string, expanded: ReadonlySet<string>, within?: Within): Set<string> {
   const open = new Set(expanded);
   for (const x of [id, ...lineageOf(graph, id, within)])
     if (graph.nodes.get(x)?.kind !== "assumption" && usesOf(graph, x, within).some((e) => e.kind !== "assumes")) open.add(x);

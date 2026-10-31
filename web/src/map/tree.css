@@ -11,18 +11,13 @@
   touch-action: none;
   --k: 1;
   background-color: var(--ground);
-  /* A dot grid in world space: the engine moves and scales it with the map. */
-  background-image: radial-gradient(circle at 1px 1px, var(--grid-dot) 1px, transparent 1.2px);
-  background-size: 22px 22px;
+  /* A drag pans from anywhere, so nothing on the canvas selects as text. */
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .tree:active {
   cursor: grabbing;
-}
-
-.tree[data-rep="mark"],
-.tree--compact {
-  background-image: none;
 }
 
 .tree__world {
@@ -203,8 +198,7 @@
   cursor: pointer;
 }
 
-.tree--moving .hit,
-.tree[data-rep="mark"] .hit {
+.tree--moving .hit {
   pointer-events: none;
 }
 
@@ -407,6 +401,11 @@
   box-shadow: none;
 }
 
+/* A Lean declaration is told from a claim by its name's face and the colour of its Lean line. */
+.card[data-kind="declaration"] {
+  border-color: var(--rel-formalizes);
+}
+
 .card:hover,
 .card.is-hover {
   border-color: color-mix(in oklab, var(--ink-3) 70%, var(--card-border));
@@ -417,6 +416,11 @@
   outline: 2px solid var(--lit);
   outline-offset: 2px;
   box-shadow: var(--card-shadow-lift), 0 0 32px -6px var(--lit-glow);
+}
+
+/* The selection's direct inputs and one route up to the goal. */
+.card.is-route {
+  border-color: var(--lit-line);
 }
 
 .card.is-lit,
@@ -510,11 +514,10 @@
 
 .card--root {
   min-height: 0;
-  padding: 20px 26px 16px;
+  padding: 14px 22px 14px;
   border-color: var(--rule-strong);
   border-radius: 10px;
   box-shadow: 0 1px 0 rgb(0 0 0 / 0.03), 0 18px 40px -26px rgb(25 21 32 / 0.35);
-  cursor: default;
 }
 
 :root[data-theme="dark"] .card--root {
@@ -527,25 +530,23 @@
 }
 
 .card--root .card__head {
-  margin-bottom: 8px;
+  margin-bottom: 5px;
 }
 
 .card--root .card__title,
 .plate__title .card__title {
   font-weight: 500;
-  font-size: var(--fs-plate);
+  font-size: 1.75rem;
   line-height: 1.12;
   letter-spacing: -0.012em;
 }
 
 .card--root .card__open {
-  margin-bottom: 10px;
+  margin-bottom: 7px;
 }
 
 .card__theorem {
-  cursor: auto;
-  user-select: text;
-  -webkit-user-select: text;
+  cursor: pointer;
 }
 
 .tree--narrow .card--root {
@@ -577,10 +578,10 @@
   font-size: 1.05rem;
 }
 
-/* ---- Representations: card, compact, mark -------------------------------------------- */
+/* ---- Representations: card and tile ---------------------------------------------------- */
 
-/* Compact form: a tidy tile. The title sits in the middle of the card's footprint at up to
-   13px on screen (10px at the least), whole words only, in as many lines as the tile holds;
+/* A tile: the title sits in the middle of the card's footprint at up to
+   13px on screen (11px at the least), whole words only, in as many lines as the tile holds;
    the source square keeps the top-left corner. */
 .card__compact {
   position: absolute;
@@ -591,26 +592,17 @@
   justify-content: center;
   gap: calc(5px / var(--k));
   /* TILE in canvas/representation.ts: the engine sizes titles to fit this box. */
-  padding: calc(5px / var(--k)) calc(8px / var(--k));
+  padding: calc(10px / var(--k)) calc(8px / var(--k)) calc(7px / var(--k));
   text-align: center;
   opacity: 0;
   pointer-events: none;
   transition: opacity 160ms var(--ease-out);
 }
 
-.card__compact .src-sq {
-  /* In the corner, clear of the title's padding box. */
-  position: absolute;
-  left: calc(4px / var(--k));
-  top: calc(3px / var(--k));
-  width: calc(6px / var(--k));
-  height: calc(6px / var(--k));
-}
-
 .card__ctitle {
   max-width: 100%;
   font-family: var(--font-sans);
-  /* The size that fits the whole title (13px down to 10px on screen) and the lines the tile then
+  /* The size that fits the whole title (13px down to 11px on screen) and the lines the tile then
      holds: both set per card by the engine (--title, --lines), so "…" appears only when it cannot fit. */
   font-size: calc(var(--title, 13px) / var(--k));
   line-height: 1.22;
@@ -623,6 +615,15 @@
   word-break: normal;
   hyphens: manual;
   text-wrap: balance;
+}
+
+/* The section where the paper under the lens first discusses this record. */
+.card__csec {
+  font-family: var(--font-sans);
+  font-size: calc(11px / var(--k));
+  line-height: 1.2;
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
 }
 
 /* A title too long for its tile is cut after a whole word: the engine writes the cut title into
@@ -692,106 +693,45 @@
   margin-top: calc(7px / var(--k));
 }
 
-.tree[data-rep="compact"] .card__full,
-.tree[data-rep="mark"] .card__full {
+/* A tile shows its title and nothing of the card under it: the card's text goes at once, with
+   no fade, and only its open button stays, invisible, to take keyboard focus. */
+.tree[data-rep="compact"] .card__full {
   opacity: 0;
+  transition: none;
+}
+
+.tree[data-rep="compact"] .card__full > :not(.card__open),
+.tree[data-rep="compact"] .card__open > * {
+  visibility: hidden;
 }
 
 .tree[data-rep="compact"] .card__compact {
   opacity: 1;
 }
 
-/* Mark form keeps the text a mark has room for: a mark whose title fits at 10px or more on
-   screen shows it (data-text, set by the engine from the mark's own size), on its source
-   colour, which already names the source. */
-.tree[data-rep="mark"] .card[data-text] .card__compact {
-  opacity: 1;
-  /* MARK_TILE in canvas/representation.ts. */
-  padding: calc(4px / var(--k));
-}
-
-.tree[data-rep="mark"] .card__compact .src-sq {
-  display: none;
-}
-
-/* On a source colour the quiet inks fall below 4.5:1, so "MAIN RESULT" takes the main ink (6:1 or more on every fill). */
-.tree[data-rep="mark"] .card__cmain {
-  color: var(--ink);
-}
-
-/* Assumption notches sit on the bottom edge of a mark that shows its title, clear of the text. */
-.tree[data-rep="mark"] .card[data-text] .card__notches {
-  bottom: calc(-7px / var(--k));
-}
-
-
-.tree[data-rep="mark"] .card {
-  background: color-mix(in oklab, var(--cat, var(--src-0)) var(--mark-mix), var(--ground));
-  border-color: color-mix(in oklab, var(--cat, var(--src-0)) 85%, var(--ground));
-  border-style: solid;
+/* The overview's dense layout: tiles at every scale, fixed in size, on the page's plain card. */
+.tree[data-dense] .card {
+  min-height: 0;
+  padding: 0;
+  border-radius: 5px;
   box-shadow: none;
 }
 
-.tree[data-rep="mark"] .card--assumption {
-  background: transparent;
-  border-style: dashed;
-  border-width: calc(1.5px / var(--k));
-  border-color: color-mix(in oklab, var(--cat, var(--ink-3)) 80%, var(--ground));
-}
-
-.tree[data-rep="mark"] .card--root {
-  outline: calc(2px / var(--k)) solid var(--ink);
-  outline-offset: calc(3px / var(--k));
-}
-
-.tree[data-rep="mark"] .card.is-selected {
-  outline: calc(2px / var(--k)) solid var(--lit);
-  outline-offset: calc(3px / var(--k));
-  box-shadow: 0 0 calc(18px / var(--k)) calc(-2px / var(--k)) var(--lit-glow);
-}
-
-.tree[data-rep="mark"] .card.is-hover {
-  outline: calc(2px / var(--k)) solid var(--edge-strong);
-  outline-offset: calc(2px / var(--k));
-}
-
-.tree[data-rep="mark"] .card.is-quiet {
-  opacity: 0.45;
-}
-
-.tree[data-rep="mark"] .tree__heads .head,
-.tree[data-rep="mark"] .tree__heads .ring {
+.tree[data-dense] .card__full {
   display: none;
 }
 
+.tree[data-dense] .card__compact {
+  gap: calc(1px / var(--k));
+  /* DENSE_TILE in canvas/representation.ts. */
+  padding: calc(4px / var(--k)) calc(10px / var(--k));
+}
+
+.tree[data-dense] .card--assumption {
+  border-style: dashed;
+}
+
 /* ---- Screen-space layer ---------------------------------------------------------------- */
-
-.tree__labels {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.tree__label {
-  position: absolute;
-  left: 0;
-  top: 0;
-  padding: 5px 10px;
-  border-radius: 7px;
-  background: var(--surface);
-  border: 1px solid var(--rule-strong);
-  box-shadow: 0 6px 18px -10px rgb(0 0 0 / 0.4);
-  font: 500 13px/1.3 var(--font-sans);
-  color: var(--ink);
-  /* Wraps to as many lines as the name needs. */
-  max-width: min(320px, 70%);
-  text-wrap: pretty;
-}
-
-.tree__label.is-selected {
-  border-color: var(--lit);
-}
 
 .tree__ui {
   position: absolute;
@@ -876,12 +816,10 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  height: 30px;
-  padding: 0 12px;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  background: var(--surface);
-  box-shadow: 0 2px 8px -4px rgb(0 0 0 / 0.15);
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
   font: 400 var(--fs-sm) var(--font-sans);
   color: var(--ink-2);
   cursor: pointer;
@@ -890,7 +828,6 @@
 .sim__button:hover,
 .sim__button[aria-expanded="true"] {
   color: var(--ink);
-  border-color: var(--rule-strong);
 }
 
 .sim__button:focus-visible {
@@ -980,60 +917,6 @@
   color: var(--ink-3);
 }
 
-/* The relation under the pointer. Hoverable: the pointer can move onto it. */
-
-.edge-tip {
-  position: absolute;
-  z-index: 6;
-  max-width: 320px;
-  padding: 9px 12px 8px;
-  background: var(--surface);
-  border: 1px solid var(--rule-strong);
-  border-radius: var(--radius-m);
-  box-shadow: var(--shadow-sheet);
-  display: grid;
-  gap: 5px;
-  cursor: auto;
-  animation: tree-pop-in var(--t-reveal) var(--ease-out);
-}
-
-.edge-tip p {
-  margin: 0;
-}
-
-.edge-tip__kind {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.edge-tip__kind .rel-sample {
-  width: 20px;
-}
-
-.edge-tip__rel {
-  font-size: var(--fs-sm);
-  font-weight: 600;
-  line-height: 1.35;
-  color: var(--ink);
-}
-
-.edge-tip__warrant {
-  font-family: var(--font-serif);
-  font-size: 0.9375rem;
-  line-height: 1.4;
-  color: var(--ink);
-}
-
-.edge-tip__hint {
-  font-size: var(--fs-sm);
-  color: var(--ink-3);
-}
-
-.edge-tip--compact {
-  max-width: 260px;
-}
-
 /* ---- Reduced motion: the same end state, no travel ---------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -1043,8 +926,7 @@
   .tree--entering .card,
   .tree--entering .tree__heads,
   .tree--entering .enter-cover,
-  .sim__pop,
-  .edge-tip {
+  .sim__pop {
     transition: none;
     animation: none;
   }
@@ -1233,18 +1115,21 @@
 }
 
 .card__tagword {
-  margin-right: 2px;
+  font-size: 13px;
+  line-height: 1.28;
+  color: var(--ink-3);
 }
 
+/* An assumption is a line of words on the card: its dotted rule is the only mark. */
 .tag {
   max-width: 100%;
-  min-height: 24px;
-  padding: 3px 10px;
-  border: 1.5px dotted var(--rel-assumes);
-  border-radius: 12px;
-  background: var(--card);
-  font: 500 13px/1.28 var(--font-sans);
-  color: var(--rel-assumes-lit);
+  padding: 0;
+  border: 0;
+  border-bottom: 1px dotted var(--rel-assumes);
+  border-radius: 0;
+  background: none;
+  font: 400 13px/1.28 var(--font-sans);
+  color: var(--ink-2);
   text-align: left;
   /* A premise is read, not guessed: the tag wraps to as many lines as its name needs. */
   display: inline-block;
@@ -1277,8 +1162,9 @@
   background: color-mix(in oklab, var(--rel-assumes-lit) 12%, var(--card));
 }
 
+/* The goal's assumptions are in its sheet: the plate keeps to its title, one sentence and the ways on. */
 .card--root .card__tags {
-  margin: 0 0 14px;
+  display: none;
 }
 
 .tree--compact .tag {
@@ -1286,33 +1172,6 @@
   font-size: 12px;
 }
 
-/* In mark form an assumption is a small dotted notch on its consumer's tile. */
-.card__notches {
-  position: absolute;
-  right: calc(4px / var(--k));
-  bottom: calc(4px / var(--k));
-  display: none;
-  gap: calc(3px / var(--k));
-}
-
-.card__notches .tag {
-  display: block;
-  width: calc(8px / var(--k));
-  height: calc(8px / var(--k));
-  min-height: 0;
-  padding: 0;
-  border: calc(1.5px / var(--k)) solid var(--ground);
-  background: var(--rel-assumes-lit);
-  box-sizing: content-box;
-}
-
-.card__notches .tag.is-selected {
-  outline: calc(2px / var(--k)) solid var(--lit);
-}
-
-.tree[data-rep="mark"] .card__notches {
-  display: flex;
-}
 
 /* ---- Clones: a record used in several places is drawn beside each use; a band marks the copies ---- */
 
@@ -1362,11 +1221,6 @@
   outline-offset: 1px;
 }
 
-.tree[data-rep="mark"] .card--clone::after {
-  height: calc(5px / var(--k));
-  background: color-mix(in oklab, var(--cat, var(--src-0)) 35%, var(--ground));
-}
-
 .tree__notes--top .sim__pop {
   top: calc(100% + 8px);
   bottom: auto;
@@ -1401,11 +1255,6 @@
 
 .card.is-passage.is-selected {
   box-shadow: 0 0 0 1px var(--lit-line), var(--card-shadow-lift), 0 0 32px -6px var(--lit-glow);
-}
-
-.tree[data-rep="mark"] .card.is-passage {
-  outline: calc(2px / var(--k)) solid var(--lit-line);
-  outline-offset: calc(2px / var(--k));
 }
 
 .tag.is-passage {
@@ -1464,28 +1313,86 @@
   }
 }
 
-/* ---- The peek: a card's whole lineage while the pointer rests on it ------------------
-   Records it adds are drawn at half strength (their opacity is set by the engine), with
-   no shadow, and their lines at half strength; lines among records already drawn light
-   in their type colours. */
-
-.card.is-peeked {
-  box-shadow: none;
+.card__leanword {
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
 }
 
-.links .is-peeked,
-.heads .is-peeked {
-  filter: opacity(0.5);
+.card__levels {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
 }
 
-.links-peek > g,
-.heads-peek .head--lit {
-  animation: passage-in var(--t-state) var(--ease-out) both;
+.card__sec {
+  font-size: var(--fs-xs);
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .links-peek > g,
-  .heads-peek .head--lit {
-    animation: none;
-  }
+/* ---- The goal's compact plate (GoalPlate in TheoremPlate.tsx) -------------------------- */
+
+.goal-plate__sentence {
+  max-width: 62ch;
+  font-family: var(--font-serif);
+  font-size: 0.9375rem;
+  line-height: 1.34;
+  color: var(--ink);
+}
+
+.goal-plate__sentence p {
+  margin: 0;
+  display: inline;
+}
+
+.goal-plate__sentence .math-display {
+  display: inline;
+  margin: 0 0 0 0.3em;
+}
+
+.goal-plate__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  margin-top: 10px;
+  font-size: var(--fs-sm);
+  color: var(--ink-2);
+}
+
+.goal-plate__primary {
+  height: 30px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--radius-m);
+  background: var(--ink);
+  color: var(--raised);
+  font: 600 var(--fs-sm) var(--font-sans);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+/* One filled action per screen: with the sheet open, its action is the filled one. */
+.map-page--panel .goal-plate__primary {
+  background: none;
+  box-shadow: inset 0 0 0 1px var(--rule-control);
+  color: var(--ink);
+}
+
+.goal-plate__primary:focus-visible {
+  outline: 2px solid var(--lit);
+  outline-offset: 2px;
+}
+
+.goal-plate__actions a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule-strong);
+  text-underline-offset: 3px;
+}
+
+.goal-plate__actions a:hover {
+  text-decoration-color: currentColor;
 }

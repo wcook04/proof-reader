@@ -6,31 +6,48 @@ import { readRoute, routeHref, type Route } from "./router";
 export function App() {
   const [route, setRoute] = useState<Route>(readRoute);
   useEffect(() => {
-    const onHash = () => setRoute(readRoute());
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
+    const onChange = () => {
+      const next = readRoute();
+      // A paper's page follows its own address; only a change of paper lands here.
+      setRoute((was) => (was.paper === next.paper ? was : next));
+    };
+    window.addEventListener("hashchange", onChange);
+    window.addEventListener("popstate", onChange);
+    return () => {
+      window.removeEventListener("hashchange", onChange);
+      window.removeEventListener("popstate", onChange);
+    };
   }, []);
-  return route.paper ? <Loaded key={route.paper} slug={route.paper} record={route.record} /> : <Shelf />;
+  return route.paper ? <Loaded key={route.paper} slug={route.paper} /> : <Shelf />;
 }
 
-function Loaded({ slug, record }: { slug: string; record?: string }) {
+function Loaded({ slug }: { slug: string }) {
   const [edition, setEdition] = useState<Edition | null>(null);
   const [failed, setFailed] = useState(false);
   useEffect(() => {
+    let live = true;
     loadEdition(slug).then((e) => {
+      if (!live) return;
       setEdition(e);
-      document.title = `${e.paper.short_title} · Proof Reader`;
-    }, () => setFailed(true));
+      document.title = `${e.paper.short_title}, read beside its Lean proof · Proof Reader`;
+    }, () => {
+      if (!live) return;
+      setFailed(true);
+      document.title = "No such paper · Proof Reader";
+    });
+    return () => {
+      live = false;
+    };
   }, [slug]);
-  if (failed) return <p className="status">There is no paper here. <a href={routeHref({})}>See all papers</a></p>;
+  if (failed) return <div className="lost"><h1>There is no paper at this address.</h1><p><a href={routeHref({})}>See all papers</a></p></div>;
   if (!edition) return <p className="status">Opening the paper…</p>;
-  return <PaperPage edition={edition} record={record} />;
+  return <PaperPage edition={edition} />;
 }
 
 function Shelf() {
   const [papers, setPapers] = useState<ShelfItem[]>([]);
   useEffect(() => {
-    document.title = "Proof Reader";
+    document.title = "Proof Reader: read a paper beside its Lean proof";
     void loadShelf().then((s) => setPapers(s.papers));
   }, []);
   return (
@@ -38,7 +55,7 @@ function Shelf() {
       <div className="shelf__in">
         <div>
           <h1>Proof Reader</h1>
-          <p className="shelf__lede">Read a paper beside its Lean proof. The paper sits on one page and the authors’ Lean on the other, with each sentence level with the lines it describes.</p>
+          <p className="shelf__lede">Read a paper beside its Lean proof. Scroll the paper and the graph of the proof and the authors’ Lean follow. Click any marked statement to open its exact lines, and go back to where you were.</p>
           <ul>
             {papers.map((p) => (
               <li key={p.slug}>
@@ -57,7 +74,7 @@ function Shelf() {
         <img
           className="shelf__picture"
           src={`${import.meta.env.BASE_URL}reader.webp`}
-          alt="A paper's page on the left with one sentence highlighted, and on the right the Lean theorem it describes, highlighted and level with that sentence."
+          alt="A paper on the left page with one sentence highlighted, and on the right the graph of its Lean proof above the Lean theorem the sentence describes."
           width={1600}
           height={877}
         />

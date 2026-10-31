@@ -12,23 +12,46 @@
   --code-well: #f6efe2;
 }
 
-.reading { position: relative; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; scrollbar-width: thin; padding: 20px 0 20px 0; outline-offset: -2px; }
-.sheet { --code-cap: 0.8125rem; position: relative; max-width: 780px; min-height: 100%; margin: 0 0 0 auto; background: var(--sheet); box-shadow: var(--sheet-shadow); container-type: inline-size; }
-.sheet__text { position: relative; padding: 52px clamp(20px, 7cqi, 60px) 64px; font-family: var(--font-serif); font-size: var(--fs-read); line-height: 1.58; color: var(--ink); font-variant-numeric: oldstyle-nums proportional-nums; font-kerning: normal; hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
+:root[data-theme="dark"] {
+  --code-keyword: #aab4ff;
+  --code-type: #74c4d6;
+  --code-comment: #93c79a;
+  --code-string: #e6ab8e;
+  --code-well: #2a2234;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --code-keyword: #aab4ff;
+    --code-type: #74c4d6;
+    --code-comment: #93c79a;
+    --code-string: #e6ab8e;
+    --code-well: #2a2234;
+  }
+}
+
+.reading { position: relative; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; scrollbar-width: thin; outline-offset: -2px; background: var(--sheet); }
+.sheet { --code-cap: 0.8125rem; position: relative; background: var(--sheet); container-type: inline-size; }
+.firstline { box-sizing: border-box; margin: 0 auto; width: min(36rem, 100cqi - 2 * clamp(20px, 7cqi, 60px)); padding: 12px 0 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--ink-2); }
+.firstline button { min-height: 24px; color: var(--lit); text-decoration: underline; text-underline-offset: 3px; }
+.sheet__text { position: relative; padding: 24px clamp(20px, 7cqi, 60px) 48px; font-family: var(--font-serif); font-size: var(--fs-read); line-height: 1.58; color: var(--ink); font-variant-numeric: oldstyle-nums proportional-nums; font-kerning: normal; hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
 .sheet__text { --bleed: min(100cqi - 2 * clamp(10px, 3.2cqi, 28px), 44rem); }
 .sheet__text > * { max-width: 36rem; margin-left: auto; margin-right: auto; }
 .sheet__text p, .sheet__text ul, .sheet__text ol { margin: 0 auto 0.72em; }
 .sheet__text p { text-wrap: pretty; }
 
 /* The tie marks run down the sheet's edge nearest the Lean. */
-.sheet__ties { position: absolute; top: 0; right: 0; width: 8px; height: 100%; pointer-events: none; }
-.sheet .tie { position: absolute; right: 2px; width: 3px; border-radius: 2px; background: var(--tie-rest); transition: background-color 140ms linear; }
-.sheet .tie.is-lit, .sheet .tie.is-hover, .sheet .tie.is-active { background: var(--thread); }
+.sheet__ties { position: absolute; top: 0; right: 0; width: 14px; height: 100%; pointer-events: none; }
+.sheet .tie { position: absolute; right: 0; width: 14px; border-radius: 0; background: none; pointer-events: auto; cursor: pointer; }
+.sheet .tie::after { content: ""; position: absolute; top: 0; bottom: 0; right: 4px; width: 3px; border-radius: 2px; background: var(--tie-rest); transition: background-color 140ms linear; }
+.sheet .tie.is-lit::after, .sheet .tie.is-hover::after, .sheet .tie.is-active::after, .sheet .tie.is-pinned::after { background: var(--thread); width: 4px; }
 
 /* Passages tied to the Lean */
 .q { cursor: pointer; border-radius: 2px; -webkit-box-decoration-break: clone; box-decoration-break: clone; transition: background-color 140ms linear; }
 .q.is-lit, .q.is-hover { background: var(--highlight-soft); }
-.q.is-active { background: var(--highlight); }
+.q.is-active, .q.is-pinned { background: var(--highlight); }
+.q.is-pinned { box-shadow: 0 2px 0 var(--thread); }
+.q:focus-visible { outline: 2px solid var(--lit); outline-offset: 1px; }
 .q::selection, .sheet__text ::selection { background: rgb(180 101 10 / 0.24); }
 
 /* The page marks of the PDF */
@@ -96,7 +119,9 @@
 .sheet__text figure { margin: 1.4em auto 1.5em; }
 .sheet__text figcaption { margin-top: 0.7em; font-family: var(--font-sans); font-size: 0.875rem; line-height: 1.42; color: var(--ink-2); text-align: center; font-variant-numeric: lining-nums; hyphens: manual; text-wrap: balance; }
 .sheet__text .zoom { display: block; width: min(var(--bleed), calc(var(--natural) * 1.75px)); max-width: none; margin-left: calc(50% - min(var(--bleed), calc(var(--natural) * 1.75px)) / 2); padding: 0; border: 0; background: none; cursor: zoom-in; }
-.sheet__text .zoom img { display: block; width: 100%; height: auto; mix-blend-mode: multiply; }
+.sheet__text .zoom img { display: block; width: 100%; height: auto; mix-blend-mode: multiply; background: var(--paper-white); }
+:root[data-theme="dark"] .sheet__text .zoom img { mix-blend-mode: normal; border-radius: 2px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .sheet__text .zoom img { mix-blend-mode: normal; border-radius: 2px; } }
 .sheet__text .zoom:focus-visible { outline: 2px solid var(--lit); outline-offset: 2px; }
 dialog.plot { width: min(1280px, 94vw); max-height: 94vh; padding: 14px 18px 12px; border: 0; border-radius: var(--radius-l); background: var(--sheet); box-shadow: var(--sheet-shadow); cursor: zoom-out; }
 dialog.plot::backdrop { background: rgb(40 30 15 / 0.5); }
@@ -124,16 +149,22 @@ dialog.plot p { margin: 8px 0 0; font-family: var(--font-sans); font-size: var(-
 .note__n { font-family: var(--font-sans); font-size: 0.8em; color: var(--ink-3); text-decoration: none; margin-right: 2px; }
 
 /* A reference or a figure opened in place */
-.inset { position: relative; margin: -0.1em auto 1em; padding: 10px 62px 11px 14px; border-radius: var(--radius-m); background: var(--code-well); font-size: 0.875em; line-height: 1.46; color: var(--ink-2); animation: inset-in 180ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
+.inset { position: relative; margin: -0.1em auto 1em; padding: 10px 14px 8px 14px; border-radius: var(--radius-m); background: var(--code-well); font-size: 0.875em; line-height: 1.46; color: var(--ink-2); animation: inset-in 180ms cubic-bezier(0.16, 1, 0.3, 1) backwards; }
 .inset p { margin: 0 !important; }
 .sheet__text .inset--figure { width: var(--bleed); max-width: none; margin: 0.2em 0 1.1em calc(50% - var(--bleed) / 2); padding: 8px 0 6px; background: none; border-radius: 0; border-top: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong); }
 .sheet__text .inset--figure figure { max-width: none; margin: 0; }
 .sheet__text .inset--figure pre.code, .sheet__text .inset--figure .code-columns { margin-left: 0; margin-top: 0; margin-bottom: 0; }
 .sheet__text .inset--figure img { margin-left: 0; }
-.inset__close { position: absolute; right: 10px; top: 8px; min-height: 24px; padding: 0 2px; font-family: var(--font-sans); font-size: var(--fs-sm); color: var(--ink-3); text-decoration: underline; text-underline-offset: 3px; }
-.inset--figure .inset__close { top: auto; bottom: 5px; right: 4px; }
-.inset__close:hover { color: var(--lit); }
+.inset__actions { display: flex; gap: 16px; margin-top: 4px; font-family: var(--font-sans); font-size: var(--fs-sm); }
+.inset--figure .inset__actions { padding: 0 2px; }
+.inset__go, .inset__close { min-height: 24px; color: var(--ink-2); text-decoration: underline; text-underline-offset: 3px; }
+.inset__go { color: var(--lit); }
+.inset__go:hover, .inset__close:hover { color: var(--lit); }
 @keyframes inset-in { from { opacity: 0; transform: translateY(-4px); } }
+
+/* Something already on the page says so where it stands. */
+.is-flash { animation: flash 1100ms ease-out; border-radius: 3px; }
+@keyframes flash { 0%, 30% { background-color: var(--highlight); box-shadow: 0 0 0 6px var(--highlight); } 100% { background-color: transparent; box-shadow: 0 0 0 6px transparent; } }
 
 /* The references */
 .ref { padding-left: 1.3em; text-indent: -1.3em; font-size: 0.875em; line-height: 1.45; scroll-margin-top: 24px; }
@@ -148,7 +179,7 @@ dialog.plot p { margin: 8px 0 0; font-family: var(--font-sans); font-size: var(-
 
 /* A big monitor gets a bigger book, not wider margins of desk. */
 @media (min-width: 2100px) {
-  .sheet { --code-cap: 0.9375rem; max-width: 1000px; }
+  .sheet { --code-cap: 0.9375rem; }
   .sheet__text { --bleed: min(100cqi - 2 * clamp(10px, 3.2cqi, 28px), 54rem); font-size: 1.3125rem; }
   .sheet__text > * { max-width: 42rem; }
   .sheet__text h2 { font-size: 1.75rem; }
@@ -156,5 +187,6 @@ dialog.plot p { margin: 8px 0 0; font-family: var(--font-sans); font-size: var(-
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .inset { animation: none; }
+  .inset, .is-flash { animation: none; }
+  .is-flash { background: var(--highlight); }
 }

@@ -4,11 +4,52 @@
 /** How far down the left page the sentence being read sits. */
 export const READING_LINE = 0.34;
 
-export interface PaperHandle {
-  scrollToPassage(id: string, instant?: boolean): void;
-  /** A heading, a figure or a PDF page. */
-  scrollToPlace?(id: string, instant?: boolean): void;
-  toTop?(): void;
-  /** Return to where the last jump left from. */
-  back?(): void;
+/** How long a statement holds the line before the right page answers. */
+export const FOLLOW_MS = 200;
+
+/** How long a pointer rests before the right page previews. */
+export const DWELL_MS = 150;
+
+/** Where to put the paper. */
+export type Target =
+  | { top: number; width: number; fallback?: Target }
+  | { passage: string }
+  | { place: string }
+  | { page: number; into?: number }
+  | { element: HTMLElement }
+  | { start: true };
+
+/** What sits at the reading line: on a tie, between two, or outside them all. */
+export type Zone = "before" | "tied" | "between" | "after";
+
+export interface Where {
+  passage: string | null;
+  zone: Zone;
+  /** The heading above the line, in the reading copy. */
+  section: string | null;
+  /** The PDF page the reader is on, with how far down it they are. */
+  page: number;
+  into: number;
 }
+
+export interface PaperHandle {
+  /** Put the paper somewhere. False when the place does not exist. */
+  place(target: Target, instant?: boolean): boolean;
+  top(): number;
+  width(): number;
+  where(): Where;
+  /** Move keyboard focus to a statement, without scrolling. */
+  focusPassage(id: string): void;
+  /** Hold the highlighter on a statement until the reader scrolls. */
+  mark(id: string | null): void;
+  insets(): string[];
+  setInsets(keys: string[]): void;
+  closeInsets(): boolean;
+}
+
+/** A pointer or keyboard focus resting on something tied. */
+export type Pointed =
+  | { kind: "passage"; id: string }
+  | { kind: "name"; id: string; passage?: string }
+  | { kind: "text"; title: string; text: string }
+  | null;

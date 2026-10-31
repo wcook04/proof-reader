@@ -3,14 +3,15 @@
 // lies under the ink, as a highlighter does, and a bar in the margin marks each
 // sentence tied to the Lean. Blank margins are trimmed on screen, so the type
 // is as large as the page allows. Scrolling reports the passage at the reading
-// line.
+// line. It stays paper-coloured at night: it is the authors' page.
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as pdfjs from "pdfjs-dist";
 import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
 import type { PDFDocumentProxy } from "pdfjs-dist";
 import type { Mention, Passage } from "../app/edition";
-import { READING_LINE, type PaperHandle } from "./reading-line";
+import type { Pin } from "../app/history";
+import { DWELL_MS, FOLLOW_MS, READING_LINE, type PaperHandle, type Pointed, type Target, type Where, type Zone } from "./reading-line";
 
 pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
 
@@ -26,28 +27,40 @@ interface Props {
   passages: Passage[];
   /** Every printed occurrence of a Lean name. */
   mentions: Mention[];
-  active: string | null;
+  hidden: boolean;
+  pin: Pin | null;
   lit: ReadonlySet<string>;
-  /** Where the reader opens. */
-  start: string | null;
-  /** A page to open at instead, such as `page-8`. */
-  openAt?: string | null;
-  onActive(id: string | null): void;
-  onPick(id: string): void;
+  onFollow(id: string | null, zone: Zone): void;
+  onSettle(): void;
+  onPin(id: string): void;
   onName(name: string): void;
-  onUserScroll(): void;
+  onPoint(pointed: Pointed): void;
+  onPinLeft(): void;
+  onReady(): void;
 }
 
 export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, ref) {
-  const { url, sizes, crop, passages, mentions, active, lit, start, openAt, onActive, onPick, onName, onUserScroll } = props;
+  const { url, sizes, crop, passages, mentions, hidden, pin, lit } = props;
+  const latest = useRef(props);
+  latest.current = props;
   const scroller = useRef<HTMLDivElement>(null);
   const [pdf, setPdf] = useState<PDFDocumentProxy | null>(null);
   const [failed, setFailed] = useState(false);
   const [width, setWidth] = useState(0);
   const [hover, setHover] = useState<string | null>(null);
   const [hoverName, setHoverName] = useState<string | null>(null);
-  const programmatic = useRef(0);
+  // The statement under the line, drawn at once; the right page hears after a hold.
+  const [active, setActive] = useState<string | null>(null);
+  const lock = useRef(0);
+  const goal = useRef<number | null>(null);
   const arrive = useRef(0);
+  const follow = useRef(0);
+  const settle = useRef(0);
+  const dwell = useRef(0);
+  const lastScroll = useRef(0);
+  const lastTarget = useRef<Target | null>(null);
+  const line = useRef<string | null>(null);
+  const zone = useRef<Zone>("before");
 
   const [left, top, right, bottom] = crop;
   const scale = width / (right - left);
@@ -79,7 +92,9 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
   useLayoutEffect(() => {
     const el = scroller.current;
     if (!el) return;
-    const measure = () => setWidth(el.clientWidth - PAGE_GAP);
+    const measure = () => {
+      if (el.clientWidth) setWidth(el.clientWidth - PAGE_GAP);
+    };
     measure();
     const observer = new ResizeObserver(measure);
     observer.observe(el);
@@ -104,73 +119,190 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
     [pageHeight, scale, top],
   );
 
-  const go = useCallback(
-    (id: string, instant = false) => {
-      const passage = passages.find((p) => p.id === id);
-      const el = scroller.current;
-      if (!passage || !el) return;
-      programmatic.current = Date.now() + 900;
-      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-      const target = passageTop(passage) - el.clientHeight * READING_LINE;
-      el.scrollTo({ top: target, behavior: reduced || instant ? "auto" : "smooth" });
-      // A background tab may never run the animation, so arrive regardless.
-      window.clearTimeout(arrive.current);
-      arrive.current = window.setTimeout(() => {
-        if (Math.abs(el.scrollTop - target) > 40) el.scrollTo({ top: target, behavior: "auto" });
-      }, 950);
+  const whereNow = useCallback((): Where => {
+    const el = scroller.current;
+    if (!el) return { passage: null, zone: "before", section: null, page: 1, into: 0 };
+    const at = el.scrollTop + el.clientHeight * READING_LINE;
+    let best: Passage | null = null;
+    let bestGap = el.clientHeight * 0.5;
+    let first = Infinity;
+    let last = -Infinity;
+    for (const p of passages) {
+      const y = passageTop(p);
+      first = Math.min(first, y);
+      last = Math.max(last, y);
+      const gap = Math.abs(y - at);
+      if (gap <= bestGap) {
+        best = p;
+        bestGap = gap;
+      }
+    }
+    const step = Math.max(1, pageHeight + PAGE_GAP);
+    const page = Math.min(sizes.length, Math.floor(Math.max(0, at - PAGE_GAP) / step) + 1);
+    return {
+      passage: best?.id ?? null,
+      zone: best ? "tied" : at < first ? "before" : at > last ? "after" : "between",
+      section: null,
+      page,
+      into: (Math.max(0, at - PAGE_GAP) / step) % 1,
+    };
+  }, [pageHeight, passageTop, passages, sizes.length]);
+
+  const followSoon = useCallback((id: string | null, kind: Zone) => {
+    window.clearTimeout(follow.current);
+    follow.current = window.setTimeout(() => latest.current.onFollow(id, kind), FOLLOW_MS);
+  }, []);
+
+  const read = useCallback(() => {
+    const here = whereNow();
+    if (here.passage !== line.current || here.zone !== zone.current) {
+      line.current = here.passage;
+      zone.current = here.zone;
+      setActive(here.passage);
+      followSoon(here.passage, here.zone);
+    }
+  }, [followSoon, whereNow]);
+
+  const scrollTo = useCallback((to: number, instant: boolean, thenRead: boolean) => {
+    const el = scroller.current;
+    if (!el) return;
+    const end = Math.max(0, Math.min(to, el.scrollHeight - el.clientHeight));
+    goal.current = end;
+    window.clearTimeout(arrive.current);
+    if (instant || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.scrollTop = end;
+      lock.current = Date.now() + 60;
+      if (thenRead) {
+        goal.current = null;
+        read();
+      }
+      return;
+    }
+    lock.current = Date.now() + 1500;
+    el.scrollTo({ top: end, behavior: "smooth" });
+    // A background tab may never run the animation, so arrive regardless.
+    arrive.current = window.setTimeout(() => {
+      if (Math.abs(el.scrollTop - end) > 2) el.scrollTop = end;
+      lock.current = 0;
+      if (thenRead) {
+        goal.current = null;
+        read();
+      }
+    }, 950);
+  }, [read]);
+
+  const place = useCallback((target: Target, instant = false): boolean => {
+    const el = scroller.current;
+    if (!el || !width) {
+      lastTarget.current = target;
+      return !!el;
+    }
+    lastTarget.current = target;
+    if ("start" in target) {
+      scrollTo(0, instant, true);
+      return true;
+    }
+    if ("top" in target) {
+      if (target.fallback && Math.abs(target.width - el.clientWidth) > 1) return place(target.fallback, instant);
+      scrollTo(target.top, true, true);
+      return true;
+    }
+    if ("passage" in target) {
+      const passage = passages.find((p) => p.id === target.passage);
+      if (!passage) return false;
+      line.current = passage.id;
+      zone.current = "tied";
+      setActive(passage.id);
+      scrollTo(passageTop(passage) - el.clientHeight * READING_LINE, instant, false);
+      followSoon(passage.id, "tied");
+      return true;
+    }
+    if ("page" in target) {
+      const offset = (target.into ?? 0) * (pageHeight + PAGE_GAP);
+      const y = PAGE_GAP + (target.page - 1) * (pageHeight + PAGE_GAP) + offset;
+      scrollTo(target.into === undefined ? y - 8 : y - el.clientHeight * READING_LINE, instant, true);
+      return true;
+    }
+    return false;
+  }, [followSoon, pageHeight, passageTop, passages, scrollTo, width]);
+
+  useImperativeHandle(ref, (): PaperHandle => ({
+    place,
+    top: () => scroller.current?.scrollTop ?? 0,
+    width: () => scroller.current?.clientWidth ?? 0,
+    where: whereNow,
+    focusPassage: () => scroller.current?.focus({ preventScroll: true }),
+    mark: (id) => {
+      line.current = id;
+      setActive(id);
     },
-    [passages, passageTop],
-  );
+    insets: () => [],
+    setInsets: () => undefined,
+    closeInsets: () => false,
+  }), [place, whereNow]);
 
-  const toPlace = useCallback(
-    (id: string, instant = false) => {
-      const page = /^page-(\d+)$/.exec(id);
-      const el = scroller.current;
-      if (!page || !el) return;
-      programmatic.current = Date.now() + 900;
-      el.scrollTo({ top: PAGE_GAP + (Number(page[1]) - 1) * (pageHeight + PAGE_GAP) - 8, behavior: instant ? "auto" : "smooth" });
-    },
-    [pageHeight],
-  );
-
-  useImperativeHandle(ref, () => ({ scrollToPassage: go, scrollToPlace: toPlace }), [go, toPlace]);
-
-  // A new width rescales every page, so keep the reader on their sentence.
-  const place = useRef(start);
-  place.current = active ?? place.current ?? start;
+  // A new width rescales every page, so go back to what was asked for.
   useEffect(() => {
-    if (width && openAt) toPlace(openAt, true);
-    else if (width && place.current) go(place.current, true);
-  }, [go, openAt, toPlace, width]);
+    if (!width) return;
+    latest.current.onReady();
+    if (lastTarget.current) place(lastTarget.current, true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [width]);
 
   useEffect(() => {
     const el = scroller.current;
     if (!el || !width) return;
     let frame = 0;
-    const read = () => {
+    const tick = () => {
       frame = 0;
-      if (Date.now() < programmatic.current) return;
-      const line = el.scrollTop + el.clientHeight * READING_LINE;
-      let best: Passage | null = null;
-      let bestGap = el.clientHeight * 0.5;
-      for (const p of passages) {
-        const gap = Math.abs(passageTop(p) - line);
-        if (gap < bestGap) {
-          best = p;
-          bestGap = gap;
-        }
+      if (Date.now() < lock.current) return;
+      if (goal.current !== null) {
+        if (Math.abs(el.scrollTop - goal.current) <= 2) return;
+        goal.current = null;
       }
-      onActive(best?.id ?? null);
+      const current = latest.current.pin;
+      if (current) {
+        const passage = current.passage ? passages.find((p) => p.id === current.passage) : null;
+        const gone = passage ? Math.abs(passageTop(passage) - el.scrollTop - el.clientHeight / 2) > el.clientHeight * 0.6 : current.at !== null && Math.abs(el.scrollTop - current.at) > el.clientHeight * 0.9;
+        if (gone) latest.current.onPinLeft();
+      }
+      read();
     };
     const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(read);
+      lastScroll.current = Date.now();
+      if (!frame) frame = requestAnimationFrame(tick);
+      window.clearTimeout(settle.current);
+      settle.current = window.setTimeout(() => latest.current.onSettle(), 220);
     };
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       el.removeEventListener("scroll", onScroll);
       if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(settle.current);
     };
-  }, [passages, passageTop, width, onActive]);
+  }, [passages, passageTop, read, width]);
+
+  useEffect(() => () => {
+    window.clearTimeout(arrive.current);
+    window.clearTimeout(dwell.current);
+  }, []);
+
+  const userInput = () => {
+    lock.current = 0;
+    goal.current = null;
+    lastTarget.current = null;
+    window.clearTimeout(arrive.current);
+  };
+
+  const pointSoon = (pointed: Pointed) => {
+    window.clearTimeout(dwell.current);
+    if (!pointed) {
+      latest.current.onPoint(null);
+      return;
+    }
+    if (Date.now() - lastScroll.current < 180) return;
+    dwell.current = window.setTimeout(() => latest.current.onPoint(pointed), DWELL_MS);
+  };
 
   /** A pointer position in PDF points. */
   const point = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -194,14 +326,15 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
   return (
     <div
       className="pdf"
-      data-paper-pane
+      data-paper-pane={hidden ? undefined : ""}
+      hidden={hidden}
       ref={scroller}
       tabIndex={0}
       aria-label="The paper"
-      onWheel={onUserScroll}
-      onTouchMove={onUserScroll}
+      onWheel={userInput}
+      onTouchMove={userInput}
       onKeyDown={(e) => {
-        if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "Home", "End"].includes(e.key)) onUserScroll();
+        if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "Home", "End"].includes(e.key)) userInput();
       }}
     >
       {failed && <p className="pdf__failed">The PDF could not be loaded. Use the link to the published paper above.</p>}
@@ -215,19 +348,28 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
             style={{ width, height: pageHeight }}
             onMouseMove={(e) => {
               const name = nameAt(e, page);
-              setHoverName(name ? `${page}:${name.rect[0]}:${name.rect[1]}` : null);
-              setHover(name ? null : hit(e, page));
+              const key = name ? `${page}:${name.rect[0]}:${name.rect[1]}` : null;
+              const id = name ? null : hit(e, page);
+              if (key !== hoverName) {
+                setHoverName(key);
+                pointSoon(name ? { kind: "name", id: name.name } : null);
+              }
+              if (id !== hover) {
+                setHover(id);
+                if (!name) pointSoon(id ? { kind: "passage", id } : null);
+              }
             }}
             onMouseLeave={() => {
               setHover(null);
               setHoverName(null);
+              pointSoon(null);
             }}
             onClick={(e) => {
               if (window.getSelection()?.toString()) return;
               const name = nameAt(e, page);
-              if (name) return onName(name.name);
+              if (name) return latest.current.onName(name.name);
               const id = hit(e, page);
-              if (id) onPick(id);
+              if (id) latest.current.onPin(id);
             }}
           >
             <div className="pdf__whole" style={{ left: -left * scale, top: -top * scale, width: w * scale, height: h * scale }}>
@@ -237,7 +379,7 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
                 return <span key={key} className={`mention${hoverName === key ? " is-hover" : ""}`} style={{ left: x0 * scale, top: y0 * scale, width: (x1 - x0) * scale, height: (y1 - y0) * scale }} />;
               })}
               {(byPage.get(page) ?? []).flatMap((p) => {
-                const state = `${p.id === active ? " is-active" : ""}${p.id === hover ? " is-hover" : ""}${lit.has(p.id) ? " is-lit" : ""}`;
+                const state = `${p.id === active || p.id === pin?.passage ? " is-active" : ""}${p.id === hover ? " is-hover" : ""}${lit.has(p.id) ? " is-lit" : ""}`;
                 const first = p.rects[0][1];
                 const last = p.rects[p.rects.length - 1][3];
                 return [

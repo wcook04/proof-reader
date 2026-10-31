@@ -72,6 +72,20 @@ export const METRICS_COMPACT: Metrics = {
   portSp: 9,
 };
 
+/** The overview's tiles: tight ranks and siblings, so a whole argument reads on one screen. */
+export const METRICS_DENSE: Metrics = {
+  sepCard: 10,
+  sepDummy: 7,
+  gapMin: 15,
+  trackSp: 4,
+  padTop: 9,
+  padBottom: 4,
+  radius: 3,
+  arrow: 7,
+  inset: 10,
+  portSp: 8,
+};
+
 export interface Dummy {
   key: string;
   edge: string;

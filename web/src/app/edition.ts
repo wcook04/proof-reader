@@ -50,8 +50,16 @@ export interface Declaration {
   line: number;
   end_line: number;
   lines: number;
+  /** The last line of the statement; what follows is the proof or body. */
+  statement_end: number;
+  /** The authors' block comment directly above, as first and last line. */
+  comment: [number, number] | null;
   uses: string[];
+  uses_statement: string[];
+  uses_proof: string[];
   used_by: string[];
+  used_by_statement: string[];
+  used_by_proof: string[];
   axioms: string[];
   standard_axioms: string[];
   passages: string[];
@@ -81,6 +89,8 @@ export interface Edition {
     source_name: string;
     licence: string;
     scope: string;
+    /** Where one declaration's lines can be read: {path}, {line} and {end} are filled in. */
+    source_lines?: string;
     toolchain: string;
     version: string;
     files: Record<string, string>;
@@ -89,6 +99,8 @@ export interface Edition {
   passages: Passage[];
   mentions: Mention[];
   declarations: Declaration[];
+  /** Which sections hold ties, in reading order. */
+  coverage: { sections: string[]; ties: number };
   /** Present when the paper has a reading copy, which reading.html holds. */
   reading: { outline: OutlineEntry[]; words: number; formulas: number; pages: number } | null;
   analytics: {
@@ -98,6 +110,8 @@ export interface Edition {
     axioms: string[];
     resting_on_axioms: Record<string, string[]>;
     free_of_axioms: string[];
+    standard_axioms: Record<string, string[]>;
+    sorry: string[];
     proof_lines: number;
     pages_with_links: number[];
   };

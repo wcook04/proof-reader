@@ -48,8 +48,6 @@ export interface Split {
   shared: Map<string, number>;
 }
 
-const COPY_SHARED_LEAVES = false as boolean;
-
 export function splitSharedLeaves(root: string, nodes: Iterable<string>, edges: readonly EngineEdge[]): Split {
   const ids = [...nodes];
   const out = new Map<string, EngineEdge[]>();
@@ -63,12 +61,8 @@ export function splitSharedLeaves(root: string, nodes: Iterable<string>, edges: 
   const shared = new Map<string, number>();
   for (const id of ids) {
     if (id === root) continue;
-    // Proof Reader draws each declaration once: its maps are small enough, and
-    // the same name twice on a card map reads as two declarations.
-    if (COPY_SHARED_LEAVES) {
-      const n = consumers.get(id)?.size ?? 0;
-      if (n >= 2 && !out.get(id)?.length) shared.set(id, n);
-    }
+    const n = consumers.get(id)?.size ?? 0;
+    if (n >= 2 && !out.get(id)?.length) shared.set(id, n);
   }
   const nodesOut: string[] = [];
   const edgesOut: EngineEdge[] = [];

@@ -1,8 +1,8 @@
-// One paper's Lean as the graph the copied map engine draws. The map's
-// "supports" relation carries Lean's own uses: an edge runs from a declaration
-// to something it refers to, as Lean reports it. Types sit on a shelf below the
-// map instead: nearly everything uses them, and drawn as cards they bury the
-// shape of the proof.
+// One paper's Lean as the graph the copied map engine draws. An edge runs from a
+// declaration to something it refers to, as Lean reports it: a use in the statement
+// or a use only in the proof or body, drawn differently as blueprints draw them.
+// Types sit on a shelf below the map instead: nearly everything uses them, and drawn
+// as cards they bury the shape of the proof.
 
 import type { Declaration, Edition } from "../app/edition";
 import type { ArgEdge, ArgGraph, ArgNode, LinkKind, Origin } from "./graph";
@@ -23,6 +23,15 @@ const KIND_WORDS: Record<string, string> = {
 
 export const isType = (d: Declaration) => ["inductive", "structure", "class"].includes(d.keyword);
 
+/** The form a declaration takes on the map and in the lists. */
+export function shapeOf(d: Declaration): "definition" | "theorem" | "axiom" {
+  if (d.keyword === "axiom") return "axiom";
+  return d.keyword === "theorem" || d.keyword === "lemma" ? "theorem" : "definition";
+}
+
+/** A section as a reader names it: "§3.3". */
+export const sectionLabel = (number: string) => (/^[0-9A-Z]/.test(number) ? `§${number}` : number);
+
 export function editionGraph(edition: Edition): ArgGraph {
   const goal = edition.claims[0]?.id ?? "";
   const drawn = edition.declarations.filter((d) => !isType(d));
@@ -40,6 +49,7 @@ export function editionGraph(edition: Edition): ArgGraph {
       kindLabel: KIND_WORDS[d.keyword],
       label: d.id,
       declaration: d.id,
+      shape: shapeOf(d),
       status: d.keyword === "axiom" ? "axiom" : "kernel_checked",
       origin: LEAN,
     });
@@ -48,7 +58,10 @@ export function editionGraph(edition: Edition): ArgGraph {
   const add = (from: string, to: string, kind: LinkKind) =>
     edges.push({ key: `${from}→${to}→${kind}`, from, to, kind, linkIds: [`${from}→${to}`], scoped: false, semanticClass: kind });
   for (const claim of edition.claims) for (const name of claim.lean) add(claim.id, name, "formalizes");
-  for (const d of drawn) for (const to of d.uses) if (nodes.has(to)) add(d.id, to, "supports");
+  for (const d of drawn) {
+    for (const to of d.uses_proof) if (nodes.has(to)) add(d.id, to, "supports");
+    for (const to of d.uses_statement) if (nodes.has(to)) add(d.id, to, "lean_type_dependency");
+  }
 
   const out = new Map<string, ArgEdge[]>();
   const into = new Map<string, ArgEdge[]>();

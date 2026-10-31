@@ -1,7 +1,7 @@
 // The paper's sections down the left of the desk, with the one being read marked
-// and each section's count of passages tied to the Lean. Above them, a search of
+// and each section's count of statements tied to the Lean. Above them, a search of
 // the paper's text and the Lean's names. The rail stays for the PDF as well, so
-// the two views of the paper share one frame.
+// the two views of the paper share one frame. Every result is a jump with a Back.
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Declaration, OutlineEntry } from "../app/edition";
@@ -22,6 +22,11 @@ interface Props {
   onTop(): void;
   onName(name: string): void;
   onPage(page: number): void;
+  /** A block of the paper the search found. */
+  onBlock(element: HTMLElement, page: number): void;
+  /** The list of every declaration. */
+  onIndex(): void;
+  onClose(): void;
 }
 
 interface Block {
@@ -73,7 +78,7 @@ function Snippet({ text, at, length }: { text: string; at: number; length: numbe
   );
 }
 
-export function Contents({ outline, current, words, open, declarations, files, html, copy, onJump, onTop, onName, onPage }: Props) {
+export function Contents({ outline, current, words, open, declarations, files, html, copy, onJump, onTop, onName, onPage, onBlock, onIndex, onClose }: Props) {
   const list = useRef<HTMLOListElement>(null);
   const input = useRef<HTMLInputElement>(null);
   const blocks = useRef<Block[]>([]);
@@ -136,11 +141,8 @@ export function Contents({ outline, current, words, open, declarations, files, h
   }, [copy, html, needle, outline]);
 
   const go = (block: Block) => {
-    if (!block.element.isConnected) return onPage(block.page);
-    const pane = document.querySelector<HTMLElement>("[data-paper-pane]");
-    if (!pane) return;
-    const top = block.element.getBoundingClientRect().top - pane.getBoundingClientRect().top + pane.scrollTop;
-    pane.scrollTo({ top: top - pane.clientHeight * 0.3, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    if (block.element.isConnected) onBlock(block.element, block.page);
+    else onPage(block.page);
   };
 
   const openFirst = () => {
@@ -151,6 +153,7 @@ export function Contents({ outline, current, words, open, declarations, files, h
 
   return (
     <nav className={`rail${open ? " is-open" : ""}`} aria-label="Sections of this paper">
+      <button type="button" className="rail__close" onClick={onClose}>Close</button>
       <div className="rail__search" role="search">
         <input
           ref={input}
@@ -163,6 +166,7 @@ export function Contents({ outline, current, words, open, declarations, files, h
             if (event.key === "Enter") openFirst();
             if (event.key === "Escape") {
               setQuery("");
+              event.stopPropagation();
               event.currentTarget.blur();
             }
           }}
@@ -211,14 +215,16 @@ export function Contents({ outline, current, words, open, declarations, files, h
               <button type="button" className="rail__item" aria-current={entry.id === current ? "location" : undefined} onClick={() => onJump(entry.id)}>
                 {entry.number && <span className="rail__no">{entry.number}</span>}
                 <span className="rail__title">{entry.title}</span>
-                {entry.ties > 0 && <span className="rail__ties" title={`${entry.ties} passages tied to the Lean`}>{entry.ties}</span>}
+                {entry.ties > 0 && <span className="rail__ties" title={`${entry.ties} statements tied to the Lean`}>{entry.ties}</span>}
               </button>
             </li>
           ))}
         </ol>
       )}
       <p className="rail__key">
-        <span className="rail__ties">Amber</span> counts the passages tied to the Lean. The left and right arrow keys step through them. A program matched all {words.toLocaleString("en-GB")} words of the reading copy against the authors’ PDF.
+        <button type="button" className="rail__index" onClick={onIndex}>All {declarations.length} declarations and their axioms</button>
+        <span>The numbers count statements tied to the Lean. <kbd>j</kbd> and <kbd>k</kbd> step through them, <kbd>Enter</kbd> pins, <kbd>Esc</kbd> unpins, <kbd>[</kbd> goes back.</span>
+        <span>A program matched all {words.toLocaleString("en-GB")} words of the reading copy against the authors’ PDF.</span>
       </p>
     </nav>
   );

@@ -1,17 +1,36 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Proof Reader</title>
-    <meta name="description" content="Read a paper beside its Lean proof: the paper set for reading, a map of the Lean declarations, and the source, tied together line by line." />
-    <meta name="theme-color" content="#f8f0e2" />
-    <meta name="color-scheme" content="light" />
-    <link rel="icon" href="/plectis.svg" type="image/svg+xml" />
+    <title>Proof Reader: read a paper beside its Lean proof</title>
+    <meta name="description" content="Read a paper beside its Lean proof. Scroll the paper and the graph of the proof and the authors' Lean follow; click any marked statement to open its exact lines." />
+    <meta name="theme-color" content="#ebe2d2" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#150f1e" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="%BASE_URL%favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href="https://wcook04.github.io/proof-reader/" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Proof Reader" />
+    <meta property="og:title" content="Proof Reader: read a paper beside its Lean proof" />
+    <meta property="og:description" content="The paper on one page and the proof on the other: a graph of the Lean above the authors' own lines, tied statement by statement." />
+    <meta property="og:url" content="https://wcook04.github.io/proof-reader/" />
+    <meta property="og:image" content="https://wcook04.github.io/proof-reader/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="A paper on the left page with one sentence highlighted, and on the right the graph of its Lean proof above the Lean lines the sentence describes." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      // The chosen theme, before the first paint, so the page never flashes.
+      try {
+        var stored = localStorage.getItem("proof-reader-theme");
+        if (stored === "light" || stored === "dark") document.documentElement.setAttribute("data-theme", stored);
+      } catch (error) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
-    <noscript>This site draws the paper and its Lean proof in the browser and needs JavaScript.</noscript>
+    <noscript>This site draws the paper and its Lean proof in the browser and needs JavaScript. The papers and their data are under <a href="%BASE_URL%papers/index.json">papers/</a>.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

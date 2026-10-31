@@ -1,25 +1,43 @@
-// How a record is drawn at a screen scale k (DESIGN.md, "Two scales, three
+// How a record is drawn at a screen scale k (DESIGN.md, "Two scales, two
 // representations"). The camera never shrinks prose below reading size: past
-// a threshold the card changes form instead.
+// a threshold a card turns into a tile that still shows its title, and the
+// camera stops at the scale where a tile can hold words at 11px on screen.
 
-export type Rep = "card" | "compact" | "mark";
+export type Rep = "card" | "compact";
 
-/** Card at k >= CARD_K, compact title down to MARK_K, a mark below. */
+/** A card at k >= CARD_K, a tile below it. The dense layout is tiles at every scale. */
 export const CARD_K = 0.8;
-export const MARK_K = 0.5;
 
 /** Steps opens at k = 1; it accepts down to this only when that buys the whole first row. */
 export const STEPS_K = 1;
 export const STEPS_FLOOR = 0.85;
 /** The side pane's tree uses smaller cards and a lower floor. */
-export const COMPACT_FLOOR = 0.4;
-export const MIN_K = 0.1;
+export const COMPACT_FLOOR = 0.75;
+
+/** The tile's title in world pixels in the dense layout, and the smallest size it may reach on screen. */
+export const DENSE_TEXT = 13;
+export const MIN_TEXT = 11;
+/** Below these scales a tile could not hold its words at MIN_TEXT, so the camera stops here. */
+export const DENSE_MIN_K = MIN_TEXT / DENSE_TEXT;
+export const STEPS_MIN_K = 0.5;
+export const COMPACT_MIN_K = 0.6;
 export const MAX_K = 1.8;
 
-export function repFor(k: number): Rep {
-  if (k >= CARD_K - 1e-6) return "card";
-  if (k >= MARK_K - 1e-6) return "compact";
-  return "mark";
+/** The dense layout's tiles, in world pixels. */
+export const DENSE_W = 190;
+export const DENSE_H = 46;
+/** With a paper lens on, a dense tile has a third line for the section. */
+export const DENSE_H_SECTION = 60;
+export const DENSE_ROOT_W = 420;
+export const DENSE_ROOT_H = 64;
+
+export function floorK(dense: boolean, compact: boolean): number {
+  if (dense) return DENSE_MIN_K;
+  return compact ? COMPACT_MIN_K : STEPS_MIN_K;
+}
+
+export function repFor(k: number, dense = false): Rep {
+  return dense || k < CARD_K - 1e-6 ? "compact" : "card";
 }
 
 export type MapMode = "steps" | "overview";
@@ -33,22 +51,23 @@ export interface TileBox {
 }
 
 /** The compact tile's box on screen (tree.css .card__compact). */
-export const TILE: TileBox = { padTop: 5, padBottom: 5, padX: 8, border: 1 };
+export const TILE: TileBox = { padTop: 10, padBottom: 7, padX: 8, border: 1 };
 
-/** A mark's text box (tree.css, mark form): the fill gives the source, so there is no corner square to clear. */
-export const MARK_TILE: TileBox = { padTop: 4, padBottom: 4, padX: 4, border: 1 };
+/** The dense tile's box: thin at top and foot, with the source square in the left padding. */
+export const DENSE_TILE: TileBox = { padTop: 4, padBottom: 4, padX: 10, border: 1 };
+
 
 export type TitleKind = "card" | "lean" | "root";
 
 /**
- * Title sizes tried in a compact tile or a mark, largest first, and their line heights.
- * A tile's title stops at 13px so it never outgrows the card it turns into at CARD_K;
- * the plate's title reaches 24px for the same reason.
+ * Title sizes tried in a tile, largest first, and their line heights. A tile's
+ * title stops at 13px so it never outgrows the card it turns into at CARD_K;
+ * the plate's title reaches 24px for the same reason. Nothing goes below MIN_TEXT.
  */
 export const TITLE_SIZES: Record<TitleKind, { sizes: number[]; lineH: number }> = {
-  card: { sizes: steps(13, 10), lineH: 1.22 },
-  lean: { sizes: steps(12, 9.5), lineH: 1.22 },
-  root: { sizes: steps(24, 11), lineH: 1.2 },
+  card: { sizes: steps(13, MIN_TEXT), lineH: 1.22 },
+  lean: { sizes: steps(12, MIN_TEXT), lineH: 1.22 },
+  root: { sizes: steps(24, MIN_TEXT), lineH: 1.2 },
 };
 
 /** The plate's compact form adds the theorem's first sentence, this wide on screen, this far under the title. */
@@ -63,11 +82,11 @@ function steps(hi: number, lo: number): number[] {
   return out;
 }
 
-/** Room for title lines: the tile's height on screen less its padding, border and (on the plate) the "MAIN RESULT" line. */
-function roomOf(h: number, k: number, kind: TitleKind, box: TileBox = TILE): number {
+/** Room for title lines: the tile's height on screen less its padding, border, any reserved line and (on the plate) the "MAIN RESULT" line. */
+function roomOf(h: number, k: number, kind: TitleKind, box: TileBox = TILE, reserve = 0): number {
   // The plate's "MAIN RESULT" line (11px at line height 1.2) and the 5px gap under it.
   const above = kind === "root" ? 11 * 1.2 + 5 : 0;
-  return h * k - 2 * box.border - box.padTop - box.padBottom - above;
+  return h * k - 2 * box.border - box.padTop - box.padBottom - above - reserve;
 }
 
 /** The width title lines have on screen: the plate's title keeps a 560px measure. */
@@ -154,6 +173,16 @@ export function shortTitle(t: MeasuredTitle, kept: number): string {
   return `${text.replace(/[\s,;:.\-–—_]+$/, "")}…`;
 }
 
+/** The start of a single piece wider than a line: the last resort, so a tile always shows words. */
+function cutPiece(t: MeasuredTitle, size: number, width: number): string | undefined {
+  const first = t.pieces[0];
+  if (!first?.text) return undefined;
+  const scale = size / REF_PX;
+  const room = width - (t.ellipsis ?? 0) * scale;
+  const n = Math.max(3, Math.floor((first.text.length * room) / Math.max(1, first.w * scale)));
+  return `${first.text.slice(0, n)}…`;
+}
+
 /** Greedy wrap at `size`: the number of lines, or Infinity when one piece is wider than the line. */
 export function wrapLines(t: MeasuredTitle, size: number, width: number): number {
   const scale = size / REF_PX;
@@ -182,16 +211,17 @@ export interface TitleFit {
 }
 
 /**
- * Compact form: the largest title size (13px down to 10px; Lean 12 to 9.5; the
- * plate 24 to 11) at which the whole title fits the tile on screen, and the
- * number of lines the tile holds at that size. Only a title that cannot fit
- * even at the smallest size is cut (`fits` false), at the smallest size and
- * after a whole word.
+ * A tile's title: the largest size (13px down to 11px; Lean 12 to 11; the plate
+ * 24 to 11) at which the whole title fits the tile on screen, and the number of
+ * lines the tile holds at that size. A title that cannot fit even at the
+ * smallest size is cut (`fits` false), at the smallest size and after a whole
+ * word, so a tile never stands empty. `reserve` is room kept for a line under
+ * the title, in screen pixels.
  */
-export function fitTitle(t: MeasuredTitle, w: number, h: number, k: number, kind: TitleKind, box: TileBox = TILE): TitleFit {
+export function fitTitle(t: MeasuredTitle, w: number, h: number, k: number, kind: TitleKind, box: TileBox = TILE, reserve = 0): TitleFit {
   const { sizes, lineH } = TITLE_SIZES[kind];
   const width = widthOf(w, k, kind, box);
-  const room = roomOf(h, k, kind, box);
+  const room = roomOf(h, k, kind, box, reserve);
   if (kind === "root") {
     const plate = fewestLines(t, sizes, width, (size) => Math.max(1, Math.floor((room + 0.5) / (size * lineH))));
     if (plate) return { size: plate.size, lines: plate.max, fits: true };
@@ -203,22 +233,8 @@ export function fitTitle(t: MeasuredTitle, w: number, h: number, k: number, kind
   const size = sizes[sizes.length - 1];
   const lines = Math.max(1, Math.floor((room + 0.5) / (size * lineH)));
   const kept = keptPieces(t, size, width, lines);
-  return { size, lines, fits: false, kept, short: kept > 0 && t.pieces[0]?.text !== undefined ? shortTitle(t, kept) : undefined };
-}
-
-/**
- * Mark form: a mark is a tile too, and shows its title whenever it fits at 10px or
- * more on screen (`show`). A title too long for the mark is cut after a whole word
- * when at least two lines fit, no word is wider than a line and at least half its
- * words stay; anything less stays a plain mark. Whether text shows depends on the
- * mark's own size on screen, not on the scale alone, so the plate keeps its title
- * long after the tiles lose theirs.
- */
-export function fitMark(t: MeasuredTitle, w: number, h: number, k: number, kind: TitleKind): TitleFit & { show: boolean } {
-  const fit = fitTitle(t, w, h, k, kind, MARK_TILE);
-  if (fit.fits) return { ...fit, show: roomOf(h, k, kind, MARK_TILE) >= fit.size * TITLE_SIZES[kind].lineH - 0.5 };
-  const whole = wrapLines(t, fit.size, widthOf(w, k, kind, MARK_TILE)) < Infinity;
-  return { ...fit, show: fit.lines >= 2 && whole && (fit.kept ?? 0) * 2 >= t.pieces.length };
+  const short = kept > 0 && t.pieces[0]?.text !== undefined ? shortTitle(t, kept) : cutPiece(t, size, width);
+  return { size, lines, fits: false, kept, short };
 }
 
 /**

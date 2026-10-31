@@ -20,7 +20,7 @@
 // for a rooted, goal-first view with stable re-layout.
 
 import { assignX } from "./coords";
-import { reduceCrossings, type Adjacency } from "./order";
+import { crossings, reduceCrossings, type Adjacency } from "./order";
 import { plan, type Plan } from "./router";
 import type { EngineEdge, Layout, Metrics, Rect, Size } from "./types";
 
@@ -34,6 +34,8 @@ export interface LayoutInput {
   prev?: Layout | null;
   /** A card to keep in place (the one being unfolded or folded). */
   pin?: string | null;
+  /** Keep the cards in the order `prev` has them: no crossing sweep, so nothing a reader knows changes place. */
+  keepOrder?: boolean;
 }
 
 export const ANCHOR = 0.03;
@@ -175,7 +177,7 @@ export function layoutTree(input: LayoutInput): { layout: Layout; plan: Plan } {
     layers[r].sort((a, b) => seedX.get(a)! - seedX.get(b)! || (dfs.get(a) ?? 0) - (dfs.get(b) ?? 0));
   }
   const seedLayers = layers.map((l) => [...l]);
-  const ordered = reduceCrossings(layers, up, down);
+  const ordered = input.keepOrder && prev ? { layers, crossings: crossings(layers, down), seedCrossings: crossings(layers, down) } : reduceCrossings(layers, up, down);
 
   // Coordinates.
   const width = (id: string) => (isDummyKey(id) ? 0 : input.size(id).w);

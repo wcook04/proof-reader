@@ -17,12 +17,10 @@ export function kindName(kind: string): string {
 /** A relation's name in the interface (DESIGN.md, Relations). */
 export function relationName(kind: string): string {
   switch (kind) {
-    case "supports":
-      return "Lean use";
     case "assumes":
-      return "Axiom";
+      return "Explicit assumption";
     case "formalizes":
-      return "Stated in Lean";
+      return "Recorded Lean correspondence";
     case "cites":
       return "Citation";
     case "lean_type_dependency":

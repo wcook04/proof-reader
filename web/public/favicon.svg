@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>
+    .page { fill: #fffdf8; stroke: #191520; }
+    .ink { stroke: #191520; }
+    .lit { stroke: #a25200; }
+    @media (prefers-color-scheme: dark) {
+      .page { fill: #1f1829; stroke: #f2e6d4; }
+      .ink { stroke: #f2e6d4; }
+      .lit { stroke: #fab250; }
+    }
+  </style>
+  <path class="page" d="M16 8 C12 5.5 7 5 3 6 V26 C7 25 12 25.5 16 28 C20 25.5 25 25 29 26 V6 C25 5 20 5.5 16 8 Z" stroke-width="2" stroke-linejoin="round" />
+  <path class="ink" d="M16 8 V28" fill="none" stroke-width="2" />
+  <path class="ink" d="M7 12 H12.5 M7 20 H12.5" fill="none" stroke-width="1.8" stroke-linecap="round" />
+  <path class="lit" d="M7 16 H12.5 M19.5 16 H25" fill="none" stroke-width="2.6" stroke-linecap="round" />
+  <path class="ink" d="M19.5 12 H25 M19.5 20 H25" fill="none" stroke-width="1.8" stroke-linecap="round" />
+</svg>
