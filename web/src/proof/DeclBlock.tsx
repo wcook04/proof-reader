@@ -89,7 +89,8 @@ export function DeclBlock({ edition, d, passage, exact, open, onToggle, onPassag
   return (
     <article className="decl" data-shape={shapeOf(d)} data-decl={d.id}>
       <header className="decl__head">
-        <h3 className="decl__name"><a href={routeHref({ paper: edition.slug, record: d.id })}>{d.id}</a></h3>
+        <h3 className="decl__name"><a href={routeHref({ paper: edition.slug, record: d.id })}>{d.plain}</a></h3>
+        <code className="decl__raw">{d.id}</code>
         <span className="decl__kind">{KIND_WORDS[d.keyword] ?? d.keyword}, line{d.lines > 1 ? `s ${d.line} to ${d.end_line}` : ` ${d.line}`}</span>
       </header>
       {passage && <p className="decl__relation">{RELATION[passage.role]}</p>}

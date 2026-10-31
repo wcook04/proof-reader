@@ -52,6 +52,7 @@ MARGIN = 14
 ROLES = ("states", "defines", "proves", "explains", "uses")
 # A type is read whole: its constructors or fields are its statement.
 READ_WHOLE = ("inductive", "structure", "class", "axiom")
+PLAIN_LIMIT = 40
 
 
 class PaperError(Exception):
@@ -383,6 +384,12 @@ def resolve(slug: str) -> dict:
                 errors.append(f"claim {claim['id']}: no Lean declaration called {name}")
         if claim.get("passage") not in ids:
             errors.append(f"claim {claim['id']}: no passage called {claim.get('passage')}")
+    for name, title in links.get("plain", {}).items():
+        if name not in written:
+            errors.append(f"plain: no Lean declaration called {name}")
+        problem = plain_problem(name, title)
+        if problem:
+            errors.append(f"plain title for {name}: {problem}")
     for name, note in links.get("notes", {}).items():
         if name not in written:
             errors.append(f"note: no Lean declaration called {name}")
@@ -392,6 +399,17 @@ def resolve(slug: str) -> dict:
         raise PaperError("\n".join(errors))
     return {"folder": folder, "config": config, "shards": shard_info, "links": links, "passages": passages,
             "sizes": sizes, "words": words}
+
+
+def plain_problem(name: str, title: str) -> str | None:
+    """A plain title is words a newcomer can read, short enough for a card."""
+    if not title.strip():
+        return "it is empty"
+    if len(title) > PLAIN_LIMIT:
+        return f"keep it to {PLAIN_LIMIT} characters"
+    if title == name or re.fullmatch(r"\S*[a-z][A-Z]\S*", title):
+        return "it reads like a Lean name"
+    return None
 
 
 def reachable(goals: list[str], uses: dict) -> set[str]:
@@ -419,6 +437,9 @@ def edition(slug: str) -> dict:
     def split(names: list[str], statement: bool, kind_of) -> list[str]:
         return sorted(n for n in names if (kind_of(n) == "statement") == statement)
 
+    untitled = sorted(name for name in keep if name not in links.get("plain", {}))
+    if untitled:
+        raise PaperError(f"links.json needs a plain title for each declaration under \"plain\": {', '.join(untitled)}")
     linked: dict[str, list[str]] = {name: [] for name in keep}
     for passage in data["passages"]:
         for name in passage.get("lean", []):
@@ -430,7 +451,7 @@ def edition(slug: str) -> dict:
         axioms = row["axioms"]
         lines = texts[row["module"]].splitlines()
         declarations.append({
-            "id": name, "keyword": row["keyword"], "kind": row["kind"], "type": row["type"],
+            "id": name, "plain": links["plain"][name], "keyword": row["keyword"], "kind": row["kind"], "type": row["type"],
             "file": f"{project_root}/{row['module'].replace('.', '/')}.lean", "line": row["line"], "end_line": row["end_line"],
             "lines": row["end_line"] - row["line"] + 1,
             "statement_end": statement_end(lines, row["line"], row["end_line"], row["keyword"]),

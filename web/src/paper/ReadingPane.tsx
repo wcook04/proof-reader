@@ -243,6 +243,9 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
           return placed;
         }
         scrollTo(target.top, true, true);
+        // A return is not reading on: the right page comes back at once.
+        window.clearTimeout(followTimer.current);
+        latest.current.onFollow(line.current, zone.current);
         return true;
       }
       if ("passage" in target) {

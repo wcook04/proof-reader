@@ -4,8 +4,10 @@
 import { memo, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type Ref } from "react";
 import type { Edition, Passage } from "../app/edition";
 import type { Tab } from "../app/history";
+import { routeHref } from "../app/router";
 import { DeclLink, LeanCode, useFileLines, type LeanActions } from "../lean/code";
 import { sectionLabel, shapeOf } from "../model/fromEdition";
+import { READING_LINE } from "../paper/reading-line";
 import { DeclBlock, KIND_WORDS, foldWord, list } from "./DeclBlock";
 
 export interface Step {
@@ -29,6 +31,8 @@ interface Props {
   ref?: Ref<LeanPageHandle>;
   edition: Edition;
   step: Step;
+  /** Open on the right page; a closed page keeps its folds. */
+  open: boolean;
   tab: Tab;
   onTab(tab: Tab): void;
   onPassage(id: string): void;
@@ -37,7 +41,7 @@ interface Props {
 
 const SHORT_PROOF = 8;
 
-export const LeanPage = memo(function LeanPage({ ref, edition, step, tab, onTab, onPassage, act }: Props) {
+export const LeanPage = memo(function LeanPage({ ref, edition, step, open, tab, onTab, onPassage, act }: Props) {
   const body = useRef<HTMLDivElement>(null);
   const names = useMemo(() => new Set(edition.declarations.map((d) => d.id)), [edition]);
   // The reader's own folds outlast the step that showed them.
@@ -62,32 +66,41 @@ export const LeanPage = memo(function LeanPage({ ref, edition, step, tab, onTab,
     });
   }, [edition, step.exact, step.passage]);
 
-  // A step comes to its head, or to its exact lines; a step come back to keeps its place.
+  // A step's Lean comes level with the paper's reading line where that falls inside this
+  // pane; a step come back to keeps its place.
+  const shownOpen = useRef(false);
   useLayoutEffect(() => {
     const el = body.current;
-    if (!el) return;
+    if (!el || !open) {
+      shownOpen.current = false;
+      return;
+    }
     const was = shownKey.current;
-    if (was === step.key) return;
-    tops.current.set(was, el.scrollTop);
+    if (was === step.key && shownOpen.current) return;
+    if (was !== step.key && shownOpen.current) tops.current.set(was, el.scrollTop);
     shownKey.current = step.key;
+    shownOpen.current = true;
     const kept = tops.current.get(step.key);
     if (kept !== undefined) {
       el.scrollTop = kept;
       return;
     }
     el.scrollTop = 0;
-    if (step.exact) {
-      const row = el.querySelector<HTMLElement>(`.decl .source__line[data-line="${step.exact[0]}"]`);
-      if (row) el.scrollTop = Math.max(0, row.getBoundingClientRect().top - el.getBoundingClientRect().top - 72);
-    }
-  }, [step]);
+    const row = el.querySelector<HTMLElement>(step.exact ? `.decl .source__line[data-line="${step.exact[0]}"]` : ".decl .source__line");
+    const paper = document.querySelector<HTMLElement>("[data-paper-pane]");
+    if (!row || !paper) return;
+    const box = el.getBoundingClientRect();
+    const line = paper.getBoundingClientRect().top + paper.clientHeight * READING_LINE - box.top;
+    const room = Math.max(64, Math.min(line, el.clientHeight * 0.6));
+    el.scrollTop = Math.max(0, row.getBoundingClientRect().top - box.top - room);
+  }, [open, step]);
 
   return (
     <section className="leaf" aria-label="Lean">
       <div className="leaf__tabs" role="group" aria-label="What the Lean page shows">
         <button type="button" aria-pressed={tab === "step"} onClick={() => onTab("step")}>This step</button>
-        <button type="button" aria-pressed={tab === "index"} onClick={() => onTab("index")}>All {edition.declarations.length} declarations</button>
         <button type="button" aria-pressed={tab === "file"} onClick={() => onTab("file")}>Whole file</button>
+        <button type="button" aria-pressed={tab === "index"} onClick={() => onTab("index")}>Index</button>
       </div>
       <div className="leaf__body" ref={body} tabIndex={-1}>
         {tab === "index" ? (
@@ -108,6 +121,7 @@ export const LeanPage = memo(function LeanPage({ ref, edition, step, tab, onTab,
                 <blockquote>{step.passage.quote}</blockquote>
               </header>
             )}
+            {!step.untied && <Crumbs edition={edition} id={step.decls[0]} onPassage={onPassage} />}
             {!step.untied && step.decls.map((id) => {
               const d = edition.declarations.find((x) => x.id === id);
               if (!d) return null;
@@ -138,6 +152,32 @@ function foldOpen(d: Edition["declarations"][number], exact: [number, number] | 
   if (exact && exact[1] > d.statement_end) return true;
   if (passage?.role === "proves") return true;
   return d.end_line - d.statement_end <= SHORT_PROOF;
+}
+
+/** Where this exists in the paper, each a link. */
+function Crumbs({ edition, id, onPassage }: { edition: Edition; id: string | undefined; onPassage(id: string): void }) {
+  const d = edition.declarations.find((x) => x.id === id);
+  if (!d?.passages.length) return null;
+  const seen = new Set<string>();
+  const stops = d.passages.flatMap((pid) => {
+    const p = edition.passages.find((x) => x.id === pid);
+    const key = p ? `${p.section}/${p.page}` : "";
+    if (!p || seen.has(key)) return [];
+    seen.add(key);
+    return [p];
+  });
+  return (
+    <nav className="crumbs" aria-label={`Where the paper discusses ${d.plain}`}>
+      <span>In the paper</span>
+      {stops.map((p) => (
+        <a key={p.id} href={routeHref({ paper: edition.slug, record: `@${p.id}` })} onClick={(event) => {
+          if (event.metaKey || event.ctrlKey || event.shiftKey) return;
+          event.preventDefault();
+          onPassage(p.id);
+        }}>{sectionLabel(p.section)}, page {p.page}</a>
+      ))}
+    </nav>
+  );
 }
 
 function Untied({ edition, untied, onPassage }: { edition: Edition; untied: NonNullable<Step["untied"]>; onPassage(id: string): void }) {
@@ -175,7 +215,7 @@ function AllDeclarations({ edition, act }: { edition: Edition; act: LeanActions 
       <h3>All {declarations.length} declarations</h3>
       <table>
         <thead>
-          <tr><th scope="col">Name</th><th scope="col">Kind</th><th scope="col">Lines</th><th scope="col">In the paper</th></tr>
+          <tr><th scope="col">Declaration</th><th scope="col">Kind</th><th scope="col">Lines</th><th scope="col">In the paper</th></tr>
         </thead>
         <tbody>
           {declarations.map((d) => {

@@ -825,6 +825,30 @@
    "quote": "Intuitively, for every Pop in the index, fromIndex weakens the ProxyTop by one, which reify then turns back into a Pop."
   }
  ],
+  "plain": {
+    "Ty": "Types of the guest language",
+    "Ctx": "Typing contexts",
+    "Index": "Typed de Bruijn indices",
+    "STLC": "First-order terms of the STLC",
+    "ProxyTop": "Index that can only be the top",
+    "ReifyIndex": "Evidence one context extends another",
+    "instReifyIndexRefl": "Evidence: same context",
+    "instReifyIndexSnoc": "Evidence: one variable more",
+    "STLCCtx": "Contextual embedding of the STLC",
+    "unembed": "Contextual term to first-order term",
+    "ProxyVar": "Variable with its context hidden",
+    "weakenPVar": "Weaken a hidden variable",
+    "varTop": "Top variable, hidden",
+    "fromVar": "Hidden variable to contextual term",
+    "fromIndex": "Index to hidden variable",
+    "toCVar": "Index to contextual variable",
+    "contextualise": "First-order term to contextual term",
+    "indexIsoL": "Index round trip",
+    "closedWorld": "Closed-world axiom",
+    "indexIsoR": "Hidden variable round trip",
+    "isoL": "First-order round trip",
+    "isoR": "Contextual round trip"
+  },
  "notes": {
   "STLC": {
    "text": "The paper's Haskell calls two constructors Lam and App. The Lean calls them Lambda and Apply.",

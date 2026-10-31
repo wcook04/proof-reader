@@ -41,6 +41,8 @@ export interface ArgNode {
   label: string;
   /** The word on the card, when the kind's own name is too general. */
   kindLabel?: string;
+  /** The raw Lean name, drawn small under a plain title. */
+  rawName?: string;
   /** The form a card takes: blueprint readers read definition and theorem from its shape. */
   shape?: "definition" | "theorem" | "axiom";
   status: string;

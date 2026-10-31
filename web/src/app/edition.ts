@@ -43,6 +43,8 @@ export interface Claim {
 
 export interface Declaration {
   id: string;
+  /** What a person calls it. The raw name stays small beside this, and in the code. */
+  plain: string;
   keyword: string;
   kind: string;
   type: string;

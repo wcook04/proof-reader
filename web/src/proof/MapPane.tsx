@@ -1,10 +1,11 @@
 // The graph of the proof, adapted from Lean Exposition's map beside the paper. It
-// opens with every branch drawn. As a statement settles under the reading line the
-// map outlines its declarations, and those already passed stay tinted, so it shows
-// how far along the proof the reader is. The camera moves only if a card has left
-// the view. The reader stays in charge: moving the map pauses following.
+// comes along with the reading: every branch drawn, the statement under the reading
+// line outlined, what has been passed tinted. The camera moves only if a card has left
+// the view, and when the Lean rises it pans only as far as keeps the card in the band
+// left above it; closing the Lean puts the camera back exactly. The reader stays in
+// charge: moving the map pauses following.
 
-import { memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState, type Ref } from "react";
+import { memo, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type Ref } from "react";
 import type { Edition } from "../app/edition";
 import { ArgumentTree, type Insets, type MapViewHandle } from "../map/ArgumentTree";
 import type { MapScene } from "../map/scene";
@@ -13,7 +14,8 @@ import type { ArgGraph } from "../model/graph";
 
 const INSETS: Insets = { top: 10, right: 12, bottom: 10, left: 12 };
 /** Narrow tiles, so that at the 11px floor the proof fits half a laptop's window. */
-const TILE_W = 122;
+const TILE_W = 148;
+const TILE_H = 58;
 
 export interface MapPaneHandle {
   scene(): MapScene | null;
@@ -36,12 +38,14 @@ interface Props {
   selected: string | null;
   /** Hold the camera still for the next change: a card was just clicked. */
   stay: boolean;
+  /** The Lean has the lower part of the page, so the graph has a band. */
+  leanOpen: boolean;
   onSelect(id: string): void;
   onHover(id: string | null): void;
   onPauseChange(paused: boolean): void;
 }
 
-export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed, passed, reached, selected, stay, onSelect, onHover, onPauseChange }: Props) {
+export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed, passed, reached, selected, stay, leanOpen, onSelect, onHover, onPauseChange }: Props) {
   const tree = useRef<MapViewHandle>(null);
   const body = useRef<HTMLDivElement>(null);
   const { claims } = edition;
@@ -136,7 +140,16 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
     };
   }, [goal, inView]);
 
-  // The room changed: a drag of the handle, or a closed pane.
+  // The Lean rises: remember the camera, to give it back exactly when the Lean goes.
+  const leanRef = useRef(leanOpen);
+  const before = useRef<MapScene | null>(null);
+  useLayoutEffect(() => {
+    if (leanRef.current === leanOpen) return;
+    leanRef.current = leanOpen;
+    if (leanOpen) before.current = tree.current?.getScene() ?? null;
+  }, [leanOpen]);
+
+  // The room changed: the Lean rose or went, the handle was dragged, the window changed.
   useEffect(() => {
     const el = body.current;
     if (!el) return;
@@ -151,8 +164,15 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
       window.clearTimeout(timer);
       timer = window.setTimeout(() => {
         if (restoring.current) return;
-        tree.current?.fitAll(false);
-        if (litRef.current.length && !inView(litRef.current)) tree.current?.panTo(litRef.current);
+        if (leanRef.current) {
+          if (litRef.current.length && !inView(litRef.current)) tree.current?.panTo(litRef.current);
+        } else if (before.current) {
+          tree.current?.restoreScene(before.current);
+          before.current = null;
+        } else {
+          tree.current?.fitAll(false);
+          if (litRef.current.length && !inView(litRef.current)) tree.current?.panTo(litRef.current);
+        }
       }, 140);
     });
     observer.observe(el);
@@ -179,6 +199,7 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
         persist={false}
         mode="overview"
         tileWidth={TILE_W}
+        tileHeight={TILE_H}
         oneCardEach
         fitMax={1.4}
         selected={selected ?? undefined}
@@ -215,7 +236,7 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, lit, pointed
           <span className="vocab__name">Types</span>
           {types.map((d) => (
             <button key={d.id} type="button" data-vocab={d.id} className={lit.includes(d.id) ? "is-lit" : ""} onClick={() => onSelect(d.id)} onMouseEnter={() => onHover(d.id)} onMouseLeave={() => onHover(null)} onFocus={() => onHover(d.id)} onBlur={() => onHover(null)}>
-              <code>{d.id}</code>
+              {d.plain} <code>{d.id}</code>
             </button>
           ))}
           <span className="vocab__reached">Reached {reached} of {edition.declarations.length}</span>

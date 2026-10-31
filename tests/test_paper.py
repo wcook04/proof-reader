@@ -66,6 +66,23 @@ class Statements(unittest.TestCase):
         self.assertIsNone(paper.comment_above(["def b := 1", "theorem a : True := trivial"], 2))
 
 
+class PlainTitles(unittest.TestCase):
+    def test_words_pass(self):
+        self.assertIsNone(paper.plain_problem("isoR", "Contextual round trip"))
+
+    def test_the_raw_name_is_not_a_title(self):
+        self.assertIn("Lean name", paper.plain_problem("isoR", "isoR"))
+
+    def test_a_camel_case_name_is_not_a_title(self):
+        self.assertIn("Lean name", paper.plain_problem("isoR", "fromIndexOf"))
+
+    def test_a_title_fits_a_card(self):
+        self.assertIn("characters", paper.plain_problem("a", "a very long title that will never fit inside a small card"))
+
+    def test_empty_is_refused(self):
+        self.assertIn("empty", paper.plain_problem("a", " "))
+
+
 class Mentions(unittest.TestCase):
     def test_finds_names_inside_punctuation(self):
         found = paper.find_mentions(words("the", "(unembed),", "unembedded"), ["unembed"])

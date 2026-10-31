@@ -81,8 +81,13 @@ def camera(page: Page) -> str:
 
 
 def lean_head(page: Page) -> str:
-    names = page.locator(".leaf__body .decl__name")
-    return names.first.inner_text() if names.count() else ""
+    """The raw name of the declaration on show, when the Lean is open."""
+    block = page.locator(".proof__lean:not([hidden]) .decl")
+    return block.first.get_attribute("data-decl") if block.count() else ""
+
+
+def lean_open(page: Page) -> bool:
+    return page.locator(".proof__lean").is_visible()
 
 
 def lean_quote(page: Page) -> str:
@@ -98,7 +103,7 @@ def snapshot(page: Page) -> dict:
         "camera": camera(page),
         "copy": page.get_attribute(".page", "data-copy"),
         "lean": lean_head(page),
-        "tab": page.locator(".leaf__tabs button[aria-pressed=true]").inner_text(),
+        "tab": page.evaluate("document.querySelector('.leaf__tabs button[aria-pressed=true]')?.textContent ?? ''"),
     }
 
 
@@ -201,7 +206,7 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check(page.locator(".firstline").is_visible(), "the first screen says what to do")
     check("Click any marked statement" in page.locator(".firstline").inner_text(), "in plain words")
     check("Before the first tie" in caption(page), f"the caption says where the ties are: {caption(page)}")
-    check(page.locator(".proof__graph").is_visible() and page.locator(".proof__lean").is_visible(), "the graph and the Lean are both showing")
+    check(page.locator(".proof__graph").is_visible() and not lean_open(page), "at rest the right page is the graph, and the Lean waits")
     check(page.locator(".skip").count() == 1, "there is a skip link")
     shot(page, shots, "01-arrive")
 
@@ -210,7 +215,8 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     wheel_to(page, 5200)
     wait_until(page, lambda: "Following the paper" in caption(page), "scrolling follows without a click")
     check(page.locator(".sheet__text .q.is-active").count() > 0, "the statement under the line takes the highlighter")
-    check(page.locator(".decl").count() > 0, "the Lean page shows its declaration")
+    check(page.locator('.card[data-trail="here"], .vocab .is-lit').count() > 0, "its card lights on the graph")
+    check(not lean_open(page), "the Lean stays closed while reading")
     wait_until(page, lambda: address(page).endswith(page.evaluate("document.querySelector('.q.is-active').dataset.p.split(' ')[0]")), "the address keeps up with the sentence")
     check(entries(page) == base_entries, "following adds no history")
     shot(page, shots, "02-following")
@@ -227,26 +233,50 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     print("Hover")
     other = visible_mark(page)
     check(other is not None, f"a second statement is on screen: {other}")
-    was_lean = lean_quote(page)
     was_top = top(page)
     was_entries = entries(page)
     target = page.locator('[data-journey="mark"]')
     box = target.evaluate("(el) => { const b = el.getClientRects()[0]; return { x: b.left, y: b.top, width: b.width, height: b.height }; }")
     page.mouse.move(box["x"] + 8, box["y"] + 6)
     check("pointer" == target.evaluate("(el) => getComputedStyle(el).cursor"), "the pointer says it can be clicked")
-    wait_until(page, lambda: "Previewing" in caption(page), "a dwell previews on the right page")
-    check(lean_quote(page) != was_lean or True, "the Lean shows the sentence under the pointer")
-    check(abs(top(page) - was_top) <= 1 and entries(page) == was_entries, "pointing moves nothing and adds no history")
+    wait_until(page, lambda: "It has Lean" in page.locator(".proof__reading").inner_text(), "a dwell names it in plain words under the graph")
+    check(abs(top(page) - was_top) <= 1 and entries(page) == was_entries and not lean_open(page), "pointing moves nothing and adds no history")
+    shot(page, shots, "03-point")
+    page.mouse.move(box["x"] + 6, 20)
+    wait_until(page, lambda: "It has Lean" not in page.locator(".proof__reading").inner_text(), "leaving restores")
+
+    print("The Lean one click away, left open")
+    page.locator(".proof__show button", has_text="Lean").click()
+    wait_until(page, lambda: lean_open(page) and lean_head(page), "one click opens the Lean")
+    first_lean = lean_quote(page)
+    page.mouse.move(box["x"] + 8, box["y"] + 6)
+    wait_until(page, lambda: "Previewing" in caption(page), "with the Lean open, a dwell previews there")
     shot(page, shots, "03-preview")
     page.mouse.move(box["x"] + 6, 20)
-    wait_until(page, lambda: "Previewing" not in caption(page), "leaving restores")
-    check(lean_quote(page) == was_lean, "the same Lean as before")
+    wait_until(page, lambda: "Previewing" not in caption(page), "and leaving restores it")
+    check(lean_quote(page) == first_lean, "the same Lean as before")
+    wheel_to(page, top(page) + 500)
+    wait_until(page, lambda: lean_quote(page) != first_lean, "left open, the Lean keeps following")
+    wait_until(page, lambda: page.evaluate("""() => { const row = document.querySelector('.proof__lean .source__line.is-exact') ?? document.querySelector('.proof__lean .source__line'); const body = document.querySelector('.leaf__body').getBoundingClientRect(); const b = row.getBoundingClientRect(); return b.top >= body.top && b.bottom <= body.bottom; }"""), "and comes into view")
+    shot(page, shots, "03-following-lean")
+    page.locator(".proof__show button", has_text="Lean").click()
+    wait_until(page, lambda: not lean_open(page), "one click closes it")
+    wheel_to(page, top(page) - 500)
+    wait_until(page, lambda: visible_mark(page), "back at a tied statement")
+    other = visible_mark(page)
+    target = page.locator('[data-journey="mark"]')
+    box = target.evaluate("(el) => { const b = el.getClientRects()[0]; return { x: b.left, y: b.top, width: b.width, height: b.height }; }")
+    was_top = top(page)
+    was_entries = entries(page)
 
     print("Click a sentence")
     stop_here("following")
     page.mouse.click(box["x"] + 8, box["y"] + 6)
     wait_until(page, lambda: address(page).endswith(f"@{other}"), f"the sentence has an address: {other}")
     check("Pinned" in caption(page), "the caption says it is pinned")
+    check(lean_open(page) and lean_head(page), "the click expands it into the raw Lean")
+    check(page.locator(".proof__graph").is_visible(), "a band of graph stays above it")
+    check(page.locator(".crumbs a").count() > 0, "breadcrumbs say where the paper has it")
     check(abs(top(page) - was_top) <= 2, "the paper does not move")
     check(entries(page) == was_entries + 1, "one history entry")
     check(page.locator(".bar .back").is_visible(), "a named Back appears")
@@ -256,12 +286,13 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
 
     print("Walk the Lean")
     link = page.locator(".leaf__body a.source__ref, .leaf__body a.declname").first
-    name = link.inner_text()
     was_top = top(page)
     link.hover()
-    wait_until(page, lambda: name in page.locator(".proof__reading").inner_text(), f"pointing at {name} says its signature on the right page")
+    raw = link.evaluate("(a) => (a.querySelector('code')?.textContent ?? a.textContent).trim()")
+    wait_until(page, lambda: raw in page.locator(".proof__reading").inner_text(), f"pointing at {raw} says its signature on the right page")
     check(page.locator(".proof__reading code").count() == 1, "in the strip, covering nothing")
     link.click()
+    name = raw
     wait_until(page, lambda: lean_head(page) == name, f"the Lean walks to {name}")
     check(address(page).endswith(f"/{name}"), "the declaration has its own address")
     check(abs(top(page) - was_top) <= 2, "the paper does not move by itself")
@@ -306,10 +337,27 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     page.locator(".graph__paused button").click()
     wait_until(page, lambda: page.locator(".graph__paused").count() == 0, "one click resumes it")
 
-    print("Escape unpins")
-    page.locator(".leaf__tabs").click(position={"x": 400, "y": 6})
+    print("Escape returns the graph exactly")
     page.keyboard.press("Escape")
-    wait_until(page, lambda: "Pinned" not in caption(page), "Escape unpins and following resumes")
+    wait_until(page, lambda: not lean_open(page), "Escape closes the Lean and following resumes")
+    page.wait_for_timeout(500)
+    rest_camera = camera(page)
+    target_card = page.locator('.card[data-record="closedWorld"]')
+    target_card.click()
+    wait_until(page, lambda: lean_head(page) == "closedWorld", "a card lower in the graph opens too")
+    page.wait_for_timeout(1300)
+    in_band = page.evaluate("""() => { const canvas = document.querySelector('.graph__canvas').getBoundingClientRect(); const b = document.querySelector('.card[data-record="closedWorld"]').getBoundingClientRect(); return b.top >= canvas.top && b.bottom <= canvas.bottom; }""")
+    check(in_band, "and its card stays in the band above the Lean")
+    shot(page, shots, "04-band")
+    page.keyboard.press("Escape")
+    wait_until(page, lambda: not lean_open(page), "Escape again")
+    wait_until(page, lambda: camera(page) == rest_camera, "the graph is exactly as it was")
+    page.go_back()
+    wait_until(page, lambda: lean_head(page) == "isoR" or not lean_open(page), "Back undoes that open")
+    page.wait_for_timeout(400)
+    if lean_open(page):
+        page.keyboard.press("Escape")
+        wait_until(page, lambda: not lean_open(page), "and Escape closes the one before")
     stack[-1] = ("card isoR, unpinned", snapshot(page))
 
     print("References")
@@ -391,9 +439,13 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     print("Past the last tie")
     check("No ties here" in caption(page), f"the caption says the ties have stopped: {caption(page)}")
     check("After the last tie" in page.locator(".stepper").inner_text(), "the counter says so too")
-    untied = page.locator(".untied").inner_text()
-    check("not" in untied.lower() or "Nothing" in untied, "the Lean page says plainly what is and is not covered")
-    check("section 6.3" in untied, "with the paper's own scope")
+    check("section 6.3" in page.locator(".proof__reading").inner_text(), "and what is and is not covered, in the paper's own scope")
+    page.locator(".proof__show button", has_text="Lean").click()
+    wait_until(page, lambda: page.locator(".untied").count() > 0, "the open Lean says plainly that nothing here is tied")
+    check("66 ties" in page.locator(".untied").inner_text(), "and where the ties are")
+    page.locator(".proof__show button", has_text="Lean").click()
+    wait_until(page, lambda: not lean_open(page), "and closes again")
+    stack[-1] = ("jumped to 3.6", snapshot(page))
     shot(page, shots, "06-past-the-ties")
 
     print("Search")
@@ -448,7 +500,7 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
         same(page, want, f"Forward to {name}")
 
     print("Back by keys, and a reload in the middle")
-    page.locator(".leaf__tabs").click(position={"x": 400, "y": 6})
+    page.locator(".bar__title").click()
     page.keyboard.press("[")
     same(page, stack[-2][1], "[ goes back")
     page.keyboard.press("Alt+ArrowLeft")
@@ -502,6 +554,8 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     wait_until(page, lambda: "Pinned" in caption(page), "it pins")
     wheel_to(page, top(page) + 1500)
     wait_until(page, lambda: "Pinned" not in caption(page), "and scrolling it away lets go")
+    page.keyboard.press("Escape")
+    wait_until(page, lambda: not lean_open(page), "Escape puts the graph back")
 
     print("Addresses")
     fresh = page.context.new_page()
@@ -545,24 +599,35 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     page.goto("about:blank")
     page.goto(f"{url}#/{SLUG}", wait_until="load")
     page.wait_for_selector(".card")
-    page.wait_for_timeout(400)
+    page.wait_for_timeout(500)
+    check(not lean_open(page), "the page starts at rest")
+    handle = page.locator(".proof__handle")
+    handle.click()
+    wait_until(page, lambda: lean_open(page), "a click on the handle brings up the Lean")
     if not page.locator(".proof[data-side]").count():
-        handle = page.locator(".proof__handle").bounding_box()
+        box = handle.bounding_box()
         was = page.locator(".proof__graph").bounding_box()["height"]
-        page.mouse.move(handle["x"] + handle["width"] / 2, handle["y"] + 5)
+        page.mouse.move(box["x"] + box["width"] / 2, box["y"] + 5)
         page.mouse.down()
-        page.mouse.move(handle["x"] + handle["width"] / 2, handle["y"] + 60, steps=5)
+        page.mouse.move(box["x"] + box["width"] / 2, box["y"] + 60, steps=5)
         page.mouse.up()
         page.wait_for_timeout(200)
         now = page.locator(".proof__graph").bounding_box()["height"]
         check(now > was + 40, f"dragging the handle gives the graph more room: {was:.0f} to {now:.0f}")
-    page.locator(".proof__show button", has_text="Graph").click()
-    check(not page.locator(".proof__graph").is_visible(), "the graph can be closed")
     reload(page)
-    page.wait_for_selector(".decl")
-    check(not page.locator(".proof__graph").is_visible(), "and stays closed")
+    page.wait_for_selector(".card")
+    page.wait_for_timeout(400)
+    check(lean_open(page), "the choice to leave the Lean open is remembered")
+    page.locator(".proof__show button", has_text="Lean").click()
+    wait_until(page, lambda: not lean_open(page), "and closes")
     page.locator(".proof__show button", has_text="Graph").click()
-    check(page.locator(".proof__graph").is_visible(), "and opens again")
+    wait_until(page, lambda: page.locator(".proof").count() == 0, "the graph can be closed, and the paper has the desk")
+    reload(page)
+    page.wait_for_selector(".sheet__text .q", state="attached")
+    page.wait_for_timeout(400)
+    check(page.locator(".proof").count() == 0, "and stays closed")
+    page.locator(".bar__open").click()
+    wait_until(page, lambda: page.locator(".proof__graph").is_visible(), "and opens again")
 
     print("Night")
     page.locator(".bar__theme").click()

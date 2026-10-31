@@ -107,7 +107,7 @@ export function Contents({ outline, current, open, declarations, files, html, co
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  const names = useMemo(() => (needle ? declarations.filter((d) => d.id.toLowerCase().includes(needle)).slice(0, 6) : []), [declarations, needle]);
+  const names = useMemo(() => (needle ? declarations.filter((d) => d.id.toLowerCase().includes(needle) || d.plain.toLowerCase().includes(needle)).slice(0, 6) : []), [declarations, needle]);
 
   // Lines of Lean that match, each opening the declaration it belongs to.
   const inLean = useMemo(() => {
@@ -145,8 +145,8 @@ export function Contents({ outline, current, open, declarations, files, html, co
   };
 
   const openFirst = () => {
-    if (names[0]) onName(names[0].id);
-    else if (found[0]) go(found[0].block);
+    if (found[0]) go(found[0].block);
+    else if (names[0]) onName(names[0].id);
     else if (inLean[0]) onName(inLean[0].name);
   };
 
@@ -158,7 +158,7 @@ export function Contents({ outline, current, open, declarations, files, html, co
           ref={input}
           type="search"
           value={query}
-          placeholder="Search paper and Lean  ( / )"
+          placeholder="Search the paper  ( / )"
           aria-label="Search the paper and the Lean names"
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={(event) => {
@@ -176,11 +176,19 @@ export function Contents({ outline, current, open, declarations, files, html, co
           <p className="rail__none">Nothing matches that.</p>
         ) : (
           <ul className="rail__found">
+            {found.map(({ block, at }) => (
+              <li key={`${block.section}${at}${block.text.slice(0, 24)}`}>
+                <button type="button" onClick={() => go(block)}>
+                  <Snippet text={block.text} at={at} length={needle.length} />
+                  <span className="rail__where">{block.section}</span>
+                </button>
+              </li>
+            ))}
             {names.map((d) => (
               <li key={d.id}>
                 <button type="button" onClick={() => onName(d.id)}>
-                  <code>{d.id}</code>
-                  <span className="rail__where">Lean, line {d.line}</span>
+                  {d.plain}
+                  <span className="rail__where">Lean: <code>{d.id}</code></span>
                 </button>
               </li>
             ))}
@@ -189,14 +197,6 @@ export function Contents({ outline, current, open, declarations, files, html, co
                 <button type="button" onClick={() => onName(hit.name)}>
                   <code><Snippet text={hit.text} at={hit.at} length={needle.length} /></code>
                   <span className="rail__where">{hit.name}, line {hit.line}</span>
-                </button>
-              </li>
-            ))}
-            {found.map(({ block, at }) => (
-              <li key={`${block.section}${at}${block.text.slice(0, 24)}`}>
-                <button type="button" onClick={() => go(block)}>
-                  <Snippet text={block.text} at={at} length={needle.length} />
-                  <span className="rail__where">{block.section}</span>
                 </button>
               </li>
             ))}
@@ -218,10 +218,14 @@ export function Contents({ outline, current, open, declarations, files, html, co
               </button>
             </li>
           ))}
+          <li>
+            <button type="button" className="rail__item" onClick={onIndex}>
+              <span className="rail__title">Index of Lean declarations</span>
+            </button>
+          </li>
         </ol>
       )}
       <p className="rail__key">
-        <button type="button" className="rail__index" onClick={onIndex}>All {declarations.length} declarations and their axioms</button>
         <span>Numbers count tied statements. <kbd>j</kbd> and <kbd>k</kbd> step through them, <kbd>Enter</kbd> pins, <kbd>Esc</kbd> unpins, <kbd>[</kbd> goes back.</span>
       </p>
     </nav>

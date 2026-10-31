@@ -25,6 +25,8 @@ export interface Entry {
   copy: Copy;
   tab: Tab;
   pin: Pin | null;
+  /** The Lean is open on the right page. A click opens it; left open, it follows. */
+  lean: boolean;
   /** The paper's exact position and the width it was measured at. */
   top: number | null;
   width: number;
@@ -50,6 +52,7 @@ export const blankEntry = (paper: string, copy: Copy): Entry => ({
   copy,
   tab: "step",
   pin: null,
+  lean: false,
   top: null,
   width: 0,
   leanTop: 0,

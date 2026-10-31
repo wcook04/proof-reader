@@ -139,6 +139,8 @@ export interface TreeProps {
   coverage?: ReadonlySet<string> | null;
   /** The dense layout's tile width, for a narrower canvas that should hold the whole argument. */
   tileWidth?: number;
+  /** The dense layout's tile height, for a tile that also holds a raw name. */
+  tileHeight?: number;
   /** The largest scale the overview fits to. */
   fitMax?: number;
   /** Draw a shared record once, with every use, instead of once under each use. */
@@ -420,7 +422,7 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
       const id = recordOf(lid);
       const node = graph.nodes.get(id) ?? fullGraph.nodes.get(id)!;
       const isRoot = lid === goal;
-      if (dense) return isRoot ? { w: DENSE_ROOT_W, h: DENSE_ROOT_H } : { w: props.tileWidth ?? DENSE_W, h: lens ? DENSE_H_SECTION : DENSE_H };
+      if (dense) return isRoot ? { w: DENSE_ROOT_W, h: DENSE_ROOT_H } : { w: props.tileWidth ?? DENSE_W, h: props.tileHeight ?? (lens ? DENSE_H_SECTION : DENSE_H) };
       const h = heights.get(lid);
       if (h === undefined) provisional = true;
       if (lid !== id) return { w: compact ? 184 : 176, h: h ?? (compact ? 54 : 96) };
@@ -576,7 +578,7 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
         m = { label, kind, title, t: measureTitle(title, label, kind) };
         measured.current.set(lid, m);
       }
-      const section = el.hasAttribute("data-section") ? 14 : 0;
+      const section = el.hasAttribute("data-section") || el.hasAttribute("data-raw") ? 14 : 0;
       const plate = kind === "root" && !denseRef.current ? fitPlate(m.t, rect.w, rect.h, k, statementH.current) : null;
       const fit = plate ?? fitTitle(m.t, rect.w, rect.h, k, kind, box, section);
       const statement = plate?.statement ?? false;
@@ -2413,7 +2415,7 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
           const tab = lid === roving ? 0 : -1;
           const lean = hasLean(id, node);
           const section = lens ? props.sectionOf?.get(id) : undefined;
-          const tileLean = node.kind === "declaration";
+          const tileLean = node.kind === "declaration" && !node.rawName;
           const tile = tileLean ? node.label.slice(node.label.lastIndexOf(".") + 1) : tileTitle(id, node.label);
           const usedBy = built.shared.get(id) ?? 0;
           return (
@@ -2426,12 +2428,13 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
               data-slot={node.origin.slot}
               data-kind={node.kind}
               data-shape={node.shape}
+              data-raw={node.rawName}
               data-full={node.label}
               data-section={section ?? undefined}
               className={cardClass(lid, node, leaf)}
               style={{ width: layout.boxes.get(lid)?.w ?? shown.current.get(lid)?.rect.w ?? 176, height: dense ? layout.boxes.get(lid)?.h : undefined, ["--rank" as string]: layout.rank.get(lid) ?? 0, ["--enter-i" as string]: enterOrder.get(lid) ?? 0 }}
               role="group"
-              aria-label={`${node.label}, ${kindName(node.kind)}${clone ? `, drawn once under each of the ${usedBy} records that use it` : ""}${lean ? ", linked to Lean" : ""}`}
+              aria-label={`${node.label}${node.rawName ? ` (${node.rawName})` : ""}, ${kindName(node.kind)}${clone ? `, drawn once under each of the ${usedBy} records that use it` : ""}${lean ? ", linked to Lean" : ""}`}
               title={clone ? node.label : undefined}
               onClick={(event) => {
                 if ((event.target as Element).closest?.(".card__inputs, .card__usedby, .tag, a")) return;
@@ -2533,6 +2536,7 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
                 {isRoot && <span className="card__cmain">Main result</span>}
                 <span className={`card__ctitle${tileLean ? " lean" : ""}`}>{tileLean ? <LeanName name={tile} camel /> : isRoot ? <WholeWords text={tile} /> : tile}</span>
                 {section && <span className="card__csec">{section}</span>}
+                {node.rawName && <code className="card__craw">{node.rawName}</code>}
                 {isRoot && rootExcerpt && (
                   <div ref={statementRef} className="card__cstatement">
                     {rootExcerpt}

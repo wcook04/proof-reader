@@ -205,6 +205,9 @@ export const PdfPane = forwardRef<PaperHandle, Props>(function PdfPane(props, re
     if ("top" in target) {
       if (target.fallback && Math.abs(target.width - el.clientWidth) > 1) return place(target.fallback, instant);
       scrollTo(target.top, true, true);
+      // A return is not reading on: the right page comes back at once.
+      window.clearTimeout(follow.current);
+      latest.current.onFollow(line.current, zone.current);
       return true;
     }
     if ("passage" in target) {

@@ -62,6 +62,8 @@ export interface LeanActions {
   walk(name: string): void;
   /** The pointer or focus reached a name, or left it. */
   name(name: string | null): void;
+  /** What a person calls this declaration. */
+  plain(name: string): string;
 }
 
 export function DeclLink({ paper, name, className, act, children }: { paper: string; name: string; className?: string; act: LeanActions; children?: ReactNode }) {
@@ -80,7 +82,7 @@ export function DeclLink({ paper, name, className, act, children }: { paper: str
       onFocus={() => act.name(name)}
       onBlur={() => act.name(null)}
     >
-      {children ?? <code>{name}</code>}
+      {children ?? <><span>{act.plain(name)}</span> <code>{name}</code></>}
     </a>
   );
 }
