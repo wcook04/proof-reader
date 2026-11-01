@@ -45,7 +45,7 @@ export function SisterSites() {
           </li>
         ))}
         <li>
-          <a href={family.owner.home}>All websites and films</a>
+          <a href={family.owner.home}>All projects and videos</a>
         </li>
       </ul>
     </nav>

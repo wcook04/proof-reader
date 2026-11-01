@@ -26,7 +26,7 @@ function llmsText(papers: ShelfItem[]): string {
 
 > A website for reading a research paper beside its proof in Lean, a programming language whose compiler rejects a proof with a wrong step. The paper is on the left page. The right page holds a graph of the Lean declarations and the authors' Lean lines, linked to the paper statement by statement.
 
-The papers and their Lean are their authors'. A program compares the reading copy of each paper with its PDF, word for word. The links between statements and Lean, and any notes and plain titles, were made with AI and have not been reviewed by the authors unless a paper says otherwise. Facts about Lean (kinds, lines, uses, axioms) come from Lean itself, run on the authors' project.
+The papers and their Lean are their authors'. A program checks each reading copy against text extracted from its PDF. The check skips some page regions and can miss changes in text order; it does not certify an exact copy. The links between statements and Lean, and any notes and plain titles, were made with AI and have not been reviewed by the authors unless a paper says otherwise. Facts about Lean (kinds, lines, uses, axioms) come from Lean itself, run on the authors' project.
 
 ## Papers
 

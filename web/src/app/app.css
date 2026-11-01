@@ -367,7 +367,7 @@ a.source__ref:hover { color: var(--lit); text-decoration: underline solid; }
   .bar { flex-wrap: wrap; height: auto; gap: 0 6px; padding: 2px 8px; }
   .bar__left { order: 1; gap: 6px; }
   .bar__right { order: 2; margin-left: auto; }
-  .bar__column { order: 3; flex: 1 0 100%; gap: 4px; justify-content: flex-start; }
+  .bar__column { order: 3; flex: 1 0 100%; flex-wrap: wrap; gap: 4px; justify-content: flex-start; }
   .bar__column .switch { margin-left: auto; }
   .bar__contents { padding: 0 4px; }
   .spread--reading.has-right, .spread.has-right { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 40fr) minmax(0, 60fr); }

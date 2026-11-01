@@ -26,7 +26,7 @@ language = "haskell"          # the language of the paper's code listings
 page_label = "{page}"         # how the paper numbers its pages, such as "191:{page}"
 
 # Plots stay the authors' own: each is cut from the PDF as vector artwork, and the
-# words inside it are left out of the word-for-word check. The box is in PDF points.
+# words inside it are left out of the text comparison. The box is in PDF points.
 # [[reading.figure]]
 # name = "fig-3.svg"
 # page = 11

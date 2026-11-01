@@ -10,7 +10,7 @@ from the page it sits on, and a line-end hyphen from a real one. This writes
 papers/SLUG/paper.md from that structure.
 
 It is a first draft. Read it and repair what the layout hid, then let
-`paper.py check` compare every word with the PDF.
+`paper.py check` compare the reading copy with extracted PDF text.
 
 Needs Poppler's pdftohtml, and pypdf for the link targets.
 """
