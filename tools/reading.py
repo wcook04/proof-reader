@@ -1,10 +1,9 @@
-"""Set a paper's reading text and hold it to the PDF, word for word.
+"""Render a paper's reading text and compare it with extracted PDF text.
 
-paper.md is typed text, so nothing on the page is true of the paper until it has
-been compared with the PDF. This renders it, reads back the words a reader would
-see, and lines them up against the PDF's words: every word must match, and the
-only forgiveness is for a word that a line end split. The same comparison says
-which PDF page each word came from, so page marks need no authoring.
+The comparison uses PDF text after margin and figure filtering. It normalizes
+some characters and allows moved text, which can also hide changes in word or
+character order. It helps detect transcription errors but does not certify an
+exact copy. The comparison also assigns page marks to the reading text.
 
 Passages and Lean names are found in the rendered text, then marked in place.
 """

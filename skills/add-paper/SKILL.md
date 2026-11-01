@@ -8,8 +8,9 @@ description: Add a paper with a Lean proof to Proof Reader. Use when given a pap
 A paper page is an open book: the authors' paper on the left, read as any paper is, and
 on the right a graph of the proof that follows the reader, with the authors' Lean one click
 away. The left page is a reading copy set from the PDF, with the PDF itself one click away.
-The paper is never rewritten: a program compares every word of the reading copy with the
-PDF. Your job is to find which words of the paper belong to which lines of Lean.
+Keep the paper's wording unchanged. A program helps compare the reading copy with the
+PDF, and you must review the copy yourself. Your job is to find which words of the
+paper belong to which lines of Lean.
 
 Everything mechanical is done by `tools/transcribe.py` and `tools/paper.py`, including
 linking every Lean name printed in the paper. What you write is `links.json`, and the
@@ -50,10 +51,13 @@ prose, positions tell a heading from a footnote, and the PDF's link targets give
 citation and cross-reference its destination. Use the reading copy route for any paper
 with an open licence. A paper without a `paper.md` still works, on the PDF alone.
 
-The draft is close, and `paper.py check` lists where it differs from the PDF. Run `npm ci` in
-`web/` once first, and write at least one claim in `links.json` (step 4), because `check` stops
-without one. `check` ignores the top 7.5% of each PDF page, so words printed there do not count.
-Repair `paper.md` by hand:
+Before comparing the draft with the PDF, run `npm ci` in `web/` and define at least one
+result under `claims` in `links.json`, with its passage and Lean declaration (step 4).
+Then run `paper.py check`. The comparison
+skips page margins, recurring headers and footers, and figure crops. It also permits
+some rearrangements of text, so passing does not certify an exact copy; see the
+[check's limits](../../README.md#what-paperpy-check-establishes).
+Review and repair `paper.md` by hand:
 
 - **The first page.** The title block, abstract, keywords and the licence box arrive in
   page order, some of them in the middle of the introduction. Lay them out as Sam
@@ -68,17 +72,16 @@ Repair `paper.md` by hand:
 Never correct the authors. A typo in the PDF stays in `paper.md`: it is their paper.
 
 ```sh
-cd web && npm install && cd ..
+cd web && npm ci && cd ..
 python3 tools/paper.py check <slug>
 ```
 
-The command needs `extract` to have run, so do step 1 first. It lists every word that
-differs from the PDF. It stops at zero differences or it stops the build.
+The command needs `extract` to have run, so do step 1 first. It reports the text
+differences it finds and stops the build if any remain.
 
-**What it cannot see.** Words that are all present but in the wrong place inside a moved
-block pass the comparison. A figure's `where` once landed in the wrong column and the
-comparison passed. So read every code listing against the PDF yourself, particularly the
-side-by-side ones.
+**What it cannot see.** Some changes in word or character order pass the comparison.
+A figure's `where` once landed in the wrong column and the comparison passed. Read every
+code listing against the PDF yourself, particularly the side-by-side ones.
 
 ## 3. Read both sides
 
@@ -189,8 +192,8 @@ external drive can turn a 15-second extraction into many minutes.
 ## What stays true on every page
 
 - The PDF is the authors' file, byte for byte, and stays one click away.
-- The reading copy says what the PDF says, word for word, and the footer says it was
-  retypeset.
+- Preserve the PDF's wording in the reading copy. The footer identifies it as retypeset
+  and explains the automated comparison's limits.
 - Every other word is a quotation from the paper, Lean's own output, a note marked as a
   note, or a declaration's plain title.
 - The line above the title and the footer say the links, notes and plain titles were made with AI and not reviewed by the

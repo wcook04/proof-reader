@@ -903,6 +903,23 @@ def phone(page: Page, url: str, shots: Path | None) -> None:
     wait_until(page, lambda: page.locator(".proof").count() == 0, "Back closes it")
 
 
+    # Open a section from the paper, so Back joins the reading/PDF controls.
+    # A direct statement link alone does not exercise this wider header state.
+    page.goto("about:blank")
+    page.goto(f"{url}#/{SLUG}", wait_until="load")
+    page.locator(".firstline button").first.tap()
+    page.locator(".bar .back").wait_for(state="visible")
+    check(page.evaluate("document.documentElement.scrollWidth <= innerWidth"), "Back and the reading controls cause no sideways scroll")
+    check(page.locator(".bar__column button").evaluate_all("""buttons => buttons.every(button => {
+      const box = button.getBoundingClientRect();
+      const bar = button.closest('.bar').getBoundingClientRect();
+      return box.left >= 0 && box.right <= document.documentElement.clientWidth && box.bottom <= bar.bottom;
+    })"""), "every phone header control fits inside the header")
+    shot(page, shots, "22-phone-back-controls")
+    page.go_back()
+    wait_until(page, lambda: address(page) == f"#/{SLUG}", "Back still returns from the selected phone section")
+
+
 def monitors(page: Page, url: str, shots: Path | None, size: tuple[int, int]) -> None:
     w, h = size
     print(f"At {w}x{h}")

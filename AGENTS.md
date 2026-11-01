@@ -11,9 +11,10 @@ Keep these true:
 
 - The PDF and the Lean project under `papers/` stay byte for byte as their authors
   published them.
-- `paper.md` says what the PDF says. One changed word stops the build, and the authors'
-  typos stay. Read code listings by eye as well: the comparison cannot see a word in the wrong
-  column of a moved block.
+- `paper.md` must preserve the PDF's wording, including the authors' typos. Run the
+  text comparison and review the copy against the PDF yourself. The automated check
+  excludes some page regions and can miss reordered words or characters; it does not
+  certify an exact copy. Read code listings by eye, including side-by-side columns.
 - Every other word on a paper's page is a quotation, Lean's own output, a marked note, or a
   declaration's short plain title.
 - Reading the paper is the way in. The right pane has two modes, Graph and Lean, with the same

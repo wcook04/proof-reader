@@ -1,5 +1,5 @@
 // The paper set as a page to read. The words come from paper.md, which the build
-// has compared with the PDF word for word, and the HTML arrives finished: the
+// has checked against extracted PDF text, and the HTML arrives finished: the
 // browser only attends to it.
 //
 // The reading line picks the statement under it at once, on this page, by writing

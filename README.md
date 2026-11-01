@@ -26,8 +26,8 @@ linked statement has its own address, so you can send someone directly to it.
 The contents also include an index of named Lean definitions and theorems
 (called **declarations**), with the assumptions each proof uses (**axioms**).
 
-The site adds no explanation of the mathematics. A program compares the reading copy with the
-PDF word for word, and the PDF is one click away. The graph and the axiom lists are built from
+The site adds no explanation of the mathematics. A program checks the reading copy against
+text extracted from the PDF, and the original PDF is one click away. The graph and the axiom lists are built from
 Lean's own output. The only added words are a short plain title for each declaration, and short
 notes where the paper and the Lean differ, each linked to the sentence it is about. These links,
 notes and titles were made with AI and have not been reviewed by the authors.
@@ -81,7 +81,7 @@ The build command turns those files into pages for the website.
 ```
 papers/<slug>/
   paper.pdf      the authors' PDF, unchanged
-  paper.md       the paper's text, compared with the PDF word for word
+  paper.md       a reading copy of the paper, checked against text from the PDF
   paper.toml     title, authors, licences and the Lean modules to read
   lean/          the authors' Lean project, unchanged
   links.json     which passage goes with which declaration, and each one's plain title
@@ -95,24 +95,27 @@ person or an AI assistant. The commands are:
 python3 tools/paper.py new my-paper       # then add the PDF, Lean and paper.toml
 python3 tools/paper.py extract my-paper   # build the Lean and list its declarations
 python3 tools/transcribe.py my-paper      # draft paper.md from the PDF's structure
-# write links.json as the guide describes; check stops until it has a claim
+# define a result under claims in links.json, with its passage and Lean declaration
 python3 tools/paper.py check my-paper     # compare the text and check the links
 python3 tools/paper.py build              # write the data the site reads
 ```
 
 `extract` needs [elan](https://github.com/leanprover/elan), the Lean installer,
 and uses the Lean version specified by the paper's authors. `check` and `build` need Python 3.11 and Poppler, and, for
-a paper with a `paper.md`, Node with `npm install` run in `web/`. `transcribe.py` also
+a paper with a `paper.md`, Node with `npm ci` run in `web/`. `transcribe.py` also
 needs `pypdf`. The authors' code runs on your machine, so read a project you do not
 trust before extracting it.
 
 ## What `paper.py check` establishes
 
-The command compares every word of the reading copy with the PDF, and one changed word stops
-the build. Two differences are allowed: a word split by a line end, and a block moved from its
-place on the PDF page, such as a footnote. A pass means the words are the same. It does not
-establish that every word is in the right place inside a moved block, and words inside plots
-are left out because the plots are cut from the PDF itself.
+The command compares the reading copy with text extracted from the PDF. It skips the top
+7.5% and bottom 5.5% of each page, repeated headers and footers, bullet marks, and words
+inside figure crops. The figures themselves are copied from the PDF.
+
+It treats some typographic differences as equivalent, such as ligatures and line-break
+hyphens, and allows text blocks to move. These allowances can also let changes in word
+or character order pass. The check helps find transcription errors; a pass does not
+certify an exact copy. Review the reading copy alongside the original PDF.
 
 The command also confirms that every quotation appears exactly once, that exact Lean lines lie
 inside their declaration and that every Lean name exists. No program confirms that a sentence is

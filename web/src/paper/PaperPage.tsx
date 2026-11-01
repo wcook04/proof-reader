@@ -682,8 +682,10 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const credit = (
     <p>
       Paper © its authors, <a href={paper.licence_url}>{paper.licence}</a>
-      {copy === "reading" ? ". Reading copy retypeset from the PDF, with the same words and the plots cut from it; the layout is ours" : ", with only its blank margins trimmed"}.
-      {" "}A program compared {edition.reading ? `all ${edition.reading.words.toLocaleString("en-GB")} words of the reading copy` : "each quotation"} with the authors’ PDF and found no differences.
+      {copy === "reading" ? ". Reading copy retypeset from the PDF, with its figures copied from the PDF; the layout is ours" : ", with only its blank margins trimmed"}.
+      {" "}{edition.reading
+        ? "A program checked the reading copy against text extracted from the PDF. The check omits margins and figures and can miss changes in text order. Use the original PDF to verify the wording."
+        : "Each linked quotation was found in text extracted from the authors’ PDF."}
       {" "}Lean from the authors’ artifact, built here on Lean {lean.version}. Links, notes and plain titles were made with AI and have not been reviewed by the authors.
     </p>
   );
