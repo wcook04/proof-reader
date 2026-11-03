@@ -302,6 +302,10 @@ class PrintedAxioms(unittest.TestCase):
         output = "'a' depends on axioms: [closedWorld, propext]\n'b' does not depend on any axioms\n"
         self.assertEqual(paper.parse_axioms(output), {"a": ["closedWorld", "propext"], "b": []})
 
+    def test_axioms_parser_reads_names_with_primes(self):
+        output = "'Foo.bar'' does not depend on any axioms\n'baz''' depends on axioms: [propext]\n"
+        self.assertEqual(paper.parse_axioms(output), {"Foo.bar'": [], "baz''": ["propext"]})
+
     def test_reads_a_list_wrapped_over_lines(self):
         output = "'a' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]"
         self.assertEqual(paper.parse_axioms(output), {"a": ["propext", "Classical.choice", "Quot.sound"]})

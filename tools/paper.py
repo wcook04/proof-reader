@@ -58,7 +58,7 @@ VERDICTS = ("same", "stronger", "weaker", "different")
 # A check is a theorem or a def it uses, written by us in papers/<slug>/checks/.
 CHECK_KEYWORDS = ("theorem", "lemma", "def")
 AXIOMS_PRINTED = re.compile(
-    r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)")
+    r"^'(.+?)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)", re.M)
 
 
 class PaperError(Exception):
