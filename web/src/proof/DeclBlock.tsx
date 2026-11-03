@@ -7,6 +7,7 @@ import type { Declaration, Edition, Passage } from "../app/edition";
 import { DeclLink, LeanCode, useFileLines, type LeanActions } from "../lean/code";
 import { isType, sectionLabel, shapeOf } from "../model/fromEdition";
 import { routeHref } from "../app/router";
+import { FidelityBlock } from "./Fidelity";
 
 export const KIND_WORDS: Record<string, string> = {
   theorem: "Theorem",
@@ -119,6 +120,7 @@ export function DeclBlock({ edition, d, passage, exact, open, onToggle, onPassag
       </header>
       {passage && <p className="decl__relation">{relation(passage)}</p>}
       {d.note && <p className="decl__note">{d.note.text}</p>}
+      <FidelityBlock edition={edition} d={d} act={act} onPassage={onPassage} />
       <Axioms edition={edition} d={d} act={act} />
       <div className="decl__code" tabIndex={0} aria-label={`Statement of ${d.id}`}>
         <LeanCode paper={edition.slug} lines={lines} from={d.line} to={d.statement_end} names={names} self={d.id} exact={exact} act={act} />

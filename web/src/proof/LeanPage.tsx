@@ -2,13 +2,15 @@
 // every declaration, or the authors' whole file. The tab is part of the address.
 
 import { memo, useCallback, useEffect, useImperativeHandle, useLayoutEffect, useMemo, useRef, useState, type Ref } from "react";
-import type { Edition, Passage } from "../app/edition";
+import { hasComparisons, type Edition, type Passage } from "../app/edition";
 import type { Tab } from "../app/history";
 import { routeHref } from "../app/router";
 import { DeclLink, LeanCode, useFileLines, type LeanActions } from "../lean/code";
 import { sectionLabel, shapeOf } from "../model/fromEdition";
 import { READING_LINE } from "../paper/reading-line";
 import { DeclBlock, KIND_WORDS, list } from "./DeclBlock";
+import { AllChecks, FidelityLines, HowMade } from "./Fidelity";
+import { MadeLink } from "./MadeLink";
 
 export interface Step {
   /** Names the view, so its scroll can be kept while something else is previewed. */
@@ -22,7 +24,8 @@ export interface Step {
   untied: { section: string | null; last: Passage | null } | null;
 }
 
-const LINK_CAVEAT = "An AI agent read each statement and its Lean and linked them. The authors have not reviewed these links, and no program tests whether the two say the same thing.";
+const LINK_CAVEAT = "An AI agent read each statement and its Lean, linked them and compared what the two say. The authors have not reviewed the links or the comparisons. Where a comparison cites a Lean proof, the proof is shown with it.";
+const LINK_CAVEAT_PLAIN = "An AI agent read each statement and its Lean and linked them. The authors have not reviewed these links.";
 
 export interface LeanPageHandle {
   top(): number;
@@ -59,6 +62,13 @@ export const LeanPage = memo(function LeanPage({ ref, edition, step, open, start
       if (body.current) body.current.scrollTop = top;
     },
   }), []);
+
+  /** Bring a declaration of this step to the top of the page. */
+  const goTo = useCallback((id: string) => {
+    const block = body.current?.querySelector<HTMLElement>(`.decl[data-decl="${CSS.escape(id)}"]`);
+    const pane = body.current;
+    if (block && pane) pane.scrollTop += block.getBoundingClientRect().top - pane.getBoundingClientRect().top;
+  }, []);
 
   const toggle = useCallback((id: string) => {
     setChosen((was) => {
@@ -104,7 +114,16 @@ export const LeanPage = memo(function LeanPage({ ref, edition, step, open, start
     const box = el.getBoundingClientRect();
     const line = paper.getBoundingClientRect().top + paper.clientHeight * READING_LINE - box.top;
     const room = Math.max(64, Math.min(line, el.clientHeight * 0.6));
-    el.scrollTop = Math.max(0, row.getBoundingClientRect().top - box.top - room);
+    const at = row.getBoundingClientRect().top - box.top;
+    let target = at - room;
+    // A comparison Lean has checked against the statement is read first, while the lines
+    // in hand still fit below it.
+    const fits = (from: number) => at - from + row.offsetHeight <= el.clientHeight;
+    const first = el.querySelector<HTMLElement>(".decl");
+    const top = first ? first.getBoundingClientRect().top - box.top : 0;
+    if (el.querySelector(".stepline__fid li[data-flagged]") && fits(0)) target = 0;
+    else if (first?.querySelector('.fid:not([data-verdict="same"]), .fid .fid__check') && fits(top)) target = Math.min(target, top);
+    el.scrollTop = Math.max(0, target);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, step]);
 
@@ -132,15 +151,14 @@ export const LeanPage = memo(function LeanPage({ ref, edition, step, open, start
               <header className="stepline">
                 {step.title && <p className="stepline__title">{step.title}</p>}
                 <blockquote>{step.passage.quote}</blockquote>
-                <p className="stepline__caveat">{LINK_CAVEAT}</p>
+                <p className="stepline__caveat">{hasComparisons(edition) ? LINK_CAVEAT : LINK_CAVEAT_PLAIN} <MadeLink onOpen={() => onTab("index")} /></p>
+                <FidelityLines edition={edition} ids={step.decls} act={act} onGo={goTo} />
                 {step.decls.length > 1 && (
                   <nav className="crumbs" aria-label="The declarations of this statement">
                     <span>{step.decls.length} declarations here</span>
                     {step.decls.map((id) => (
                       <button key={id} type="button" onClick={(event) => {
-                        const block = body.current?.querySelector<HTMLElement>(`.decl[data-decl="${CSS.escape(id)}"]`);
-                        const pane = body.current;
-                        if (block && pane) pane.scrollTop += block.getBoundingClientRect().top - pane.getBoundingClientRect().top;
+                        goTo(id);
                         event.currentTarget.blur();
                       }}>{act.plain(id)}</button>
                     ))}
@@ -227,6 +245,7 @@ function AllDeclarations({ edition, act }: { edition: Edition; act: LeanActions 
   const plain = (names: string[]) => list(names.map((name) => declarations.find((d) => d.id === name)?.plain ?? name));
   return (
     <div className="index">
+      <HowMade edition={edition} />
       <h3>Axioms, as Lean reports them</h3>
       {analytics.axioms.length === 0 && <p>The authors state no axioms.</p>}
       {analytics.axioms.map((name) => (
@@ -240,6 +259,7 @@ function AllDeclarations({ edition, act }: { edition: Edition; act: LeanActions 
         Lean’s own standard axioms: {list(standard.map(([name, users]) => `${name} (${users.length ? plain(users) : "not used"})`))}.
         {" "}{analytics.sorry.length ? <strong>sorry appears in {plain(analytics.sorry)}.</strong> : <>No declaration here uses sorry.</>}
       </p>
+      <AllChecks edition={edition} act={act} />
       <h3>All {declarations.length} declarations</h3>
       <table>
         <thead>

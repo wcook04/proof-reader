@@ -9,13 +9,14 @@
 
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { blankEntry, newEntryId, pushEntry, readEntry, replaceEntry, returning, type Copy, type Entry, type Pin, type Tab } from "../app/history";
-import { loadSource, paperFile, type Edition, type Passage } from "../app/edition";
+import { hasComparisons, loadSource, paperFile, type Edition, type Passage } from "../app/edition";
 import { Lockup, SisterSites } from "../app/Family";
 import { readRoute, routeHref } from "../app/router";
 import { setScheme, useScheme } from "../app/theme";
 import type { LeanActions } from "../lean/code";
 import { editionGraph, sectionLabel } from "../model/fromEdition";
 import type { LeanPageHandle, Step } from "../proof/LeanPage";
+import { MadeLink } from "../proof/MadeLink";
 import type { MapPaneHandle } from "../proof/MapPane";
 import type { PaneMode } from "../proof/ModeToggle";
 import { ProofPage, readLayout, saveLayout, type Layout } from "../proof/ProofPage";
@@ -686,7 +687,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
       {" "}{edition.reading
         ? "A program checked the reading copy against text extracted from the PDF. The check omits margins and figures and can miss changes in text order. Use the original PDF to verify the wording."
         : "Each linked quotation was found in text extracted from the authors’ PDF."}
-      {" "}Lean from the authors’ artifact, built here on Lean {lean.version}. Links, notes and plain titles were made with AI and have not been reviewed by the authors.
+      {" "}Lean from the authors’ artifact, built here on Lean {lean.version}. Links, notes, plain titles{hasComparisons(edition) ? " and comparisons" : ""} were made with AI and have not been reviewed by the authors. <MadeLink onOpen={() => onTab("index")} />.
     </p>
   );
 
@@ -780,7 +781,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
               onReady={() => setTick((t) => t + 1)}
               hint={(
                 <>
-                <p className="firstline firstline--status">The links from this paper to its proof in Lean, and the notes, were made with AI and have not been reviewed by the authors.</p>
+                <p className="firstline firstline--status">The links from this paper to its proof in Lean, the notes{hasComparisons(edition) ? " and the comparisons" : ""} were made with AI and have not been reviewed by the authors. <MadeLink onOpen={() => onTab("index")} />.</p>
                 <p className="firstline">
                   Click a statement with a mark beside it to read its Lean.
                   {firstSection && <> The first is in <button type="button" onClick={() => jumpTo(firstSection.id)}>{sectionLabel(firstSection.number)}</button></>}

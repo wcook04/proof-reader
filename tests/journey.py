@@ -251,7 +251,7 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check(home.locator("img").evaluate("(img) => img.complete && img.naturalWidth > 0"), "and its picture loads from this site")
     check(page.locator(".bar").bounding_box()["height"] <= 47, "the header keeps its height")
     foot = page.locator(".foot .fam-sites").first
-    check(foot.count() == 1 and "All websites and films" in foot.text_content() and "Plectis Atlas" in foot.text_content(), "the end of the paper lists the sister sites")
+    check(foot.count() == 1 and "All projects and videos" in foot.text_content() and "Plectis Atlas" in foot.text_content(), "the end of the paper lists the sister sites")
     check(foreign == [], f"nothing is asked of another host: {foreign[:2]}")
     page.goto(url, wait_until="load")
     page.wait_for_selector(".shelf li a[href*='contextual-embeddings']")
@@ -883,6 +883,117 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check(not errors, f"nothing went wrong in the console: {errors[:3]}")
 
 
+def in_pane(page: Page, selector: str) -> bool:
+    """The element is on screen inside the Lean page, below its sticky head."""
+    return page.evaluate("""(sel) => {
+      const el = document.querySelector(sel);
+      const pane = document.querySelector('.proof__lean:not([hidden]) .leaf__body');
+      if (!el || !pane) return false;
+      const b = el.getBoundingClientRect(), p = pane.getBoundingClientRect();
+      return b.height > 0 && b.top >= p.top && b.top < p.bottom - 20;
+    }""", selector)
+
+
+def fidelity(page: Page, url: str, shots: Path | None) -> None:
+    errors: list[str] = []
+    page.on("pageerror", lambda e: errors.append(str(e)))
+    if shots:
+        shots.mkdir(parents=True, exist_ok=True)
+    print(f"The paper and the Lean, at {page.viewport_size['width']}x{page.viewport_size['height']}")
+    page.goto("about:blank")
+    page.goto(f"{url}#/{SLUG}/@proven", wait_until="load")
+    page.wait_for_selector(".stepline__caveat")
+    page.wait_for_timeout(900)
+    data = page.evaluate(f"fetch('{url}papers/{SLUG}/edition.json').then(r => r.json())")
+    compared = [d for d in data["declarations"] if d.get("fidelity")]
+    if not compared:
+        held_paper(page, url, shots, errors)
+        return
+    claimed = [name for claim in data["claims"] for name in claim["lean"] if any(d["id"] == name for d in compared)]
+    check(page.locator(".stepline__fid li").count() == len(claimed), "the claim shows one comparison line per compared declaration")
+    no_overlaps(page)
+    caveat = page.locator(".stepline__caveat").inner_text()
+    check("How this page was made" in caveat and "compared what the two say" in caveat, "the step's caveat says the comparisons were made with AI and links to how the page was made")
+    shot(page, shots, "40-claim-comparisons")
+
+    words = {"same": "Says the same as the paper.", "stronger": "Says more than the paper.",
+             "weaker": "Says less than the paper.", "different": "Says something different from the paper."}
+    for d in compared:
+        page.goto(f"{url}#/{SLUG}/{d['id']}", wait_until="load")
+        block = f'.decl[data-decl="{d["id"]}"] .fid'
+        page.wait_for_selector(block)
+        page.wait_for_timeout(600)
+        fid = page.locator(block)
+        check(in_pane(page, block), f"{d['id']}'s comparison is on screen")
+        check(fid.locator(".fid__verdict").inner_text() == words[d["fidelity"]["verdict"]], f"{d['id']}: {words[d['fidelity']['verdict']]}")
+        check("Compared by AI" in fid.inner_text(), "labelled as compared by AI")
+        for name in d["fidelity"]["checks"]:
+            line = fid.locator(f'.fid__check[data-check="{name}"]')
+            check(line.count() == 1 and "Lean accepted this proof" in line.inner_text(), f"it cites {name}, which Lean accepted")
+            before = (entries(page), address(page))
+            line.locator(".fid__fold").click()
+            wait_until(page, lambda: line.locator(".fid__code").is_visible(), "a click opens the proof's code")
+            check(name in line.locator(".fid__code").inner_text() and (entries(page), address(page)) == before, "in place, adding no history")
+            line.locator(".fid__back").click()
+            wait_until(page, lambda: line.locator(".fid__code").count() == 0, "Hide the proof closes it")
+        shot(page, shots, f"41-{d['id']}")
+
+    print("How this page was made")
+    page.goto(f"{url}#/{SLUG}", wait_until="load")
+    page.wait_for_selector(".firstline--status")
+    page.wait_for_timeout(600)
+    link = page.locator(".firstline--status .made__link")
+    check(link.is_visible() and link.inner_text() == "How this page was made", "the status line links to how the page was made")
+    before = entries(page)
+    link.click()
+    page.wait_for_selector(".made")
+    wait_until(page, lambda: address(page).endswith("@declarations"), "it opens the index, at its own address")
+    check(entries(page) == before + 1, "as one history entry")
+    made = page.locator(".made").inner_text()
+    for phrase in ("text extracted from the authors’ PDF", "Lean’s own output", "made with AI", "have not reviewed", "the proof is shown with it"):
+        check(phrase in made, f"it says: {phrase}")
+    check(in_pane(page, ".made"), "and is on screen")
+    if data.get("checks"):
+        index = page.locator(".index").inner_text()
+        check("Lean proofs written for this page" in index and "written for this page with AI" in index, "the index lists the Lean proofs written for this page")
+        check(page.locator(".index__check").count() == len(data["checks"]), "each of them")
+    shot(page, shots, "43-how-made")
+    page.go_back()
+    wait_until(page, lambda: not address(page).endswith("@declarations"), "Back leaves the index")
+    check(not errors, f"nothing went wrong in the console: {errors[:3]}")
+
+
+def no_overlaps(page: Page) -> None:
+    overlaps = page.evaluate("""() => [...document.querySelectorAll('.sheet__text pre')].filter(pre => {
+        const tops = [...pre.querySelectorAll('.cl')].map(l => l.getBoundingClientRect());
+        return tops.some((r, i) => i > 0 && r.top < tops[i - 1].bottom - 1);
+    }).map(pre => pre.textContent.slice(0, 40))""")
+    check(not overlaps, f"no listing in the paper draws one line over another: {overlaps[:2]}")
+
+
+def held_paper(page: Page, url: str, shots: Path | None, errors: list[str]) -> None:
+    """A paper whose comparisons are held shows none, and says nothing of them."""
+    check(page.locator(".stepline__fid").count() == 0 and page.locator(".fid").count() == 0, "a paper with comparisons held shows none")
+    caveat = page.locator(".stepline__caveat").inner_text()
+    check("How this page was made" in caveat and "comparison" not in caveat, "its caveat links to how the page was made, and mentions no comparisons")
+    no_overlaps(page)
+    shot(page, shots, "40-claim")
+    page.goto(f"{url}#/{SLUG}", wait_until="load")
+    page.wait_for_selector(".firstline--status")
+    page.wait_for_timeout(600)
+    check("comparison" not in page.locator(".firstline--status").inner_text(), "the status line mentions no comparisons")
+    page.locator(".firstline--status .made__link").click()
+    page.wait_for_selector(".made")
+    made = page.locator(".made").inner_text()
+    for words in ("text extracted from the authors’ PDF", "Lean’s own output", "made with AI", "have not reviewed"):
+        check(words in made, f"how the page was made says: {words}")
+    check("between the paper and the Lean" not in made and "Lean proof" not in made and page.locator(".index__check").count() == 0, "and nothing of comparisons with the Lean or proofs written for the page")
+    shot(page, shots, "43-how-made")
+    page.go_back()
+    wait_until(page, lambda: not address(page).endswith("@declarations"), "Back leaves the index")
+    check(not errors, f"nothing went wrong in the console: {errors[:3]}")
+
+
 def phone(page: Page, url: str, shots: Path | None) -> None:
     print("Phone")
     page.goto("about:blank")
@@ -1001,7 +1112,7 @@ def main() -> int:
     parser.add_argument("--url", help="a running site, ending in /")
     parser.add_argument("--dist", type=Path, default=ROOT / "web" / "dist")
     parser.add_argument("--shots", type=Path)
-    parser.add_argument("--only", choices=("journey", "sizes"))
+    parser.add_argument("--only", choices=("journey", "fidelity", "sizes"))
     parser.add_argument("--browser", choices=("chromium", "firefox", "webkit"), default="chromium")
     parser.add_argument("--serve", type=Path, help=argparse.SUPPRESS)
     parser.add_argument("--port", type=int, help=argparse.SUPPRESS)
@@ -1019,11 +1130,16 @@ def main() -> int:
     try:
         with sync_playwright() as playwright:
             browser = getattr(playwright, args.browser).launch()
-            if args.only != "sizes":
+            if args.only in (None, "journey"):
                 context = browser.new_context(viewport={"width": 1440, "height": 790})
                 journey(context.new_page(), url, args.shots)
                 context.close()
-            if args.only != "journey":
+            if args.only in (None, "journey", "fidelity"):
+                for w, h in ((1440, 900), (1280, 800)):
+                    context = browser.new_context(viewport={"width": w, "height": h})
+                    fidelity(context.new_page(), url, args.shots / f"{w}" if args.shots else None)
+                    context.close()
+            if args.only in (None, "sizes"):
                 for size in PAIRS:
                     context = browser.new_context(viewport={"width": size[0], "height": size[1]})
                     monitors(context.new_page(), url, args.shots, size)

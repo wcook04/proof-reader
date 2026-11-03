@@ -15,8 +15,8 @@ Keep these true:
   text comparison and review the copy against the PDF yourself. The automated check
   excludes some page regions and can miss reordered words or characters; it does not
   certify an exact copy. Read code listings by eye, including side-by-side columns.
-- Every other word on a paper's page is a quotation, Lean's own output, a marked note, or a
-  declaration's short plain title.
+- Every other word on a paper's page is a quotation, Lean's own output, a marked note, a
+  comparison of a statement with its Lean, or a declaration's short plain title.
 - Reading the paper is the way in. The right pane has two modes, Graph and Lean, with the same
   words and behaviour as Lean Exposition. A click goes to Lean as one history entry, and every
   way back lands where Back lands. The list of declarations is an index at the back.

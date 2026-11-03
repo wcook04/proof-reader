@@ -68,6 +68,31 @@ export interface Declaration {
   standard_axioms: string[];
   passages: string[];
   note: { text: string; because: string[] } | null;
+  /** How the paper's statement stands to this Lean, compared with AI; absent before it was run. */
+  fidelity?: Fidelity | null;
+}
+
+export type Verdict = "same" | "stronger" | "weaker" | "different";
+
+export interface Fidelity {
+  verdict: Verdict;
+  text: string;
+  /** Passage ids the comparison reads. */
+  because: string[];
+  /** Names of checks, written for this page, that Lean ran against the authors' file. */
+  checks: string[];
+}
+
+export interface Check {
+  name: string;
+  keyword: "theorem" | "def";
+  file: string;
+  line: number;
+  end_line: number;
+  code: string;
+  doc: string;
+  axioms: string[];
+  status: "checked";
 }
 
 export interface Edition {
@@ -103,6 +128,8 @@ export interface Edition {
   passages: Passage[];
   mentions: Mention[];
   declarations: Declaration[];
+  /** Lean proofs written for this page, which Lean accepted against the authors' file. */
+  checks?: Check[];
   /** Which sections hold ties, in reading order. */
   coverage: { sections: string[]; ties: number };
   /** Present when the paper has a reading copy, which reading.html holds. */
@@ -118,6 +145,7 @@ export interface Edition {
     sorry: string[];
     proof_lines: number;
     pages_with_links: number[];
+    fidelity?: { required: string[]; same: string[]; stronger: string[]; weaker: string[]; different: string[]; refuted_by_check: string[] };
   };
 }
 
@@ -147,3 +175,6 @@ export async function loadEdition(slug: string): Promise<Edition> {
 /** What only the Lean page, the PDF and a search need, kept out of the first screen. */
 export const loadSource = (slug: string) => json<{ files: Record<string, string>; mentions: Mention[] }>(paperFile(slug, "source.json"));
 export const loadShelf = () => json<{ papers: ShelfItem[] }>(`${base}papers/index.json`);
+
+/** True when the page carries comparisons of the paper's statements with the Lean. */
+export const hasComparisons = (edition: Edition) => edition.declarations.some((d) => !!d.fidelity);

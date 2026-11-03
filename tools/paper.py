@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Turn a folder under papers/ into the data the website reads.
 
-  extract SLUG   build the Lean project and list its declarations
+  extract SLUG   build the Lean project and list its declarations; compile
+                 the paper's checks/ against it and record their axioms
   check SLUG     check links.json against the PDF and the Lean, and paper.md word
                  for word against the PDF; print coverage
   build [SLUG]   write web/public/papers/ for the website (all papers by default)
@@ -53,6 +54,11 @@ ROLES = ("states", "defines", "proves", "explains", "uses", "mentions", "mirrors
 # A type is read whole: its constructors or fields are its statement.
 READ_WHOLE = ("inductive", "structure", "class", "axiom")
 PLAIN_LIMIT = 40
+VERDICTS = ("same", "stronger", "weaker", "different")
+# A check is a theorem or a def it uses, written by us in papers/<slug>/checks/.
+CHECK_KEYWORDS = ("theorem", "lemma", "def")
+AXIOMS_PRINTED = re.compile(
+    r"'([^']+)' (?:depends on axioms: \[([^\]]*)\]|does not depend on any axioms)")
 
 
 class PaperError(Exception):
@@ -92,6 +98,117 @@ def extract(slug: str) -> None:
     out.parent.mkdir(exist_ok=True)
     out.write_text(json.dumps(report, ensure_ascii=False, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     print(f"wrote {out.relative_to(ROOT)}: {len(report['declarations'])} Lean constants on {report['lean_version']}")
+    if (folder / "checks").is_dir():
+        extract_checks(folder, project)
+
+
+def extract_checks(folder: Path, project: Path) -> None:
+    """Compile our checks against the authors' Lean and record the axioms each one rests on."""
+    files = sorted((folder / "checks").glob("*.lean"))
+    report: dict = {"files": {}, "checks": []}
+    for path in files:
+        text = path.read_text(encoding="utf-8")
+        found = check_declarations(text)
+        kept = [line for line in text.splitlines() if not line.lstrip().startswith("#print axioms")]
+        kept += [f"#print axioms {item['name']}" for item in found]
+        with tempfile.TemporaryDirectory(prefix="proof-reader-") as scratch:
+            copy = Path(scratch) / path.name
+            copy.write_text("\n".join(kept) + "\n", encoding="utf-8")
+            run = subprocess.run(["lake", "env", "lean", str(copy.resolve())], cwd=project, capture_output=True, text=True)
+        output = run.stdout + run.stderr
+        relative = path.relative_to(folder).as_posix()
+        if run.returncode != 0 or re.search(r"(^|:)\s*error:", output, re.M):
+            raise PaperError(f"{relative} does not compile:\n{output[-3000:]}")
+        axioms = parse_axioms(output)
+        for item in found:
+            if item["name"] not in axioms:
+                raise PaperError(f"{relative}: Lean printed no axioms for {item['name']}:\n{output[-3000:]}")
+            if "sorryAx" in axioms[item["name"]]:
+                raise PaperError(f"{relative}: {item['name']} uses sorry, so it checks nothing:\n{output[-3000:]}")
+            report["checks"].append({**item, "file": relative, "axioms": axioms[item["name"]], "status": "checked"})
+        report["files"][relative] = hashlib.sha256(path.read_bytes()).hexdigest()
+    out = folder / "generated" / "checks.json"
+    out.write_text(json.dumps(report, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    for item in report["checks"]:
+        print(f"  check {item['name']}: axioms [{', '.join(item['axioms'])}]")
+    print(f"wrote {out.relative_to(ROOT)}: {len(report['checks'])} checks in {len(files)} files")
+
+
+def parse_axioms(output: str) -> dict[str, list[str]]:
+    """What `#print axioms` reported for each name. Lean may wrap a long list over lines."""
+    found = {}
+    for match in AXIOMS_PRINTED.finditer(output):
+        found[match[1]] = [a.strip() for a in match[2].split(",") if a.strip()] if match[2] is not None else []
+    return found
+
+
+def check_declarations(text: str) -> list[dict]:
+    """The theorems and defs of a check file, in file order, each with its docstring."""
+    lines = text.splitlines()
+    starts = []
+    for number, line in enumerate(lines, 1):
+        match = WRITTEN.match(line)
+        if match and not line[:1].isspace():
+            first = number
+            if number > 1 and lines[number - 2].rstrip().endswith("-/"):
+                first = number - 1
+                while first > 1 and "/--" not in lines[first - 1]:
+                    first -= 1
+            starts.append((first, number, match.group(1).split()[0], match.group(2)))
+    found = []
+    for index, (first, at, keyword, name) in enumerate(starts):
+        stop = starts[index + 1][0] - 1 if index + 1 < len(starts) else len(lines)
+        last = stop
+        while last > at and (not lines[last - 1].strip() or lines[last - 1].lstrip().startswith("#")):
+            last -= 1
+        if keyword not in CHECK_KEYWORDS:
+            continue
+        doc_lines = "\n".join(lines[first - 1:at - 1])
+        doc = " ".join(doc_lines.replace("/--", " ").replace("-/", " ").split())
+        found.append({"name": name, "keyword": "def" if keyword == "def" else "theorem", "line": first,
+                      "end_line": last, "code": "\n".join(lines[first - 1:last]), "doc": doc})
+    return found
+
+
+def load_checks(folder: Path) -> dict:
+    path = folder / "generated" / "checks.json"
+    return json.loads(path.read_text(encoding="utf-8")) if path.is_file() else {"files": {}, "checks": []}
+
+
+def stale_checks(folder: Path, recorded: dict) -> list[str]:
+    """Check files changed, added or removed since `extract` last compiled them."""
+    current = {path.relative_to(folder).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+               for path in sorted((folder / "checks").glob("*.lean"))} if (folder / "checks").is_dir() else {}
+    return sorted(name for name in set(current) | set(recorded) if current.get(name) != recorded.get(name))
+
+
+def comparison_problems(links: dict, written: dict, ids: set, check_names: set, required: list[str]) -> list[str]:
+    """A paper carries its comparisons, or says why they are held and carries none."""
+    if str(links.get("fidelity_held", "")).strip():
+        return ["fidelity_held: a paper whose comparisons are held carries none in links.json"] if links.get("fidelity") else []
+    return fidelity_problems(links.get("fidelity", {}), written, ids, check_names, required)
+
+
+def fidelity_problems(fidelity: dict, written: dict, ids: set, check_names: set, required: list[str]) -> list[str]:
+    """Each comparison names a declaration, a verdict, its reasons and checks that exist."""
+    errors = []
+    for name, entry in fidelity.items():
+        if name not in written:
+            errors.append(f"fidelity: no Lean declaration called {name}")
+        if entry.get("verdict") not in VERDICTS:
+            errors.append(f"fidelity of {name}: verdict must be one of {VERDICTS}")
+        if not str(entry.get("text", "")).strip():
+            errors.append(f"fidelity of {name}: text is empty")
+        if not entry.get("because") or any(b not in ids for b in entry["because"]):
+            errors.append(f"fidelity of {name}: `because` must name passages that exist")
+        for check_name in entry.get("checks", []):
+            if check_name not in check_names:
+                errors.append(f"fidelity of {name}: no check called {check_name} in generated/checks.json")
+    missing = [name for name in required if name not in fidelity]
+    if missing:
+        errors.append("fidelity: compare the paper's statement with the Lean for each claim's declaration "
+                      f"and each axiom of the authors; missing: {', '.join(missing)}")
+    return errors
 
 
 def module_file(project: Path, module: str) -> Path:
@@ -408,10 +525,19 @@ def resolve(slug: str) -> dict:
             errors.append(f"note: no Lean declaration called {name}")
         if not note.get("because") or any(b not in ids for b in note["because"]):
             errors.append(f"note on {name}: `because` must name passages that exist")
+    checks = load_checks(folder)
+    stale = stale_checks(folder, checks["files"])
+    if stale:
+        errors.append(f"checks changed since extract last compiled them ({', '.join(stale)}): "
+                      f"run python3 tools/paper.py extract {slug}")
+    claimed = [name for claim in claims for name in claim.get("lean", []) if name in written]
+    required = list(dict.fromkeys(claimed + sorted(
+        name for name in reachable(claimed, shard_info["uses"]) if written[name]["keyword"] == "axiom")))
+    errors += comparison_problems(links, written, ids, {c["name"] for c in checks["checks"]}, required)
     if errors:
         raise PaperError("\n".join(errors))
     return {"folder": folder, "config": config, "shards": shard_info, "links": links, "passages": passages,
-            "sizes": sizes, "words": words}
+            "sizes": sizes, "words": words, "checks": checks["checks"], "required": required}
 
 
 def plain_problem(name: str, title: str) -> str | None:
@@ -479,6 +605,7 @@ def edition(slug: str) -> dict:
             "standard_axioms": sorted(a for a in axioms if a in STANDARD_AXIOMS),
             "passages": linked.get(name, []),
             "note": links.get("notes", {}).get(name),
+            "fidelity": fidelity_of(links.get("fidelity", {}).get(name)),
         })
     names = [d["id"] for d in declarations if d["id"] not in links.get("unlinked_names", [])]
     setting = None
@@ -493,6 +620,7 @@ def edition(slug: str) -> dict:
             passage["code"] = passage["id"] in in_code
     named_in_paper = [d["id"] for d in declarations if d["passages"]]
     custom = sorted(d["id"] for d in declarations if d["keyword"] == "axiom")
+    fidelity = links.get("fidelity", {})
     paper = config["paper"]
     # In reading order, so a page can say plainly where the ties begin and stop.
     tied_sections = list(dict.fromkeys(p["section"] for p in data["passages"]))
@@ -508,6 +636,7 @@ def edition(slug: str) -> dict:
         "passages": [{k: v for k, v in p.items() if k != "order"} for p in data["passages"]],
         "mentions": find_mentions(data["words"], names),
         "declarations": declarations,
+        "checks": data["checks"],
         "coverage": {"sections": tied_sections, "ties": len(data["passages"])},
         "reading": {k: v for k, v in setting.items() if k != "html"} if setting else None,
         "reading_html": setting["html"] if setting else None,
@@ -522,8 +651,19 @@ def edition(slug: str) -> dict:
             "sorry": sorted(name for name in keep if "sorryAx" in written[name]["axioms"]),
             "proof_lines": sum(d["lines"] for d in declarations if d["keyword"] in ("theorem", "lemma")),
             "pages_with_links": sorted({p["page"] for p in data["passages"]}),
+            "fidelity": {
+                "required": data["required"],
+                **{verdict: sorted(n for n, e in fidelity.items() if e["verdict"] == verdict) for verdict in VERDICTS},
+                "refuted_by_check": sorted(n for n, e in fidelity.items() if e.get("checks")),
+            },
         },
     }
+
+
+def fidelity_of(entry: dict | None) -> dict | None:
+    if not entry:
+        return None
+    return {"verdict": entry["verdict"], "text": entry["text"], "because": entry["because"], "checks": entry.get("checks", [])}
 
 
 def check(slug: str) -> None:
@@ -538,6 +678,15 @@ def check(slug: str) -> None:
         print(f"  not tied yet: {', '.join(stats['not_linked'])}")
     for axiom, names in stats["resting_on_axioms"].items():
         print(f"  axiom {axiom} carries: {', '.join(names)}")
+    fidelity = stats["fidelity"]
+    held = load_links(PAPERS / slug).get("fidelity_held")
+    if held:
+        print(f"  comparisons held: {held}")
+    for verdict in VERDICTS:
+        names = fidelity[verdict]
+        print(f"  compared as {verdict}: {len(names)}" + (f" ({', '.join(names)})" if names else ""))
+    for item in built["checks"]:
+        print(f"  check {item['name']} rests on: {', '.join(item['axioms']) or 'no axioms'}")
 
 
 def build(slugs: list[str]) -> None:

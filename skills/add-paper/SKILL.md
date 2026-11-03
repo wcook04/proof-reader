@@ -146,7 +146,7 @@ a reader sees on cards, in Back labels and in headings, with the raw name small 
 `paper.py check` stops if one is missing. You answer for each title: it must say what the Lean
 does and no more.
 
-**Notes** are the only sentences of ours on the page, so they earn their place. Write one
+**Notes** and comparisons (step 5) are the only sentences of ours on the page, so they earn their place. Write one
 only when the paper and the Lean differ in a way a careful reader would want to know:
 a renamed object, a different encoding, a step the Lean does differently. Every note
 names the passages it rests on in `because`. Plain sentences, one or two. No praise, no
@@ -154,7 +154,51 @@ interpretation of what the authors meant, no claims about the mathematics beyond
 the paper and the Lean say. Lean's own report of axioms and dependencies is computed, so
 never restate it in a note.
 
-## 5. Run the comparison
+## 5. Compare each statement with its Lean
+
+AI-written Lean often proves a statement near the paper's theorem that differs from it in a
+hypothesis or a quantifier. So compare the two for every declaration a claim names, every declaration a `states`
+passage names, and every axiom of the authors.
+
+Read the paper's statement and the Lean statement side by side, and record what you find
+under `"fidelity"` in `links.json`:
+
+```json
+"fidelity": {
+  "mainTheorem": {"verdict": "weaker",
+    "text": "The paper states the bound for every n. The Lean proves it for n at least 2, which the paper does not mention.",
+    "because": ["main-statement"], "checks": []}
+}
+```
+
+- `verdict` is `same`, `stronger` (the Lean says more than the paper), `weaker` (it says
+  less) or `different`.
+- `text` says what differs, or that nothing does, in one to three plain sentences.
+- `because` names the passages that carry the paper's statement.
+
+Then try to refute each statement in Lean. Write `papers/<slug>/checks/<Name>.lean`, importing the
+authors' modules:
+
+- For each axiom of the authors, build a value its statement covers that the paper's
+  assumption does not, and try to prove `False` from the axiom.
+- For each theorem, try to prove the negation of its statement without the authors' axioms.
+
+Give every `theorem` and `def` a `/-- ... -/` docstring stating what it proves. Keep whatever
+Lean accepts and name it in the entry's `checks`. `paper.py extract` compiles the checks
+against the authors' Lean and records the axioms each one rests on; a check with `sorry`
+or an error stops it. Run `extract` again after changing a check, or `check` stops.
+
+Never edit the authors' Lean. A comparison is an AI judgement. A proof under `checks/` is
+accepted or rejected by Lean. `paper.py check` stops if a claim's declaration or an axiom
+the claims rest on has no comparison.
+
+If a comparison shows a problem in the authors' Lean, tell the maintainer before publishing it,
+because the authors may want to hear it from us first. Until then, keep the comparisons on a
+local branch and put `"fidelity_held": "<reason>"` in `links.json` in place of `"fidelity"`.
+`check` then skips the comparison step for that paper, and the page says nothing about
+comparisons.
+
+## 6. Run the comparison
 
 ```sh
 python3 tools/paper.py check <slug>
@@ -170,7 +214,7 @@ Then confirm the meaning yourself, because no program can. For each passage, rea
 Lean lines it points to and confirm the passage really is about them. For each note,
 confirm it against both sides.
 
-## 6. Look at it
+## 7. Look at it
 
 ```sh
 python3 tools/paper.py build <slug>
@@ -195,8 +239,8 @@ external drive can turn a 15-second extraction into many minutes.
 - Preserve the PDF's wording in the reading copy. The footer identifies it as retypeset
   and explains the automated comparison's limits.
 - Every other word is a quotation from the paper, Lean's own output, a note marked as a
-  note, or a declaration's plain title.
-- The line above the title and the footer say the links, notes and plain titles were made with AI and not reviewed by the
+  note, a comparison of a statement with its Lean, or a declaration's plain title.
+- The line above the title and the footer say the links, notes, comparisons and plain titles were made with AI and not reviewed by the
   authors.
   Change that only when an author has reviewed them.
 - Publishing a page is the maintainer's decision. Adding a paper to the repository does

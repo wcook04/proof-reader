@@ -8,7 +8,7 @@ and proofs that a computer can check. Click a linked statement in the paper to
 open the authors' corresponding Lean code. You can also explore a diagram of
 the proof steps and the connections between them.
 
-**[Read a paper in it](https://wcook04.github.io/proof-reader/#/contextual-embeddings)**: *Contextual Embeddings* by Frohlich, Foster, Kavvos and Wang (PLDI 2026), shown with the authors' Lean under CC BY 4.0. The links between the paper and the Lean were made with AI and have not been reviewed by the authors.
+**[Read a paper in it](https://wcook04.github.io/proof-reader/#/contextual-embeddings)**: *Contextual Embeddings* by Frohlich, Foster, Kavvos and Wang (PLDI 2026), shown with the authors' Lean under CC BY 4.0. The links and comparisons between the paper and the Lean were made with AI and have not been reviewed by the authors.
 
 [![A paper on the left page with one sentence highlighted, and on the right the graph of its Lean proof above the exact Lean lines the sentence describes.](web/public/reader.webp)](https://wcook04.github.io/proof-reader/#/contextual-embeddings)
 
@@ -27,10 +27,13 @@ The contents also include an index of named Lean definitions and theorems
 (called **declarations**), with the assumptions each proof uses (**axioms**).
 
 The site adds no explanation of the mathematics. A program checks the reading copy against
-text extracted from the PDF, and the original PDF is one click away. The graph and the axiom lists are built from
-Lean's own output. The only added words are a short plain title for each declaration, and short
-notes where the paper and the Lean differ, each linked to the sentence it is about. These links,
-notes and titles were made with AI and have not been reviewed by the authors.
+text extracted from the PDF, and the original PDF is one click away. The graph's edges and the
+axiom lists come from Lean's own report on the authors' files, read from the compiled project.
+The only added words are a short plain title for each declaration, short notes where the paper
+and the Lean differ, and a comparison of each stated result with its Lean statement, each linked
+to the sentence it is about. These links, titles, notes and comparisons were made with AI and
+have not been reviewed by the authors. Where a comparison cites a Lean proof written for the page,
+the proof is shown with it, and Lean accepted it against the authors' code.
 
 ## Run the site
 
@@ -84,8 +87,9 @@ papers/<slug>/
   paper.md       a reading copy of the paper, checked against text from the PDF
   paper.toml     title, authors, licences and the Lean modules to read
   lean/          the authors' Lean project, unchanged
-  links.json     which passage goes with which declaration, and each one's plain title
-  generated/     what Lean reports about the project
+  links.json     which passage goes with which declaration, plain titles, notes and comparisons
+  checks/        optional Lean files of ours that test a statement against the authors' Lean
+  generated/     what Lean reports about the project and the checks
 ```
 
 The [add-paper guide](skills/add-paper/SKILL.md) gives the full procedure for a
@@ -93,7 +97,7 @@ person or an AI assistant. The commands are:
 
 ```sh
 python3 tools/paper.py new my-paper       # then add the PDF, Lean and paper.toml
-python3 tools/paper.py extract my-paper   # build the Lean and list its declarations
+python3 tools/paper.py extract my-paper   # build the Lean, list its declarations, compile checks/
 python3 tools/transcribe.py my-paper      # draft paper.md from the PDF's structure
 # define a result under claims in links.json, with its passage and Lean declaration
 python3 tools/paper.py check my-paper     # compare the text and check the links
@@ -122,7 +126,13 @@ inside their declaration and that every Lean name exists. No program confirms th
 about the code it is linked to: a person has to read both. Names printed in the paper are linked
 by matching the name alone, so `STLC` in the paper's Haskell opens the Lean `STLC`. Lean reports
 what a proof depends on, and does not report whether a Lean statement means what the paper says.
-Each page says that the links and notes have not been reviewed by the authors, until an author
+
+So every result the paper states, and every axiom of the authors, carries a comparison: the Lean
+says the same as the paper, more, less, or something different. `check` stops if one is missing.
+A comparison is AI judgement. Where it cites a check, the check is a Lean file of ours under
+`papers/<slug>/checks/`, compiled by `extract` against the authors' Lean, with the axioms Lean
+reports for it. `check` stops if a check file has changed since `extract` compiled it. Each page
+says that the links, notes and comparisons have not been reviewed by the authors, until an author
 has reviewed them.
 
 ## Repository map

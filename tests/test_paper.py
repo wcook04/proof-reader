@@ -295,3 +295,72 @@ class Drafting(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class PrintedAxioms(unittest.TestCase):
+    def test_reads_a_list_and_an_empty_report(self):
+        output = "'a' depends on axioms: [closedWorld, propext]\n'b' does not depend on any axioms\n"
+        self.assertEqual(paper.parse_axioms(output), {"a": ["closedWorld", "propext"], "b": []})
+
+    def test_reads_a_list_wrapped_over_lines(self):
+        output = "'a' depends on axioms: [propext,\n Classical.choice,\n Quot.sound]"
+        self.assertEqual(paper.parse_axioms(output), {"a": ["propext", "Classical.choice", "Quot.sound"]})
+
+    def test_finds_each_check_with_its_docstring(self):
+        text = "import CE\n\n/-- A value.\nby hand. -/\ndef v : Nat := 1\n\n/-- It is one. -/\ntheorem t : v = 1 := rfl\n\n#print axioms t\n"
+        found = paper.check_declarations(text)
+        self.assertEqual([(c["name"], c["keyword"], c["line"], c["end_line"]) for c in found],
+                         [("v", "def", 3, 5), ("t", "theorem", 7, 8)])
+        self.assertEqual(found[0]["doc"], "A value. by hand.")
+        self.assertTrue(found[1]["code"].startswith("/-- It is one. -/\ntheorem t"))
+
+
+class Fidelity(unittest.TestCase):
+    written = {"isoR": {}, "closedWorld": {}}
+    ids = {"proven"}
+
+    def entry(self, **change):
+        return {"verdict": "same", "text": "The Lean says what the paper says.", "because": ["proven"], "checks": [], **change}
+
+    def problems(self, fidelity, checks=(), required=("isoR", "closedWorld")):
+        return paper.fidelity_problems(fidelity, self.written, self.ids, set(checks), list(required))
+
+    def test_a_full_comparison_passes(self):
+        self.assertEqual(self.problems({"isoR": self.entry(), "closedWorld": self.entry(verdict="stronger", checks=["c"])}, ["c"]), [])
+
+    def test_a_missing_comparison_is_named(self):
+        errors = self.problems({"isoR": self.entry()})
+        self.assertTrue(any("missing: closedWorld" in e for e in errors), errors)
+
+    def test_a_verdict_outside_the_list_is_refused(self):
+        errors = self.problems({"isoR": self.entry(verdict="close"), "closedWorld": self.entry()})
+        self.assertTrue(any("verdict" in e for e in errors), errors)
+
+    def test_an_unknown_check_is_refused(self):
+        errors = self.problems({"isoR": self.entry(checks=["nowhere"]), "closedWorld": self.entry()})
+        self.assertTrue(any("no check called nowhere" in e for e in errors), errors)
+
+    def test_an_unknown_passage_or_name_is_refused(self):
+        errors = self.problems({"isoR": self.entry(because=["gone"]), "closedWorld": self.entry(), "other": self.entry()})
+        self.assertTrue(any("`because`" in e for e in errors) and any("called other" in e for e in errors), errors)
+
+    def test_held_comparisons_skip_the_step_and_carry_none(self):
+        held = {"fidelity_held": "Held until the authors have seen them."}
+        self.assertEqual(paper.comparison_problems(held, self.written, self.ids, set(), ["isoR"]), [])
+        both = {**held, "fidelity": {"isoR": self.entry()}}
+        self.assertTrue(paper.comparison_problems(both, self.written, self.ids, set(), ["isoR"]))
+        self.assertTrue(paper.comparison_problems({}, self.written, self.ids, set(), ["isoR"]))
+
+    def test_a_changed_check_file_is_stale(self):
+        import hashlib
+        import tempfile
+        with tempfile.TemporaryDirectory() as scratch:
+            folder = Path(scratch)
+            (folder / "checks").mkdir()
+            path = folder / "checks" / "F.lean"
+            path.write_text("theorem t : True := trivial\n")
+            recorded = {"checks/F.lean": hashlib.sha256(path.read_bytes()).hexdigest()}
+            self.assertEqual(paper.stale_checks(folder, recorded), [])
+            path.write_text("theorem t : True := by trivial\n")
+            self.assertEqual(paper.stale_checks(folder, recorded), ["checks/F.lean"])
+            self.assertEqual(paper.stale_checks(folder, {}), ["checks/F.lean"])

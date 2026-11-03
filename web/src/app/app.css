@@ -260,6 +260,38 @@ button:disabled { cursor: default; }
 .decl__relation, .decl__facts { margin: 3px 0 0; font-size: var(--fs-sm); line-height: 1.42; color: var(--ink-2); text-wrap: pretty; }
 .decl__axiom { margin: 3px 0 0; font-size: var(--fs-sm); font-weight: 600; color: var(--rel-assumes-lit); }
 .decl__note { margin: 5px 0 0; padding-left: 10px; border-left: 2px solid var(--rule-strong); font-family: var(--font-serif); font-size: 0.9375rem; line-height: 1.42; color: var(--ink); text-wrap: pretty; }
+/* The paper and the Lean: a comparison made with AI, and the checks Lean ran */
+.fid { margin: 8px 0 0; padding-left: 10px; border-left: 2px solid var(--rule-strong); font-size: var(--fs-sm); line-height: 1.42; color: var(--ink-2); }
+.fid:not([data-verdict="same"]), .fid:has(.fid__check) { border-left-color: var(--rel-assumes-lit); }
+.fid p { margin: 0; }
+.fid__head { display: flex; align-items: baseline; gap: 10px; }
+.fid__by { font-size: var(--fs-xs); color: var(--ink-3); }
+.fid__verdict { font-weight: 600; color: var(--ink); }
+.fid:not([data-verdict="same"]) .fid__verdict { color: var(--rel-assumes-lit); }
+.fid__text { margin-top: 2px !important; font-family: var(--font-serif); font-size: 0.9375rem; color: var(--ink); text-wrap: pretty; }
+.fid__because { margin-top: 2px !important; font-size: var(--fs-xs); }
+.fid__because a { color: inherit; text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
+.fid__because a:hover, .fid__back:hover, .made__link:hover { color: var(--lit); }
+.fid__check { margin-top: 6px; }
+.fid__doc { color: var(--ink); text-wrap: pretty; }
+.fid__doc code, .stepline__fid code { font-family: var(--font-mono); font-size: 0.8em; }
+.fid__checked b { font-weight: 600; color: var(--rel-assumes-lit); }
+.fid__checked .declname, .index__check .declname, .stepline__fid .declname { display: inline; margin-right: 0; }
+.fid__fold { min-height: 26px; margin-top: 0; }
+.fid .fid__code { margin: 4px -16px 0 -28px; }
+.fid__file { margin-top: 2px !important; font-size: var(--fs-xs); }
+.fid__back, .made__link { min-height: 24px; color: inherit; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+.stepline__fid { list-style: none; margin: 5px 0 0; padding: 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--ink-2); }
+.stepline__fid li { padding: 1px 0 1px 8px; border-left: 2px solid var(--rule-strong); text-wrap: pretty; }
+.stepline__fid li + li { margin-top: 3px; }
+.stepline__fid li[data-flagged] { border-left-color: var(--rel-assumes-lit); color: var(--ink); }
+.stepline__fid button { min-height: 22px; color: var(--ink); font-weight: 600; text-decoration: underline; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+.stepline__fid button:hover { color: var(--lit); }
+.made p { margin: 0 0 4px; color: var(--ink); text-wrap: pretty; }
+.index__check { margin: 0 0 10px; }
+.index__check .fid__code { margin: 4px -16px 0; }
+.index__checkname { font-family: var(--font-mono); font-size: 0.75rem; color: var(--ink); }
+.index__checkkind { font-size: var(--fs-xs); }
 .decl__code { margin: 7px -16px 0; background: var(--code-well); }
 .decl__code:focus-visible { outline-offset: -2px; }
 .decl__fold { display: block; min-height: 28px; margin-top: 4px; font-size: var(--fs-sm); color: var(--ink-2); }
