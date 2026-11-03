@@ -781,7 +781,9 @@ export function PaperPage({ edition }: { edition: Edition }) {
               onReady={() => setTick((t) => t + 1)}
               hint={(
                 <>
-                <p className="firstline firstline--status">The links from this paper to its proof in Lean, the notes{hasComparisons(edition) ? " and the comparisons" : ""} were made with AI and have not been reviewed by the authors. <MadeLink onOpen={() => onTab("index")} />.</p>
+                <p className="firstline firstline--status">{hasComparisons(edition)
+                  ? "The links from this paper to its proof in Lean, the notes and the comparisons were made with AI"
+                  : "The links from this paper to its proof in Lean, and the notes, were made with AI"} and have not been reviewed by the authors. <MadeLink onOpen={() => onTab("index")} />.</p>
                 <p className="firstline">
                   Click a statement with a mark beside it to read its Lean.
                   {firstSection && <> The first is in <button type="button" onClick={() => jumpTo(firstSection.id)}>{sectionLabel(firstSection.number)}</button></>}
