@@ -162,6 +162,8 @@ change their sources and rebuild them.
 
 ## Related work and videos
 
+[Introduction to the projects](https://www.youtube.com/watch?v=Yk_kUQUCylc) · [Proof Reader short](https://www.youtube.com/watch?v=gwNR6Lyst2M) · [Full comparison of the three maths readers](https://www.youtube.com/watch?v=i5GdVgC-cw0)
+
 [Lean Exposition](https://github.com/wcook04/lean-exposition) contains writing guides and tools for explaining a Lean proof in three papers
 with different levels of detail. Its
 [reading website](https://wcook04.github.io/lean-exposition-site/) presents those draft
