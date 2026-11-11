@@ -622,7 +622,7 @@ def edition(slug: str) -> dict:
         for passage in data["passages"]:
             passage["code"] = passage["id"] in in_code
     paragraphs = setting.pop("paragraphs") if setting else {}
-    example = shelf_example(config, data["passages"], paragraphs, written, texts, links.get("plain", {}))
+    examples = shelf_examples(config, data["passages"], paragraphs, written, texts, links.get("plain", {}))
     named_in_paper = [d["id"] for d in declarations if d["passages"]]
     custom = sorted(d["id"] for d in declarations if d["keyword"] == "axiom")
     fidelity = links.get("fidelity", {})
@@ -642,7 +642,7 @@ def edition(slug: str) -> dict:
         "mentions": find_mentions(data["words"], names),
         "declarations": declarations,
         "checks": data["checks"],
-        "shelf": {"example": example},
+        "shelf": {"example": examples[0] if examples else None, "examples": examples},
         "coverage": {"sections": tied_sections, "ties": len(data["passages"])},
         "reading": {k: v for k, v in setting.items() if k != "html"} if setting else None,
         "reading_html": setting["html"] if setting else None,
@@ -666,16 +666,31 @@ def edition(slug: str) -> dict:
     }
 
 
-def shelf_problem(config: dict, passages: list[dict]) -> str | None:
-    """The front page's example must name a passage tied to Lean."""
+def shelf_ids(config: dict):
+    """The passages `[shelf] example` names: one id or a list, in the order given. None without one."""
     wanted = config.get("shelf", {}).get("example")
     if wanted is None:
         return None
-    found = next((p for p in passages if p["id"] == wanted), None)
-    if not found:
-        return f"[shelf] example: no passage called {wanted!r} in links.json"
-    if not found.get("lean"):
-        return f"[shelf] example: passage {wanted!r} names no Lean declaration"
+    return [wanted] if isinstance(wanted, str) else wanted
+
+
+def shelf_problem(config: dict, passages: list[dict]) -> str | None:
+    """Each of the front page's examples must name a passage tied to Lean, once."""
+    wanted = shelf_ids(config)
+    if wanted is None:
+        return None
+    if not isinstance(wanted, list) or not wanted or not all(isinstance(w, str) for w in wanted):
+        return "[shelf] example: give one passage id or a list of passage ids"
+    seen = set()
+    for pid in wanted:
+        if pid in seen:
+            return f"[shelf] example: passage {pid!r} is named twice"
+        seen.add(pid)
+        found = next((p for p in passages if p["id"] == pid), None)
+        if not found:
+            return f"[shelf] example: no passage called {pid!r} in links.json"
+        if not found.get("lean"):
+            return f"[shelf] example: passage {pid!r} names no Lean declaration"
     return None
 
 
@@ -684,37 +699,47 @@ def example_code(lines: list[str], first: int, last: int, decl_first: int, decl_
     return [{"n": n, "text": lines[n - 1]} for n in range(max(decl_first, first - 2), min(decl_last, last) + 1)]
 
 
-def shelf_example(config: dict, passages: list[dict], paragraphs: dict, written: dict, texts: dict, plain: dict) -> dict | None:
-    """One linked sentence and its Lean lines, for the front page. None without a [shelf] table."""
-    wanted = config.get("shelf", {}).get("example")
+def shelf_examples(config: dict, passages: list[dict], paragraphs: dict, written: dict, texts: dict, plain: dict) -> list[dict]:
+    """Linked sentences and their Lean lines, for the front page, in the order named. Empty without a [shelf] table."""
+    wanted = shelf_ids(config)
     if wanted is None:
-        return None
+        return []
     problem = shelf_problem(config, passages)
     if problem:
         raise PaperError(problem)
-    passage = next(p for p in passages if p["id"] == wanted)
-    name = passage["lean"][0]
-    row = written[name]
-    if name not in plain:
-        raise PaperError(f"[shelf] example: links.json needs a plain title for {name}")
-    lines = texts[row["module"]].splitlines()
-    decl_first, decl_last = row["line"], row["end_line"]
-    if passage.get("lines"):
-        first, last = passage["lines"]
-    else:
-        first, last = decl_first, statement_end(lines, decl_first, decl_last, row["keyword"])
     label = config.get("reading", {}).get("page_label")
-    around = paragraphs.get(wanted) or {"before": "", "after": ""}
     project_root = config["lean"].get("project", "lean")
-    return {
-        "id": wanted, "section": passage.get("section", ""),
-        "page_label": label.format(page=passage["page"]) if label else str(passage["page"]),
-        "before": around["before"], "quote": passage["quote"], "after": around["after"],
-        "name": name, "plain": plain[name], "keyword": row["keyword"],
-        "file": f"{project_root}/{row['module'].replace('.', '/')}.lean",
-        "decl_first": decl_first, "decl_last": decl_last, "first": first, "last": last,
-        "code": example_code(lines, first, last, decl_first, decl_last),
-    }
+    examples = []
+    for pid in wanted:
+        passage = next(p for p in passages if p["id"] == pid)
+        name = passage["lean"][0]
+        row = written[name]
+        if name not in plain:
+            raise PaperError(f"[shelf] example: links.json needs a plain title for {name}")
+        lines = texts[row["module"]].splitlines()
+        decl_first, decl_last = row["line"], row["end_line"]
+        if passage.get("lines"):
+            first, last = passage["lines"]
+        else:
+            first, last = decl_first, statement_end(lines, decl_first, decl_last, row["keyword"])
+        around = paragraphs.get(pid) or {"before": "", "after": ""}
+        examples.append({
+            "id": pid, "section": passage.get("section", ""),
+            "page_label": label.format(page=passage["page"]) if label else str(passage["page"]),
+            "before": around["before"], "quote": passage["quote"], "after": around["after"],
+            "name": name, "plain": plain[name], "keyword": row["keyword"],
+            "file": f"{project_root}/{row['module'].replace('.', '/')}.lean",
+            "decl_first": decl_first, "decl_last": decl_last, "first": first, "last": last,
+            "code": example_code(lines, first, last, decl_first, decl_last),
+            "role": passage.get("role"),
+        })
+    return examples
+
+
+def shelf_example(config: dict, passages: list[dict], paragraphs: dict, written: dict, texts: dict, plain: dict) -> dict | None:
+    """The first of the front page's examples. None without a [shelf] table."""
+    examples = shelf_examples(config, passages, paragraphs, written, texts, plain)
+    return examples[0] if examples else None
 
 
 def fidelity_of(entry: dict | None) -> dict | None:
@@ -808,7 +833,8 @@ def shelf_entry(slug: str, built: dict, files: dict[str, str]) -> dict:
                  "version": built["lean"]["version"], "axioms": len(built["analytics"]["axioms"]),
                  "sorry": len(built["analytics"]["sorry"])},
         "linked": len(built["passages"]),
-        "example": built.get("shelf", {}).get("example"),
+        "example": (built.get("shelf", {}).get("examples") or [None])[0],
+        "examples": built.get("shelf", {}).get("examples", []),
     }
 
 

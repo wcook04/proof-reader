@@ -431,3 +431,80 @@ class ShelfExample(unittest.TestCase):
         config = {k: v for k, v in self.config.items() if k != "shelf"}
         self.assertIsNone(paper.shelf_problem(config, []))
         self.assertIsNone(self.example(config=config))
+        self.assertEqual(self.examples(config, []), [])
+
+    def other(self):
+        return {"id": "isoR-stmt", "section": "3.2", "role": "states", "lean": ["isoR"], "quote": "isoR holds.", "page": 6}
+
+    def examples(self, config, passages):
+        return paper.shelf_examples(config, passages, {}, self.written, {"CE": "\n".join(self.lean) + "\n"},
+                                    {"isoR": "Contextual round trip"})
+
+    def test_a_list_builds_in_order(self):
+        passages = [self.passage(lines=[6, 8], role="proves"), self.other()]
+        config = {**self.config, "shelf": {"example": ["isoR-stmt", "isoR-clam"]}}
+        self.assertIsNone(paper.shelf_problem(config, passages))
+        built = self.examples(config, passages)
+        self.assertEqual([(e["id"], e["role"], e["page_label"]) for e in built],
+                         [("isoR-stmt", "states", "191:6"), ("isoR-clam", "proves", "191:7")])
+        self.assertEqual(paper.shelf_example(config, passages, {}, self.written, {"CE": "\n".join(self.lean) + "\n"},
+                                             {"isoR": "Contextual round trip"}), built[0])
+
+    def test_a_string_still_works(self):
+        built = self.examples(self.config, [self.passage(lines=[6, 8], role="proves")])
+        self.assertEqual([(e["id"], e["role"]) for e in built], [("isoR-clam", "proves")])
+
+    def test_a_duplicate_fails(self):
+        config = {**self.config, "shelf": {"example": ["isoR-clam", "isoR-clam"]}}
+        self.assertIn("twice", paper.shelf_problem(config, [self.passage()]))
+        with self.assertRaises(paper.PaperError):
+            self.examples(config, [self.passage()])
+
+    def test_an_unknown_id_in_a_list_fails_naming_it(self):
+        config = {**self.config, "shelf": {"example": ["isoR-clam", "nowhere"]}}
+        self.assertIn("'nowhere'", paper.shelf_problem(config, [self.passage()]))
+        with self.assertRaises(paper.PaperError) as caught:
+            self.examples(config, [self.passage()])
+        self.assertIn("'nowhere'", str(caught.exception))
+
+    def test_a_passage_without_lean_in_a_list_fails_naming_it(self):
+        bare = {**self.other(), "lean": []}
+        config = {**self.config, "shelf": {"example": ["isoR-clam", "isoR-stmt"]}}
+        self.assertIn("'isoR-stmt'", paper.shelf_problem(config, [self.passage(), bare]))
+
+
+class RealShelfExamples(unittest.TestCase):
+    """The contextual-embeddings front page: each example reads as its paragraph and its authors' lines."""
+
+    slug = "contextual-embeddings"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.built = paper.edition(cls.slug)
+
+    def test_the_three_examples_in_order(self):
+        examples = self.built["shelf"]["examples"]
+        self.assertEqual([e["id"] for e in examples], ["isoR-clam", "closed-world", "indexIsoL"])
+        self.assertEqual(self.built["shelf"]["example"], examples[0])
+        links = paper.load_links(paper.PAPERS / self.slug)
+        roles = {p["id"]: p["role"] for p in links["passages"]}
+        self.assertEqual([e["role"] for e in examples], [roles[e["id"]] for e in examples])
+
+    def test_each_example_is_its_paragraph(self):
+        page = reading.parse(self.built["reading_html"])
+        for example in self.built["shelf"]["examples"]:
+            with self.subTest(example["id"]):
+                spots, errors = reading.locate(page, [{"id": example["id"], "quote": example["quote"]}])
+                self.assertEqual(errors, [])
+                found = reading.paragraph(page, *spots[example["id"]], example["quote"])
+                self.assertIsNotNone(found)
+                self.assertEqual(example["before"] + example["quote"] + example["after"], found["text"])
+
+    def test_each_example_is_the_authors_lines(self):
+        for example in self.built["shelf"]["examples"]:
+            with self.subTest(example["id"]):
+                lines = (paper.PAPERS / self.slug / example["file"]).read_text(encoding="utf-8").splitlines()
+                self.assertTrue(example["code"])
+                for line in example["code"]:
+                    self.assertEqual(line["text"], lines[line["n"] - 1])
+                self.assertEqual(example["code"][-1]["n"], min(example["last"], example["decl_last"]))

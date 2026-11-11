@@ -38,4 +38,4 @@ page = 24
 box = [143, 109, 340, 240]
 
 [shelf]
-example = "isoR-clam"
+example = ["isoR-clam", "closed-world", "indexIsoL"]

@@ -152,6 +152,8 @@ export interface Edition {
 /** One linked sentence and its Lean lines, chosen in paper.toml and cut out by the build. */
 export interface ShelfExample {
   id: string;
+  /** The passage's role in links.json: "proves", "states" and so on. */
+  role?: string;
   section: string;
   page_label: string;
   before: string;
@@ -178,6 +180,7 @@ export interface ShelfItem {
   lean?: { files: number; lines: number; version: string; axioms: number; sorry: number };
   linked?: number;
   example?: ShelfExample | null;
+  examples?: ShelfExample[];
 }
 
 const base = import.meta.env.BASE_URL;

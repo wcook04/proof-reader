@@ -38,6 +38,11 @@ interface Opened {
   bad: string | null;
 }
 
+/** Wide enough for the right page to stand beside the paper; narrower, it opens on demand. */
+const WIDE = "(min-width: 1280px)";
+/** A phone: the right page is a sheet below the paper (the 767px rule in app.css). */
+const PHONE = "(max-width: 767px)";
+
 function useMedia(query: string): boolean {
   const [on, setOn] = useState(() => window.matchMedia(query).matches);
   useEffect(() => {
@@ -100,7 +105,11 @@ export function PaperPage({ edition }: { edition: Edition }) {
       replaceEntry(saved);
       started.current = { entry: saved, target: saved.top !== null ? { top: saved.top, width: saved.width, fallback: meaning.target ?? undefined } : meaning.target, record: route.record };
     } else {
-      const entry: Entry = { ...blankEntry(slug, homeCopy), lean: readLayout().lean, ...meaning.entry, bad: meaning.bad };
+      // A statement's address opened afresh shows its Lean at once. On a phone, where the right
+      // page is a sheet under the paper, the sheet opens as a tap would open it and the
+      // statement sits above it. A wider screen keeps the right page waiting to be asked for.
+      const sheet = !!meaning.entry.pin && window.matchMedia(PHONE).matches;
+      const entry: Entry = { ...blankEntry(slug, homeCopy), lean: readLayout().lean, ...meaning.entry, sheet, bad: meaning.bad };
       replaceEntry(entry);
       started.current = { entry, target: meaning.target, record: route.record };
     }
@@ -119,7 +128,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const [mapStays, setMapStays] = useState(false);
   const [tick, setTick] = useState(0);
 
-  const wide = useMedia("(min-width: 1280px)");
+  const wide = useMedia(WIDE);
   const [layout, setLayoutState] = useState<Layout>(readLayout);
   const layoutRef = useRef(layout);
   layoutRef.current = layout;
@@ -410,13 +419,22 @@ export function PaperPage({ edition }: { edition: Edition }) {
     else letGo(false);
   }, [chooseMode, letGo, open]);
 
+  const closeSheet = useCallback(() => {
+    const next = { ...entryRef.current, sheet: false, pin: null, lean: false };
+    entryRef.current = next;
+    setEntry(next);
+    replaceEntry(next);
+  }, []);
+
   /** Escape and Unpin: one level, from an opened statement to what was there, or from Lean to Graph. */
   const closeLean = useCallback(() => {
     const cur = entryRef.current;
     if (!cur.pin && cur.tab === "step") setMode("graph");
     else if (cur.opened) window.history.go(-cur.opened.steps);
+    // An address opened directly on a sheet: close it, where Back from a tapped statement lands.
+    else if (cur.sheet && !wide) closeSheet();
     else letGo(layoutRef.current.lean);
-  }, [letGo, setMode]);
+  }, [closeSheet, letGo, setMode, wide]);
 
   const onFollow = useCallback<Follow>((id, zone, above) => {
     setLine({ id, zone, above });
@@ -531,13 +549,6 @@ export function PaperPage({ edition }: { edition: Edition }) {
   }, []);
 
   const closePage = useCallback(() => onLayout({ ...layoutRef.current, graph: false }), [onLayout]);
-
-  const closeSheet = useCallback(() => {
-    const next = { ...entryRef.current, sheet: false, pin: null, lean: false };
-    entryRef.current = next;
-    setEntry(next);
-    replaceEntry(next);
-  }, []);
 
   // The keys a reader of a long page reaches for.
   useEffect(() => {
@@ -784,20 +795,24 @@ export function PaperPage({ edition }: { edition: Edition }) {
               onPoint={onPoint}
               onReady={() => setTick((t) => t + 1)}
               hint={(
-                <>
+                <div className="start">
                 <p className="firstline firstline--status">{hasComparisons(edition)
                   ? "The links from this paper to its proof in Lean, the notes and the comparisons were made with AI"
                   : "The links from this paper to its proof in Lean, and the notes, were made with AI"} and have not been reviewed by the authors. <MadeLink onOpen={() => onTab("index")} />.</p>
                 <p className="firstline">
                   Click a statement with a mark<span className="firstline__mark" aria-hidden="true" /> beside it to read its Lean.
-                  {firstSection && <> The first is in <button type="button" onClick={() => jumpTo(firstSection.id)}>{sectionLabel(firstSection.number)}</button></>}
-                  {claimSection && <>, the main claim in <button type="button" onClick={() => jumpTo(claimSection.id)}>{sectionLabel(claimSection.number)}</button></>}.
+                  {(firstSection || claimSection) && (
+                    <span className="start__go">
+                      {firstSection && <button type="button" onClick={() => jumpTo(firstSection.id)}>{sectionLabel(firstSection.number)}: the first linked statement</button>}
+                      {claimSection && <button type="button" onClick={() => jumpTo(claimSection.id)}>{sectionLabel(claimSection.number)}: the main claim</button>}
+                    </span>
+                  )}
                 </p>
                 <p className="firstfilm">
                   <a href={SHORT_FILM.youtube} target="_blank" rel="noopener noreferrer"><span className="bar__film-mark" aria-hidden="true" />{SHORT_FILM.title}, {clockTime(SHORT_FILM.seconds)}</a>
                   <a href={LONG_FILM.youtube} target="_blank" rel="noopener noreferrer"><span className="bar__film-mark" aria-hidden="true" />{LONG_FILM.title}, {clockTime(LONG_FILM.seconds)}</a>
                 </p>
-                </>
+                </div>
               )}
               foot={<footer className="foot">{credit}<SisterSites /></footer>}
             />
