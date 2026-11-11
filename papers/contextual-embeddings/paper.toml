@@ -36,3 +36,6 @@ box = [50, 245, 432, 371]
 name = "fig-9.svg"
 page = 24
 box = [143, 109, 340, 240]
+
+[shelf]
+example = "isoR-clam"

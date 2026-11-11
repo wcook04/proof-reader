@@ -32,8 +32,15 @@
 
 .reading { position: relative; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-gutter: stable; scrollbar-width: thin; outline-offset: -2px; background: var(--sheet); overflow-anchor: none; }
 .sheet { --code-cap: 0.8125rem; position: relative; background: var(--sheet); container-type: inline-size; }
-.firstline { box-sizing: border-box; margin: 0 auto; width: min(var(--column, 36rem), 100cqi - 2 * clamp(20px, 7cqi, 60px)); padding: 4px 0 0; font-size: var(--fs-sm); line-height: 1.4; color: var(--ink-2); }
-.firstline--status { padding-top: 12px; color: var(--ink); }
+.firstline, .firstfilm { box-sizing: border-box; margin: 0 auto; width: min(var(--column, 36rem), 100cqi - 2 * clamp(20px, 7cqi, 60px)); padding: 5px 0 0; font-size: var(--fs-ui); line-height: 1.45; color: var(--ink-2); }
+.firstline--status { padding-top: 14px; color: var(--ink); }
+/* The mark the sentence names, drawn as it stands in the margin. */
+.firstline__mark { display: inline-block; width: 2px; height: 0.95em; margin: 0 1px 0 6px; vertical-align: -0.12em; border-radius: 1px; background: var(--thread); }
+/* The videos about this page: quiet, under the two lines, out of the paper's way. */
+.firstfilm { display: flex; flex-wrap: wrap; gap: 2px 20px; padding-top: 8px; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; }
+.firstfilm a { display: inline-flex; align-items: center; gap: 7px; min-height: 24px; color: var(--ink-2); text-decoration: none; }
+.firstfilm a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.firstfilm .bar__film-mark { border-left-width: 7px; border-top-width: 4.5px; border-bottom-width: 4.5px; }
 .firstline button { min-height: 24px; color: var(--lit); text-decoration: underline; text-underline-offset: 3px; }
 .sheet__text { position: relative; padding: 24px clamp(20px, 7cqi, 60px) 48px; font-family: var(--font-serif); font-size: var(--fs-read); line-height: 1.5; color: var(--ink); font-variant-numeric: oldstyle-nums proportional-nums; font-kerning: normal; hyphens: auto; -webkit-hyphens: auto; hyphenate-limit-chars: 8 3 3; -webkit-hyphenate-limit-before: 3; -webkit-hyphenate-limit-after: 3; overflow-wrap: break-word; }
 .sheet__text { --bleed: min(100cqi - 2 * clamp(10px, 3.2cqi, 28px), 44rem); }

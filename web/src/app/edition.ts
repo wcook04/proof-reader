@@ -149,12 +149,35 @@ export interface Edition {
   };
 }
 
+/** One linked sentence and its Lean lines, chosen in paper.toml and cut out by the build. */
+export interface ShelfExample {
+  id: string;
+  section: string;
+  page_label: string;
+  before: string;
+  quote: string;
+  after: string;
+  name: string;
+  plain: string;
+  keyword: string;
+  file: string;
+  decl_first: number;
+  decl_last: number;
+  first: number;
+  last: number;
+  code: { n: number; text: string }[];
+}
+
 export interface ShelfItem {
   slug: string;
   title: string;
+  short_title?: string;
   authors: string[];
   venue: string;
   declarations: number;
+  lean?: { files: number; lines: number; version: string; axioms: number; sorry: number };
+  linked?: number;
+  example?: ShelfExample | null;
 }
 
 const base = import.meta.env.BASE_URL;

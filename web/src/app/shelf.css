@@ -1,0 +1,136 @@
+/* The front page. One container (--shelf-w, --shelf-pad) for the header's lockup
+   and every band, so each band starts on the lockup's left edge. The first screen
+   is one real linked sentence beside its Lean lines, drawn with the reader's own
+   highlighter and thread (app.css, reading.css), not a picture of them. */
+
+.shelf {
+  --shelf-w: 1320px;
+  --shelf-pad: clamp(20px, 4vw, 56px);
+  min-height: 100%; background: var(--ground); outline: none;
+}
+.bar--shelf { justify-content: space-between; padding: 0 max(16px, calc((100vw - 1320px) / 2 + clamp(20px, 4vw, 56px) - 4px)); background: var(--ground); border-bottom-color: var(--rule); height: 56px; }
+.bar--shelf .bar__right { gap: 6px; }
+.bar__link--shelf { padding: 0 8px; }
+/* Buttons: one filled action in ink, one ghost. */
+.button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px; border-radius: var(--radius-m); font-family: var(--font-sans); font-size: var(--fs-base); font-weight: 600; text-decoration: none; white-space: nowrap; transition: background-color var(--t-hover) linear, border-color var(--t-hover) linear, scale var(--t-press) var(--ease-out); }
+.button:active { scale: 0.97; }
+.button--ink { background: var(--ink); color: var(--ground); }
+.button--ink:hover { background: color-mix(in oklab, var(--ink) 86%, var(--lit)); }
+.button--ghost { color: var(--ink); box-shadow: inset 0 0 0 1px var(--rule-control); }
+.button--ghost:hover { box-shadow: inset 0 0 0 1px var(--ink); background: var(--hover-wash); }
+.button--held { min-width: 15rem; opacity: 0.12; }
+:where(.button):where(:focus-visible) { border-radius: var(--radius-m); outline-offset: 3px; }
+
+/* ------------------------------------------------------------------ hero */
+.hero {
+  box-sizing: border-box; max-width: var(--shelf-w); margin: 0 auto;
+  padding: clamp(28px, 5.5vh, 64px) var(--shelf-pad) clamp(36px, 6vh, 72px);
+  display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 14fr); gap: clamp(32px, 4vw, 64px); align-items: center;
+  min-height: min(calc(100vh - 56px), 760px);
+}
+.hero h1 { margin: 0; font-family: var(--font-serif); font-size: clamp(2rem, 1.25rem + 1.75vw, 2.85rem); font-weight: 400; letter-spacing: -0.018em; line-height: 1.1; text-wrap: balance; }
+.hero .hero__lede { margin: 18px 0 0; max-width: 34rem; font-family: var(--font-serif); font-size: var(--fs-read); line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+.hero__actions { margin: 26px 0 0; display: flex; flex-wrap: wrap; gap: 12px; min-height: 44px; }
+.hero__films { margin-top: 22px; display: grid; grid-template-columns: minmax(0, 13fr) minmax(0, 10fr); gap: 28px; align-items: start; }
+.hero__films .film-slot--inline { grid-template-columns: 11.5rem minmax(0, 1fr); gap: 0 16px; align-items: center; }
+.hero__films .film-slot--inline + .film-slot--inline { grid-template-columns: 7.5rem minmax(0, 1fr); }
+.hero__films .film-slot.film-slot--inline .film-slot__title { font-size: 1.02rem; line-height: 1.25; }
+.hero__films .film-slot.film-slot--inline .film-slot__text { font-size: var(--fs-sm); line-height: 1.45; color: var(--ink-2); }
+.film-slot__frame { --fam-rule-strong: var(--rule-control); }
+
+/* The specimen: a sheet of the paper and a leaf of Lean on the desk. */
+.hero__specimen { min-width: 0; }
+.specimen { position: relative; margin: 0; display: grid; grid-template-columns: minmax(0, 10fr) minmax(0, 13fr); border-radius: var(--radius-l); background: var(--desk); box-shadow: 0 0 0 1px var(--rule-strong), var(--shadow-sheet); overflow: hidden; }
+.specimen--held { min-height: 26rem; opacity: 0.5; }
+.specimen__paper { padding: 20px clamp(18px, 2vw, 30px) 26px; background: var(--sheet); }
+.specimen__lean { min-width: 0; padding: 20px 0 0; background: var(--surface); border-left: 1px solid var(--rule-strong); }
+.specimen__label { margin: 0 0 14px; font-size: var(--fs-sm); line-height: 1.35; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.specimen__lean .specimen__label, .specimen__decl { padding: 0 18px; }
+.specimen__text { margin: 0; font-family: var(--font-serif); font-size: 1.0625rem; line-height: 1.58; color: var(--ink); hyphens: manual; text-wrap: pretty; }
+.specimen__quote { color: inherit; text-decoration: none; background: var(--highlight); box-shadow: 0 2px 0 var(--thread); border-radius: 1px; padding: 1px 0; -webkit-box-decoration-break: clone; box-decoration-break: clone; cursor: pointer; }
+.specimen__quote:hover { background: color-mix(in oklab, var(--highlight) 78%, var(--thread)); }
+.specimen__decl { margin: 0 0 10px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 10px; }
+.specimen__plain { font-family: var(--font-serif); font-size: 1.125rem; color: var(--ink); }
+.specimen__decl code { font-family: var(--font-mono); font-size: var(--fs-xs); color: var(--ink-2); }
+.specimen__where { font-size: var(--fs-sm); color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.specimen__code { margin: 0; padding: 8px 0 14px; background: var(--sunk); border-top: 1px solid var(--rule); overflow: hidden; font-size: 0.78rem; }
+.specimen__line { display: flex; padding-right: 12px; }
+.specimen__line.is-exact { background: var(--highlight); box-shadow: inset 3px 0 0 var(--thread); }
+.specimen__no { flex: none; width: 3.1em; padding-right: 10px; text-align: right; font-size: 0.6875rem; line-height: 1.95; color: var(--ink-3); user-select: none; font-variant-numeric: tabular-nums; }
+.specimen__src { min-width: 0; white-space: pre-wrap; overflow-wrap: anywhere; padding-left: calc((var(--indent, 0) + 2) * 1ch); text-indent: calc((var(--indent, 0) + 2) * -1ch); }
+.specimen__code .lk--type { color: var(--code-type); }
+/* On the highlighter the type colour leans to ink, to keep 4.5:1 at night. */
+.specimen__line.is-exact .lk--type { color: color-mix(in oklab, var(--code-type) 45%, var(--ink)); }
+.specimen__thread { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.specimen__thread path { fill: none; stroke: var(--thread); stroke-width: 1.5; }
+.specimen__thread circle { fill: var(--thread); }
+.specimen__caption { grid-column: 1 / -1; padding: 11px clamp(18px, 2vw, 30px) 12px; border-top: 1px solid var(--rule-strong); background: var(--ground); font-size: var(--fs-sm); line-height: 1.45; color: var(--ink-2); }
+.specimen__caption a { color: var(--ink); font-weight: 600; white-space: nowrap; text-underline-offset: 3px; text-decoration-color: var(--rule-control); }
+.specimen__caption a::after { content: "\00a0\2192"; }
+.specimen__caption a:hover { color: var(--lit); }
+/* The thread is drawn once, from the sentence to its lines, then stays. */
+@media (prefers-reduced-motion: no-preference) {
+  .specimen__thread path { stroke-dasharray: 600; stroke-dashoffset: 600; animation: specimen-thread 700ms var(--ease-move) 250ms forwards; }
+  .specimen__line.is-exact { animation: specimen-lines 380ms var(--ease-out) 800ms backwards; }
+}
+@keyframes specimen-thread { to { stroke-dashoffset: 0; } }
+@keyframes specimen-lines { from { background: transparent; box-shadow: inset 3px 0 0 transparent; } }
+
+/* ------------------------------------------------------------------ bands */
+.band { border-top: 1px solid var(--rule); }
+.band__in { box-sizing: border-box; max-width: var(--shelf-w); margin: 0 auto; padding: clamp(40px, 6vh, 68px) var(--shelf-pad); }
+.band h2 { margin: 0 0 24px; font-family: var(--font-serif); font-size: clamp(1.5rem, 1.2rem + 0.8vw, 1.9rem); font-weight: 400; letter-spacing: -0.012em; line-height: 1.18; text-wrap: balance; }
+
+.band--sources { background: var(--desk); }
+.sources { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 clamp(24px, 3vw, 48px); }
+.sources > div { padding-top: 14px; border-top: 2px solid var(--ink); }
+.sources > .sources__ai { border-top-color: var(--lit-line); }
+.sources dt { margin: 0 0 6px; font-size: var(--fs-base); font-weight: 600; color: var(--ink); }
+.sources dd { margin: 0; max-width: 34rem; font-size: var(--fs-base); line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+.sources__limit { margin: 28px 0 0; max-width: 46rem; font-family: var(--font-serif); font-size: var(--fs-read); line-height: 1.5; color: var(--ink); text-wrap: pretty; }
+
+.band__in--split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 4vw, 64px); align-items: center; }
+.facts { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; max-width: 32rem; }
+.facts li { padding-left: 16px; border-left: 2px solid var(--rule-strong); font-size: var(--fs-base); line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
+.facts strong { font-weight: 600; color: var(--ink); }
+.reader-picture { display: block; border-radius: var(--radius-m); overflow: hidden; box-shadow: 0 0 0 1px var(--rule-strong), var(--shadow-sheet); aspect-ratio: 16 / 9; background: var(--desk); }
+.reader-picture img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: top left; }
+@media (hover: hover) and (pointer: fine) { a.reader-picture:hover { box-shadow: 0 0 0 1px var(--ink-3), var(--shadow-sheet); } }
+
+/* The papers. Room for one before the list arrives, so that nothing below it moves. */
+.shelf__list { list-style: none; margin: 0; padding: 0; min-height: 142px; }
+.shelf__list li + li { margin-top: 24px; }
+.shelf__list li a { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 22px; align-items: center; max-width: 52rem; color: inherit; text-decoration: none; }
+.shelf__list li a img { display: block; width: 96px; height: auto; background: var(--paper-white); box-shadow: var(--sheet-shadow); }
+.shelf__list li a:hover .shelf__title { color: var(--lit); }
+.shelf__title { display: block; margin-bottom: 6px; font-family: var(--font-serif); font-size: 1.3rem; line-height: 1.25; text-wrap: balance; }
+.shelf__by { display: block; font-size: var(--fs-ui); line-height: 1.45; color: var(--ink-2); }
+.shelf__counts { font-variant-numeric: tabular-nums; }
+.shelf__status { display: block; max-width: 38rem; margin-top: 6px; font-size: var(--fs-ui); line-height: 1.4; color: var(--ink); }
+.shelf__add { margin: 30px 0 0; max-width: 46rem; font-size: var(--fs-base); line-height: 1.5; color: var(--ink-2); }
+.shelf__add a { color: var(--ink); text-underline-offset: 3px; text-decoration-color: var(--rule-control); }
+.shelf__add a:hover { color: var(--lit); }
+.shelf__foot { box-sizing: border-box; max-width: var(--shelf-w); margin: 0 auto; padding: 28px var(--shelf-pad) 28px; border-top: 1px solid var(--rule); }
+
+@media (max-width: 1080px) {
+  .hero, .band__in--split { grid-template-columns: minmax(0, 1fr); }
+  .hero { min-height: 0; }
+  .sources { grid-template-columns: minmax(0, 1fr); gap: 22px; }
+}
+@media (max-width: 640px) {
+  .shelf__foot .fam-sites__list { row-gap: 0.7rem; }
+  .bar--shelf { height: 48px; }
+  .bar__link--shelf { display: none; }
+  .specimen { grid-template-columns: minmax(0, 1fr); }
+  .specimen__lean { border-left: 0; border-top: 1px solid var(--rule-strong); }
+  .hero__actions .button { flex: 1 1 auto; }
+  .hero__films { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .hero__films .film-slot--inline, .hero__films .film-slot--inline + .film-slot--inline { display: grid; grid-template-columns: 9rem minmax(0, 1fr); }
+  .hero__films .film-slot--inline .film-slot__frame { max-width: none; --play: 30px; }
+  .hero__films .film-slot.film-slot--inline .film-slot__caption { margin-top: 0; }
+  .shelf__list li a { grid-template-columns: 72px minmax(0, 1fr); gap: 16px; align-items: start; }
+  .shelf__list li a img { width: 72px; }
+}
+@media (forced-colors: active) {
+  .specimen__quote, .specimen__line.is-exact { outline: 1px solid Highlight; }
+}

@@ -75,6 +75,11 @@ button:disabled { cursor: default; }
 .bar__paper { min-width: 0; overflow: hidden; text-overflow: ellipsis; margin: 0; font-family: var(--font-serif); font-size: 1rem; font-weight: 400; color: var(--ink); white-space: nowrap; }
 .bar__link { font-size: var(--fs-sm); color: var(--ink-2); white-space: nowrap; text-underline-offset: 3px; text-decoration-color: var(--rule-strong); }
 .bar__link:hover { color: var(--lit); }
+/* The short video about this site: a play mark and its running time. */
+.bar__film { display: inline-flex; align-items: center; gap: 7px; min-height: 28px; padding: 0 9px; border-radius: var(--radius-s); font-size: var(--fs-sm); color: var(--ink-2); text-decoration: none; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.bar__film:hover { color: var(--ink); background: var(--hover-wash); }
+.bar__film-mark { flex: none; width: 0; height: 0; border-left: 8px solid currentColor; border-top: 5px solid transparent; border-bottom: 5px solid transparent; }
+
 .bar__theme, .bar__contents, .bar__open { flex: none; min-height: 28px; padding: 0 8px; border-radius: var(--radius-s); font-size: var(--fs-sm); color: var(--ink-2); white-space: nowrap; }
 .bar__theme:hover, .bar__contents:hover, .bar__open:hover { color: var(--ink); background: var(--hover-wash); }
 .stepper { flex: none; display: flex; align-items: center; gap: 8px; font-size: var(--fs-sm); color: var(--ink-2); font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -354,25 +359,8 @@ a.source__ref:hover { color: var(--lit); text-decoration: underline solid; }
 .foot .fam-sites, .shelf__foot .fam-sites { font-size: var(--fs-xs); }
 .foot .fam-sites { max-width: 72ch; margin: 10px auto 0; padding: 0 16px; }
 .foot .fam-sites__title, .shelf__foot .fam-sites__title { font-size: var(--fs-xs); }
-.shelf__foot { max-width: 1400px; margin: 0 auto; padding: 0 40px 20px; }
 .foot p:not([class]) { margin: 0 auto; max-width: 72ch; padding: 0 16px; font-size: var(--fs-xs); line-height: 1.4; color: var(--ink-2); text-wrap: pretty; }
 .foot a { color: inherit; }
-
-/* The shelf */
-.shelf { min-height: 100%; background: var(--ground); outline: none; }
-.shelf__in { box-sizing: border-box; max-width: 1400px; min-height: calc(100vh - 110px); margin: 0 auto; padding: 48px 40px; display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 8fr); gap: 56px; align-items: center; }
-.shelf h1 { margin: 0 0 12px; font-family: var(--font-serif); font-size: var(--fs-display); font-weight: 400; letter-spacing: -0.015em; line-height: var(--lh-tight); }
-.shelf__lede { margin: 0 0 36px; font-family: var(--font-serif); font-size: var(--fs-read); line-height: 1.5; color: var(--ink-2); text-wrap: pretty; }
-/* Room for one paper before the list arrives, so that nothing below it moves. */
-.shelf ul { list-style: none; margin: 0; padding: 0; min-height: 142px; }
-.shelf li + li { margin-top: 20px; }
-.shelf li a { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 18px; align-items: center; color: inherit; text-decoration: none; }
-.shelf li a img { display: block; width: 96px; height: auto; background: var(--paper-white); box-shadow: var(--sheet-shadow); }
-.shelf li a:hover .shelf__title { color: var(--lit); }
-.shelf__title { display: block; margin-bottom: 5px; font-family: var(--font-serif); font-size: 1.125rem; line-height: 1.3; text-wrap: balance; }
-.shelf__by { display: block; font-size: var(--fs-sm); line-height: 1.45; color: var(--ink-2); }
-.shelf__status { display: block; margin-top: 4px; font-size: var(--fs-sm); line-height: 1.4; color: var(--ink); }
-.shelf__picture { display: block; width: 100%; height: auto; border-radius: var(--radius-s); box-shadow: var(--sheet-shadow); }
 
 @media (min-width: 2100px) {
   .spread--reading.has-right { grid-template-columns: 260px minmax(0, 1000px) minmax(0, 1fr); }
@@ -392,10 +380,10 @@ a.source__ref:hover { color: var(--lit); text-decoration: underline solid; }
   .rail__close { display: block; }
 }
 @media (max-width: 960px) {
-  .shelf__in { grid-template-columns: minmax(0, 1fr); gap: 32px; padding: 40px 20px; min-height: 0; }
   .page .fam-lockup__name, .bar__title { display: none; }
 }
 @media (max-width: 767px) {
+  .page .bar__film { display: none; }
   .bar { flex-wrap: wrap; height: auto; gap: 0 6px; padding: 2px 8px; }
   .bar__left { order: 1; gap: 6px; }
   .bar__right { order: 2; margin-left: auto; }
