@@ -27,7 +27,9 @@ export function Shelf() {
     void loadShelf().then((s) => setPapers(s.papers), () => setPapers([]));
   }, []);
   const lead = papers?.find((p) => p.example) ?? papers?.[0];
-  const example = lead?.example ?? null;
+  const examples = lead?.examples?.length ? lead.examples : lead?.example ? [lead.example] : [];
+  const [pick, setPick] = useState(0);
+  const example = examples[Math.min(pick, examples.length - 1)] ?? null;
   return (
     <>
       <a className="skip" href="#papers" onClick={(event) => {
@@ -48,18 +50,26 @@ export function Shelf() {
         <section className="hero">
           <div className="hero__words">
             <h1>A published paper beside its authors’ Lean&nbsp;proof</h1>
-            <p className="hero__lede">Lean is a program that checks mathematical proofs. In Proof Reader, a click on a linked sentence of the paper opens the lines of Lean it is linked to, and a graph of the proof follows the reading.</p>
+            <p className="hero__lede">Lean is a program that checks mathematical proofs. Clicking a linked sentence in the paper opens the Lean lines linked to it. As the paper is scrolled, a graph of the proof highlights the step linked to the passage on screen.</p>
             <p className="hero__actions">
               {lead ? (
                 <>
                   <a className="button button--ink" href={routeHref({ paper: lead.slug })}>Read {lead.short_title ?? "the paper"}</a>
-                  {example && <a className="button button--ghost" href={routeHref({ paper: lead.slug, record: `@${example.id}` })}>Open one linked sentence</a>}
+                  {examples[0] && <a className="button button--ghost" href={routeHref({ paper: lead.slug, record: `@${examples[0].id}` })}>Open one linked sentence</a>}
                 </>
               ) : <span className="button button--ink button--held" aria-hidden="true">&nbsp;</span>}
             </p>
           </div>
           <div className="hero__specimen">
-            {lead && example ? <Specimen paper={lead} example={example} /> : <div className="specimen specimen--held" aria-hidden="true" />}
+            {examples.length > 1 && (
+              <div className="specimen-picks" role="group" aria-label="Linked sentences from the paper">
+                <span className="specimen-picks__label" aria-hidden="true">Linked sentences</span>
+                {examples.map((e, i) => (
+                  <button key={e.id} type="button" aria-pressed={e.id === example?.id} onClick={() => setPick(i)}>{e.plain}</button>
+                ))}
+              </div>
+            )}
+            {lead && example ? <Specimen key={example.id} paper={lead} example={example} /> : <div className="specimen specimen--held" aria-hidden="true" />}
             <div className="hero__films">
               <FilmSlot film={SHORT_FILM} size="inline" />
               <FilmSlot film={LONG_FILM} size="inline" text={false} />
@@ -69,41 +79,41 @@ export function Shelf() {
 
         <section className="band band--sources" aria-labelledby="sources-title">
           <div className="band__in">
-            <h2 id="sources-title">Where each part of a page comes from</h2>
+            <h2 id="sources-title">What comes from the authors, from Lean and from AI</h2>
             <dl className="sources">
               <div>
                 <dt>The authors</dt>
-                <dd>The paper, in their own wording, with the original PDF one click away, and their Lean file, unchanged.</dd>
+                <dd>The text of the paper, in the authors’ wording, and their Lean file, unchanged. The original PDF is one click away.</dd>
               </div>
               <div>
                 <dt>Lean</dt>
-                <dd>The lines of the graph and the list of axioms each proof uses, taken from Lean’s report on the authors’ compiled files.</dd>
+                <dd>The connections drawn in the graph, and the axioms (statements assumed without proof) that each proof uses. Both are read from Lean’s report on the authors’ compiled files.</dd>
               </div>
               <div className="sources__ai">
                 <dt>AI, not reviewed by the authors</dt>
-                <dd>The links between sentences and Lean, a short plain title for each declaration, and short notes where the paper and the Lean differ.</dd>
+                <dd>The links between sentences and Lean lines, a short plain title for each definition and theorem, and short notes where the paper and the Lean differ. I made these with AI.</dd>
               </div>
             </dl>
-            <p className="sources__limit">Lean checks the code. Whether a sentence and the code say the same thing is for a person to judge, and the reader puts the two side by side for that.</p>
+            <p className="sources__limit">Lean checks the proofs in the code. Whether a sentence and the code say the same thing is for a person to judge, so the two are placed side by side.</p>
           </div>
         </section>
 
         <section className="band band--reader" aria-labelledby="reader-title">
           <div className="band__in band__in--split">
             <div>
-              <h2 id="reader-title">In the reader</h2>
+              <h2 id="reader-title">On a paper’s page</h2>
               <ul className="facts">
-                <li><strong>The graph follows the reading.</strong> Scrolling the paper moves the graph to the step linked to the passage on screen.</li>
-                <li><strong>A click opens the Lean.</strong> Back returns to the same place in the paper.</li>
-                <li><strong>Every linked statement has its own address,</strong> so one sentence and its Lean can be sent to someone.</li>
+                <li><strong>Scrolling the paper</strong> moves the graph to the step linked to the passage on screen.</li>
+                <li><strong>Clicking a linked sentence</strong> opens its Lean lines, and Back returns to the same place in the paper.</li>
+                <li><strong>Every linked sentence has its own address,</strong> so one sentence and its Lean lines can be sent to someone.</li>
                 <li><strong>An index lists each definition and theorem</strong> with the axioms its proof uses.</li>
               </ul>
             </div>
             {lead ? (
-              <a className="reader-picture" href={routeHref({ paper: lead.slug })} aria-label={`Read ${lead.short_title ?? lead.title} in the reader`}>
+              <a className="reader-picture" href={routeHref({ paper: lead.slug })} aria-label={`Open ${lead.short_title ?? lead.title} beside its Lean`}>
                 <img
                   src={`${import.meta.env.BASE_URL}${scheme === "dark" ? "reader-graph-night.webp" : "reader-graph-day.webp"}`}
-                  alt="The reader: the paper on the left with one statement highlighted, and on the right the graph of the Lean proof with the linked step lit."
+                  alt="A paper’s page: the paper on the left with one line of a code listing highlighted, and on the right the graph of the Lean proof."
                   width={1600} height={900} loading="lazy" decoding="async"
                 />
               </a>
@@ -113,7 +123,7 @@ export function Shelf() {
 
         <section className="band band--papers" id="papers" aria-labelledby="papers-title">
           <div className="band__in">
-            <h2 id="papers-title">{papers && papers.length > 1 ? "Papers in the reader" : "The paper in the reader"}</h2>
+            <h2 id="papers-title">{papers && papers.length > 1 ? "Papers on this site" : "The paper on this site"}</h2>
             <ul className="shelf__list">
               {(papers ?? []).map((p) => (
                 <li key={p.slug}>
@@ -134,13 +144,29 @@ export function Shelf() {
                 </li>
               ))}
             </ul>
-            <p className="shelf__add">A paper with public Lean and an open licence can be added. <a href={ADD_A_PAPER}>The add-paper guide</a> has the procedure, and <a href={REPOSITORY}>the code is on GitHub</a>.</p>
+            <p className="shelf__add">If you have written a paper with public Lean and an open licence, I would be glad to add it. <a href={ADD_A_PAPER}>The add-paper guide</a> lists the steps, and <a href={REPOSITORY}>the code is on GitHub</a>.</p>
           </div>
         </section>
         <footer className="shelf__foot"><SisterSites /></footer>
       </main>
     </>
   );
+}
+
+// A long paragraph is shown as an excerpt: whole sentences nearest the linked one, with an
+// ellipsis where the authors' paragraph goes on. No word inside the excerpt is changed.
+const NEAR = 170;
+function lead_in(before: string): string {
+  if (before.length <= NEAR) return before;
+  const tail = before.slice(-NEAR);
+  const start = tail.search(/[.!?] [A-Z‘“(]/);
+  return start < 0 ? before : `… ${tail.slice(start + 2)}`;
+}
+function lead_out(after: string): string {
+  if (after.length <= NEAR) return after;
+  const head = after.slice(0, NEAR);
+  const end = Math.max(head.lastIndexOf(". "), head.lastIndexOf("? "), head.lastIndexOf("! "));
+  return end < 0 ? after : `${head.slice(0, end + 1)} …`;
 }
 
 /** One sentence of the paper and its Lean lines, as the reader draws them, and a way in at that exact place. */
@@ -182,9 +208,9 @@ function Specimen({ paper, example }: { paper: ShelfItem; example: ShelfExample 
       <div className="specimen__paper">
         <p className="specimen__label">{paper.short_title ?? paper.title}, §{example.section}, page {example.page_label}</p>
         <p className="specimen__text">
-          {example.before}
-          <a className="specimen__quote" href={href} title="Open this sentence and its Lean in the reader">{example.quote}</a>
-          {example.after}
+          {lead_in(example.before)}
+          <a className="specimen__quote" href={href} title="Open this sentence and its Lean lines on the paper’s page">{example.quote}</a>
+          {lead_out(example.after)}
         </p>
       </div>
       <div className="specimen__lean">
@@ -220,7 +246,7 @@ function Specimen({ paper, example }: { paper: ShelfItem; example: ShelfExample 
         </svg>
       )}
       <figcaption className="specimen__caption">
-        The highlighted sentence is linked to lines {example.first} to {example.last} of the authors’ Lean. <a href={href}>Open it in the reader</a>
+        The highlighted sentence is linked to {example.first === example.last ? `line ${example.first}` : `lines ${example.first} to ${example.last}`} of the authors’ Lean file. <a href={href}>Open this sentence on the paper’s page</a>
       </figcaption>
     </figure>
   );

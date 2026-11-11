@@ -252,6 +252,8 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check(page.locator(".bar").bounding_box()["height"] <= 47, "the header keeps its height")
     check(page.locator(".bar__film").get_attribute("href") == "https://www.youtube.com/watch?v=gwNR6Lyst2M", "the header opens the short video")
     check(page.locator(".firstfilm a").count() == 2, "and the first screen names both videos")
+    check(page.locator(".start .start__go button").count() == 2, "the opening panel has a button to the first linked statement and one to the main claim")
+    check(page.locator(".sheet__text .q").first.evaluate("(el) => getComputedStyle(el).textDecorationLine") in ("underline", "none"), "linked statements carry a resting line outside code")
     foot = page.locator(".foot .fam-sites").first
     check(foot.count() == 1 and "All projects and videos" in foot.text_content() and "Plectis Atlas" in foot.text_content(), "the end of the paper lists the sister sites")
     check(foreign == [], f"nothing is asked of another host: {foreign[:2]}")
@@ -264,6 +266,16 @@ def journey(page: Page, url: str, shots: Path | None) -> None:
     check(quote.count() == 1 and quote.get_attribute("href").endswith("#/contextual-embeddings/@isoR-clam"), "the front page's sentence opens its own address in the reader")
     check(page.locator(".specimen__line.is-exact").count() == 5, "beside the five Lean lines it is linked to")
     check(page.locator(".specimen__thread path").count() == 1, "and a thread joins the two")
+    picks = page.locator(".specimen-picks button")
+    check(picks.count() == 3 and picks.first.get_attribute("aria-pressed") == "true", "three linked sentences can be chosen, the first shown")
+    frame = page.locator(".specimen").bounding_box()
+    picks.nth(1).click()
+    wait_until(page, lambda: page.locator(".specimen__quote").get_attribute("href").endswith("@closed-world"), "choosing another sentence changes the paper and its Lean")
+    check(page.locator(".specimen__decl code").inner_text() == "closedWorld", "to that sentence's own declaration")
+    after = page.locator(".specimen").bounding_box()
+    check(abs(after["height"] - frame["height"]) < 1 and abs(after["y"] - frame["y"]) < 1, "and the frame does not move")
+    picks.first.click()
+    wait_until(page, lambda: page.locator(".specimen__quote").get_attribute("href").endswith("@isoR-clam"), "the first sentence comes back")
     films = page.locator(".hero__films .film-slot__title a")
     check([films.nth(i).get_attribute("href") for i in range(films.count())] == ["https://www.youtube.com/watch?v=gwNR6Lyst2M", "https://www.youtube.com/watch?v=i5GdVgC-cw0"], "the short video and the long one are on the first screen")
     check(page.locator(".hero__films img").evaluate_all("(imgs) => imgs.every((img) => img.complete && img.naturalWidth > 0)"), "with stills served by this site")
@@ -1012,11 +1024,51 @@ def held_paper(page: Page, url: str, shots: Path | None, errors: list[str]) -> N
 
 def phone(page: Page, url: str, shots: Path | None) -> None:
     print("Phone")
+    above_sheet = """() => { const pane = document.querySelector('[data-paper-pane]').getBoundingClientRect(); const b = document.querySelector('.q.is-pinned').getBoundingClientRect(); const sheet = document.querySelector('.proof').getBoundingClientRect(); return b.top >= pane.top && b.bottom <= pane.bottom && b.bottom <= sheet.top; }"""
+    paper_top = "document.querySelector('[data-paper-pane]').scrollTop"
+
+    # An emailed statement address, opened afresh: the sentence and its Lean at once.
     page.goto("about:blank")
     page.goto(f"{url}#/{SLUG}/@isoR-clam", wait_until="load")
     page.wait_for_selector(".sheet__text .q", state="attached")
+    wait_until(page, lambda: page.locator(".proof").count() == 1, "a fresh statement address opens the sheet")
+    wait_until(page, lambda: lean_head(page) == "isoR", "on that statement's Lean", timeout=8)
+    wait_until(page, lambda: page.locator(".proof .source__line.is-exact").count() == 5, "with its five Lean lines lit")
+    page.wait_for_timeout(1200)
+    check(page.evaluate(above_sheet), "and the pinned sentence in view above the sheet")
+    check(page.evaluate("document.documentElement.scrollWidth <= innerWidth"), "with no sideways scroll")
+    check(address(page) == f"#/{SLUG}/@isoR-clam", "the address still names the statement")
+    shot(page, shots, "20-phone-fresh-statement")
+    before = page.evaluate(paper_top)
+    page.locator(".proof__close").tap()
+    wait_until(page, lambda: page.locator(".proof").count() == 0, "the sheet's Close closes it")
+    page.wait_for_timeout(800)
+    check(abs(page.evaluate(paper_top) - before) <= 2, "and leaves the paper where it was")
+    check(page.locator(".q.is-pinned").count() == 0, "with nothing left pinned")
+
+    # Unpin on a fresh statement address lands where Back from a tapped one lands.
+    page.goto("about:blank")
+    page.goto(f"{url}#/{SLUG}/@isoR-clam", wait_until="load")
+    wait_until(page, lambda: page.locator(".proof__unpin").count() == 1, "a fresh statement address shows Unpin", timeout=8)
     page.wait_for_timeout(1000)
-    check(page.locator(".proof").count() == 0, "the paper fills the screen")
+    before = page.evaluate(paper_top)
+    page.locator(".proof__unpin").tap()
+    wait_until(page, lambda: page.locator(".proof").count() == 0, "Unpin closes the sheet")
+    page.wait_for_timeout(800)
+    check(abs(page.evaluate(paper_top) - before) <= 2, "and leaves the paper where it was")
+
+    # A declaration's address opens the sheet the same way.
+    page.goto("about:blank")
+    page.goto(f"{url}#/{SLUG}/isoR", wait_until="load")
+    wait_until(page, lambda: page.locator(".proof").count() == 1, "a fresh declaration address opens the sheet")
+    wait_until(page, lambda: lean_head(page) == "isoR", "on its Lean", timeout=8)
+
+    # The bare paper address stays the paper alone.
+    page.goto("about:blank")
+    page.goto(f"{url}#/{SLUG}", wait_until="load")
+    page.wait_for_selector(".sheet__text .q", state="attached")
+    page.wait_for_timeout(1000)
+    check(page.locator(".proof").count() == 0, "the bare paper address fills the screen with the paper")
     check(page.evaluate("document.documentElement.scrollWidth <= innerWidth"), "with no sideways scroll")
     shot(page, shots, "20-phone")
     page.locator('.sheet__text .q[data-p~="isoR-clam"]:not(:has(a))').last.tap()

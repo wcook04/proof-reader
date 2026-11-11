@@ -230,9 +230,11 @@ widths. Fix what you find in `links.json` or `paper.md`.
 someone who wants to see one thing. `#/<slug>/<declaration>` opens a declaration, and
 `#/<slug>/@declarations` the index at the back.
 
-The front page can show one sentence of the paper beside its Lean lines. Choose a short
-passage with exact `lines` that a newcomer would follow, and name its id under `[shelf]`
-in `paper.toml` as `example = "<passage>"`; a name that is not a passage stops the build.
+The front page can show sentences of the paper beside their Lean lines. Choose short
+passages with exact `lines` that a newcomer would follow, and name them under `[shelf]`
+in `paper.toml`, either one id as `example = "<passage>"` or a list in the order to show
+them as `example = ["<passage>", "<passage>"]`. A name that is not a passage, a passage
+with no Lean declaration, or a name given twice stops the build.
 
 If Lean is slow to start, find where elan keeps its toolchains. A toolchain on an
 external drive can turn a 15-second extraction into many minutes.

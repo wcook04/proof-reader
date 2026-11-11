@@ -25,7 +25,7 @@ export const SHORT_FILM: Film = {
 export const LONG_FILM: Film = {
   id: "long",
   title: "Three reader websites compared",
-  about: "Lean Exposition, Quartic Reader and Proof Reader, and which parts of each come from Lean.",
+  about: "Lean Exposition, Quartic Reader and Proof Reader, and what on each site comes from Lean.",
   youtube: "https://www.youtube.com/watch?v=i5GdVgC-cw0",
   seconds: 298,
   still: still("three-readers-long.webp"),
