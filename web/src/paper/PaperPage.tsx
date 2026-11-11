@@ -17,6 +17,7 @@ import type { LeanActions } from "../lean/code";
 import { editionGraph, sectionLabel } from "../model/fromEdition";
 import type { LeanPageHandle, Step } from "../proof/LeanPage";
 import { MadeLink } from "../proof/MadeLink";
+import { clockTime, LONG_FILM, SHORT_FILM } from "../app/films";
 import type { MapPaneHandle } from "../proof/MapPane";
 import type { PaneMode } from "../proof/ModeToggle";
 import { ProofPage, readLayout, saveLayout, type Layout } from "../proof/ProofPage";
@@ -727,6 +728,9 @@ export function PaperPage({ edition }: { edition: Edition }) {
           </div>
           {(wide ? !showRight : !entry.sheet) && <button type="button" className="bar__open" onClick={() => (wide ? onLayout({ ...layout, graph: true }) : open({ sheet: true, record: readRoute().record, tab: entry.tab, lean: entry.lean }))}>Graph</button>}
           <button type="button" className="bar__theme" aria-label={scheme === "dark" ? "Use the day theme" : "Use the night theme"} onClick={() => setScheme(scheme === "dark" ? "light" : "dark")}>{scheme === "dark" ? "Day" : "Night"}</button>
+          <a className="bar__film" href={SHORT_FILM.youtube} target="_blank" rel="noopener noreferrer" title={`${SHORT_FILM.title}, video on YouTube`}>
+            <span className="bar__film-mark" aria-hidden="true" />Video, {clockTime(SHORT_FILM.seconds)}<span className="sr-only"> on YouTube</span>
+          </a>
           <a className="bar__link" href={paper.url}>Published paper</a>
           <a className="bar__link" href={lean.source}>Lean artifact</a>
         </div>
@@ -785,9 +789,13 @@ export function PaperPage({ edition }: { edition: Edition }) {
                   ? "The links from this paper to its proof in Lean, the notes and the comparisons were made with AI"
                   : "The links from this paper to its proof in Lean, and the notes, were made with AI"} and have not been reviewed by the authors. <MadeLink onOpen={() => onTab("index")} />.</p>
                 <p className="firstline">
-                  Click a statement with a mark beside it to read its Lean.
+                  Click a statement with a mark<span className="firstline__mark" aria-hidden="true" /> beside it to read its Lean.
                   {firstSection && <> The first is in <button type="button" onClick={() => jumpTo(firstSection.id)}>{sectionLabel(firstSection.number)}</button></>}
                   {claimSection && <>, the main claim in <button type="button" onClick={() => jumpTo(claimSection.id)}>{sectionLabel(claimSection.number)}</button></>}.
+                </p>
+                <p className="firstfilm">
+                  <a href={SHORT_FILM.youtube} target="_blank" rel="noopener noreferrer"><span className="bar__film-mark" aria-hidden="true" />{SHORT_FILM.title}, {clockTime(SHORT_FILM.seconds)}</a>
+                  <a href={LONG_FILM.youtube} target="_blank" rel="noopener noreferrer"><span className="bar__film-mark" aria-hidden="true" />{LONG_FILM.title}, {clockTime(LONG_FILM.seconds)}</a>
                 </p>
                 </>
               )}

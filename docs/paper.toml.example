@@ -31,3 +31,9 @@ page_label = "{page}"         # how the paper numbers its pages, such as "191:{p
 # name = "fig-3.svg"
 # page = 11
 # box = [50, 84, 432, 210]
+
+# The front page shows one linked sentence beside its Lean lines. Name the id of one
+# passage in links.json; a name that is not a passage stops the build. Leave it out
+# and the front page shows no example.
+# [shelf]
+# example = "isoR-clam"

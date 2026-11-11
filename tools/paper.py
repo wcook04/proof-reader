@@ -525,6 +525,9 @@ def resolve(slug: str) -> dict:
             errors.append(f"note: no Lean declaration called {name}")
         if not note.get("because") or any(b not in ids for b in note["because"]):
             errors.append(f"note on {name}: `because` must name passages that exist")
+    problem = shelf_problem(config, links["passages"])
+    if problem:
+        errors.append(problem)
     checks = load_checks(folder)
     stale = stale_checks(folder, checks["files"])
     if stale:
@@ -618,6 +621,8 @@ def edition(slug: str) -> dict:
         in_code = setting.pop("code")
         for passage in data["passages"]:
             passage["code"] = passage["id"] in in_code
+    paragraphs = setting.pop("paragraphs") if setting else {}
+    example = shelf_example(config, data["passages"], paragraphs, written, texts, links.get("plain", {}))
     named_in_paper = [d["id"] for d in declarations if d["passages"]]
     custom = sorted(d["id"] for d in declarations if d["keyword"] == "axiom")
     fidelity = links.get("fidelity", {})
@@ -637,6 +642,7 @@ def edition(slug: str) -> dict:
         "mentions": find_mentions(data["words"], names),
         "declarations": declarations,
         "checks": data["checks"],
+        "shelf": {"example": example},
         "coverage": {"sections": tied_sections, "ties": len(data["passages"])},
         "reading": {k: v for k, v in setting.items() if k != "html"} if setting else None,
         "reading_html": setting["html"] if setting else None,
@@ -657,6 +663,57 @@ def edition(slug: str) -> dict:
                 "refuted_by_check": sorted(n for n, e in fidelity.items() if e.get("checks")),
             },
         },
+    }
+
+
+def shelf_problem(config: dict, passages: list[dict]) -> str | None:
+    """The front page's example must name a passage tied to Lean."""
+    wanted = config.get("shelf", {}).get("example")
+    if wanted is None:
+        return None
+    found = next((p for p in passages if p["id"] == wanted), None)
+    if not found:
+        return f"[shelf] example: no passage called {wanted!r} in links.json"
+    if not found.get("lean"):
+        return f"[shelf] example: passage {wanted!r} names no Lean declaration"
+    return None
+
+
+def example_code(lines: list[str], first: int, last: int, decl_first: int, decl_last: int) -> list[dict]:
+    """The authors' lines from two before a passage's first to its last, kept inside the declaration."""
+    return [{"n": n, "text": lines[n - 1]} for n in range(max(decl_first, first - 2), min(decl_last, last) + 1)]
+
+
+def shelf_example(config: dict, passages: list[dict], paragraphs: dict, written: dict, texts: dict, plain: dict) -> dict | None:
+    """One linked sentence and its Lean lines, for the front page. None without a [shelf] table."""
+    wanted = config.get("shelf", {}).get("example")
+    if wanted is None:
+        return None
+    problem = shelf_problem(config, passages)
+    if problem:
+        raise PaperError(problem)
+    passage = next(p for p in passages if p["id"] == wanted)
+    name = passage["lean"][0]
+    row = written[name]
+    if name not in plain:
+        raise PaperError(f"[shelf] example: links.json needs a plain title for {name}")
+    lines = texts[row["module"]].splitlines()
+    decl_first, decl_last = row["line"], row["end_line"]
+    if passage.get("lines"):
+        first, last = passage["lines"]
+    else:
+        first, last = decl_first, statement_end(lines, decl_first, decl_last, row["keyword"])
+    label = config.get("reading", {}).get("page_label")
+    around = paragraphs.get(wanted) or {"before": "", "after": ""}
+    project_root = config["lean"].get("project", "lean")
+    return {
+        "id": wanted, "section": passage.get("section", ""),
+        "page_label": label.format(page=passage["page"]) if label else str(passage["page"]),
+        "before": around["before"], "quote": passage["quote"], "after": around["after"],
+        "name": name, "plain": plain[name], "keyword": row["keyword"],
+        "file": f"{project_root}/{row['module'].replace('.', '/')}.lean",
+        "decl_first": decl_first, "decl_last": decl_last, "first": first, "last": last,
+        "code": example_code(lines, first, last, decl_first, decl_last),
     }
 
 
@@ -734,10 +791,25 @@ def write_shelf() -> None:
         if not path.is_file():
             continue
         built = json.loads(path.read_text(encoding="utf-8"))
-        paper = built["paper"]
-        shelf.append({"slug": slug, "title": paper["title"], "authors": paper["authors"], "venue": paper.get("venue", ""),
-                      "declarations": built["analytics"]["declarations"]})
+        source = json.loads((PUBLIC / slug / "source.json").read_text(encoding="utf-8"))
+        shelf.append(shelf_entry(slug, built, source["files"]))
     (PUBLIC / "index.json").write_text(json.dumps({"papers": shelf}, ensure_ascii=False), encoding="utf-8")
+
+
+def shelf_entry(slug: str, built: dict, files: dict[str, str]) -> dict:
+    """What the front page shows of one paper, read from its built edition."""
+    paper = built["paper"]
+    used = sorted({d["file"] for d in built["declarations"]})
+    return {
+        "slug": slug, "title": paper["title"], "short_title": paper.get("short_title") or paper["title"],
+        "authors": paper["authors"], "venue": paper.get("venue", ""),
+        "declarations": built["analytics"]["declarations"],
+        "lean": {"files": len(used), "lines": sum(len(files[f].splitlines()) for f in used),
+                 "version": built["lean"]["version"], "axioms": len(built["analytics"]["axioms"]),
+                 "sorry": len(built["analytics"]["sorry"])},
+        "linked": len(built["passages"]),
+        "example": built.get("shelf", {}).get("example"),
+    }
 
 
 def all_papers() -> list[str]:

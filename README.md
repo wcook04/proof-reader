@@ -73,7 +73,7 @@ python3 tests/journey.py --shots /tmp/journey
 
 `tests/speed.py` measures a paper's first screen on a home connection.
 
-`tools/capture_images.py` retakes the social card and the picture above from a running site.
+`tools/capture_images.py` retakes the social card, the picture above and the front page's two pictures of the reader from a running site.
 
 ## Add a paper
 

@@ -368,3 +368,66 @@ class Fidelity(unittest.TestCase):
             path.write_text("theorem t : True := by trivial\n")
             self.assertEqual(paper.stale_checks(folder, recorded), ["checks/F.lean"])
             self.assertEqual(paper.stale_checks(folder, {}), ["checks/F.lean"])
+
+
+class ShelfExample(unittest.TestCase):
+    """The one linked sentence the front page shows beside its Lean lines."""
+
+    lean = ["-- head", "theorem isoR {e : E}", "  : back (forth e) = e := by", "  induction e with",
+            "  | CStar => rfl", "  | CLam f ih => simp", "                 funext x", "                 rfl", "", "def after := 1"]
+    written = {"isoR": {"module": "CE", "line": 2, "end_line": 8, "keyword": "theorem"}}
+    quote = "isoR’s CLam case, which requires function extensionality."
+    config = {"lean": {"project": "lean"}, "reading": {"page_label": "191:{page}"}, "shelf": {"example": "isoR-clam"}}
+
+    def passage(self, **extra):
+        return {"id": "isoR-clam", "section": "3.3", "lean": ["isoR"], "quote": self.quote, "page": 7, **extra}
+
+    def example(self, config=None, passage=None, paragraphs=None):
+        return paper.shelf_example(config or self.config, [passage or self.passage(lines=[6, 8])], paragraphs or {},
+                                   self.written, {"CE": "\n".join(self.lean) + "\n"}, {"isoR": "Contextual round trip"})
+
+    def test_the_paragraph_splits_round_the_quote(self):
+        source = ('<p>The interesting cases are: <code>isoL</code>’s case; and <code>isoR</code>’s <code>CLam</code> '
+                  'case, which requires\n function extensionality.</p><p>Next.</p>')
+        page = reading.parse(source)
+        spots, errors = reading.locate(page, [{"id": "isoR-clam", "quote": self.quote}])
+        self.assertEqual(errors, [])
+        found = reading.paragraph(page, *spots["isoR-clam"], self.quote)
+        self.assertEqual(found["before"] + self.quote + found["after"], found["text"])
+        self.assertEqual(found["text"], "The interesting cases are: isoL’s case; and " + " ".join(self.quote.split()))
+        built = self.example(paragraphs={"isoR-clam": found})
+        self.assertEqual(built["quote"], self.quote)
+        self.assertEqual(built["before"] + built["quote"] + built["after"], found["text"])
+
+    def test_a_quote_across_two_paragraphs_has_no_paragraph(self):
+        page = reading.parse("<p>one two</p><p>three four</p>")
+        spots, _ = reading.locate(page, [{"id": "a", "quote": "two three"}])
+        self.assertIsNone(reading.paragraph(page, *spots["a"], "two three"))
+        built = self.example()
+        self.assertEqual((built["before"], built["after"]), ("", ""))
+
+    def test_the_code_is_the_authors_lines(self):
+        built = self.example()
+        self.assertEqual((built["first"], built["last"], built["decl_first"], built["decl_last"]), (6, 8, 2, 8))
+        self.assertEqual(built["code"], [{"n": n, "text": self.lean[n - 1]} for n in range(4, 9)])
+        self.assertEqual((built["name"], built["plain"], built["keyword"], built["file"], built["page_label"]),
+                         ("isoR", "Contextual round trip", "theorem", "lean/CE.lean", "191:7"))
+
+    def test_the_code_stays_inside_its_declaration(self):
+        built = self.example(passage=self.passage(lines=[2, 3]))
+        self.assertEqual([line["n"] for line in built["code"]], [2, 3])
+
+    def test_a_passage_without_lines_shows_the_statement(self):
+        built = self.example(passage=self.passage())
+        self.assertEqual((built["first"], built["last"]), (2, 3))
+
+    def test_an_unknown_passage_stops_the_build(self):
+        config = {**self.config, "shelf": {"example": "nowhere"}}
+        self.assertIn("nowhere", paper.shelf_problem(config, [self.passage()]))
+        with self.assertRaises(paper.PaperError):
+            self.example(config=config)
+
+    def test_no_shelf_table_gives_no_example(self):
+        config = {k: v for k, v in self.config.items() if k != "shelf"}
+        self.assertIsNone(paper.shelf_problem(config, []))
+        self.assertIsNone(self.example(config=config))

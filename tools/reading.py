@@ -26,6 +26,8 @@ RENDER = ROOT / "web" / "tools" / "render-paper.mjs"
 # Formulas first, so each one is a single piece of the page.
 PART = re.compile(r'<span class="m" data-m="(\d+)">(.*?)</span>|<[^>]+>|[^<]+', re.S)
 BLOCK = re.compile(r"</?(?:p|div|li|ul|ol|pre|figure|figcaption|h[1-4]|aside|header|section|blockquote)\b|<span class=\"cl\"")
+# The blocks a reader sees as a paragraph: a code line inside a listing is not one.
+PARAGRAPH = re.compile(r"</?(?:p|div|li|ul|ol|pre|figure|figcaption|h[1-4]|aside|header|section|blockquote)\b")
 TAG_NAME = re.compile(r"</?([a-zA-Z0-9]+)")
 BULLETS = {"•", "∙", "◦"}
 ALLOWED_TAGS = {
@@ -196,6 +198,35 @@ def locate(page: Page, passages: list[dict]) -> tuple[dict[str, tuple[int, int]]
     return where, errors
 
 
+def paragraph(page: Page, start: int, stop: int, quote: str) -> dict | None:
+    """The plain text of the paragraph holding a passage, split round its quote.
+
+    None when the quote crosses a paragraph's edge or the paragraph's words do not
+    read as the quote with only spaces changed.
+    """
+    edges = [0]
+    length = 0
+    for part in page.parts:
+        if part.kind == "tag":
+            if PARAGRAPH.match(part.raw):
+                edges.append(length)
+        else:
+            length = part.start + len(part.text)
+    edges.append(len(page.visible))
+    if any(start < edge < stop for edge in edges):
+        return None
+    first = max(edge for edge in edges if edge <= start)
+    last = min(edge for edge in edges if edge >= stop)
+    text = " ".join(page.visible[first:last].split())
+    lead = page.visible[first:start]
+    before = " ".join(lead.split())
+    if before and lead[-1].isspace():
+        before += " "
+    if not text[len(before):].startswith(quote) or not text.startswith(before):
+        return None
+    return {"text": text, "before": before, "after": text[len(before) + len(quote):]}
+
+
 def section_ranges(page: Page, outline: list[dict]) -> list[tuple[str, int]]:
     """Where each section begins in the visible text."""
     ranges = []
@@ -346,7 +377,10 @@ def build(folder: Path, slug: str, passages: list[dict], names: list[str], pdf_w
     outline = [{**entry, "ties": counts.get(entry["id"], 0), "page": page_of(entry)} for entry in done["outline"]]
     order = sorted(spans, key=lambda pid: spans[pid][0])
     code = {pid for pid, (start, _stop) in spans.items() if any(p.code and p.kind != "tag" and p.start <= start < p.start + len(p.text) for p in page.parts)}
-    return {"html": body, "outline": outline, "words": len(ours), "formulas": len(done["math"]), "pages": len(marks), "order": order, "code": code}
+    quotes = {p["id"]: p["quote"] for p in passages}
+    paragraphs = {pid: paragraph(page, start, stop, quotes[pid]) for pid, (start, stop) in spans.items()}
+    return {"html": body, "outline": outline, "words": len(ours), "formulas": len(done["math"]), "pages": len(marks), "order": order, "code": code,
+            "paragraphs": paragraphs}
 
 
 def inside(box: list[float], outer: list[float]) -> bool:
