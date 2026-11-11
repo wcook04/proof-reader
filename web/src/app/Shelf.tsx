@@ -190,12 +190,16 @@ function Specimen({ paper, example }: { paper: ShelfItem; example: ShelfExample 
       const pane = paperPane.getBoundingClientRect();
       // Stacked on a narrow screen: the two are not side by side, so no thread.
       if (!end || target.left < pane.right - 4) return setThread(null);
-      const x0 = end.right - origin.left + 3;
+      // The thread starts in the sheet's right margin, level with the sentence's last line,
+      // and runs down or up the margin to the Lean lines, so it never crosses the paper's words.
+      const margin = parseFloat(getComputedStyle(paperPane).paddingRight) || 18;
+      const x0 = pane.right - origin.left - margin / 2;
       const y0 = end.top + end.height / 2 - origin.top;
       const x1 = target.left - origin.left;
       const y1 = target.top + target.height / 2 - origin.top;
-      const mid = pane.right - origin.left - 14;
-      setThread(`M${x0},${y0} H${mid - 10} Q${mid},${y0} ${mid},${y0 + Math.sign(y1 - y0) * 10} V${y1 - Math.sign(y1 - y0) * 10} Q${mid},${y1} ${mid + 10},${y1} H${x1}`);
+      const turn = Math.min(7, Math.abs(y1 - y0) / 2);
+      const way = Math.sign(y1 - y0);
+      setThread(turn < 1 ? `M${x0},${y0} H${x1}` : `M${x0},${y0} V${y1 - way * turn} Q${x0},${y1} ${x0 + turn},${y1} H${x1}`);
     };
     draw();
     const watch = new ResizeObserver(draw);
@@ -242,7 +246,7 @@ function Specimen({ paper, example }: { paper: ShelfItem; example: ShelfExample 
       {thread && (
         <svg className="specimen__thread" aria-hidden="true">
           <path d={thread} />
-          <circle r="3.5" cx={thread.slice(1).split(/[ ,H]/)[0]} cy={thread.slice(1).split(/[ ,H]/)[1]} />
+          <circle r="3.5" cx={thread.slice(1).split(/[ ,HV]/)[0]} cy={thread.slice(1).split(/[ ,HV]/)[1]} />
         </svg>
       )}
       <figcaption className="specimen__caption">
