@@ -17,7 +17,7 @@ export const SHORT_FILM: Film = {
   id: "short",
   title: "Proof Reader in a minute and a half",
   about: "One sentence of this paper and the five lines of Lean linked to it.",
-  youtube: "https://www.youtube.com/watch?v=gwNR6Lyst2M",
+  youtube: "https://www.youtube.com/watch?v=LZxaDZ-gQm8",
   seconds: 90,
   still: still("proof-reader-short.webp"),
 };
@@ -26,7 +26,7 @@ export const LONG_FILM: Film = {
   id: "long",
   title: "Three reader websites compared",
   about: "Lean Exposition, Quartic Reader and Proof Reader, and what on each site comes from Lean.",
-  youtube: "https://www.youtube.com/watch?v=i5GdVgC-cw0",
+  youtube: "https://www.youtube.com/watch?v=ZE9thkr5jew",
   seconds: 298,
   still: still("three-readers-long.webp"),
 };

@@ -162,7 +162,7 @@ change their sources and rebuild them.
 
 ## Related work and videos
 
-[Introduction to the projects](https://www.youtube.com/watch?v=Yk_kUQUCylc) · [Proof Reader short](https://www.youtube.com/watch?v=gwNR6Lyst2M) · [Full comparison of the three maths readers](https://www.youtube.com/watch?v=i5GdVgC-cw0)
+[Introduction to the projects](https://www.youtube.com/watch?v=FwgaZYH2otY) · [Proof Reader short](https://www.youtube.com/watch?v=LZxaDZ-gQm8) · [Full comparison of the three maths readers](https://www.youtube.com/watch?v=ZE9thkr5jew)
 
 [Lean Exposition](https://github.com/wcook04/lean-exposition) contains writing guides and tools for explaining a Lean proof in three papers
 with different levels of detail. Its
