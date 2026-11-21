@@ -625,8 +625,8 @@ $$
 
 For fixed $u$ the word is linear in the label $R$, although $R$ may be
 cubic in the coordinates. We write $R(u)$ for $R(\rho(u))$. **Affine** labels have
-degree at most one, constants included; **homogeneous** labels are those
-without constant term; all labels of degree at most $r$ are the **full**
+degree at most one, constants included; **homogeneous** labels are the linear
+labels without constant term; all labels of degree at most $r$ are the **full**
 labels. For $t=3$ there are $8$ homogeneous linear labels, $16$ affine
 labels, used later for the certificates and line restrictions, and
 $2^8=256$ full labels of degree at most three, used for $\chi$ and $\chi'$.
@@ -826,6 +826,7 @@ The output is rejection or one bit; honest tables of a polynomial $P$ of
 degree strictly below $b^c$ return $L(P(a))$ for every seed.
 
 **Theorem 8.2 (local correction; cf. [ABSSW26, Theorem 5.1]).**
+Let $q>2c$, with the generator nodes of Section 6.
 Suppose the points table has homogeneous distance at most $\delta$ from
 a polynomial $P$ of degree at most $D$, and the local corrector at $a$
 rejects with probability $\kappa_a$. Then

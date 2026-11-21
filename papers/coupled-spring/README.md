@@ -45,7 +45,7 @@ so the proof doubles as a worked example of the test. The sections below
 follow it in order: what the test requires (§1) and how its proof turns a
 positive Hessian into a minimum (§2). Then come a perturbed potential for
 which the completed square no longer settles the question (§3) and a
-hypothesis of the test's remainder lemma that its proof never uses (§4).
+hypothesis of the test's remainder lemma that its proof does not need (§4).
 The last two sections derive U from three springs and describe the
 motion it governs.
 
@@ -80,7 +80,7 @@ gradient vanishes at a, and D²f(a)[h, h] > 0 for every h ≠ 0, then f
 has a local minimum at a.
 
 <details>
-<summary><b>PhyslibAlpha</b> · The second-derivative test · <code>second_derivative_test_analyticAt</code></summary>
+<summary><b>PhyslibAlpha</b> · Analytic second derivative test · <code>second_derivative_test_analyticAt</code></summary>
 
 ```lean
 /--
@@ -201,7 +201,7 @@ hᵀKh ≥ ‖h‖², with equality exactly when h₀ = −h₁, where
 the last square vanishes.
 
 <details>
-<summary><b>PhyslibAlpha</b> · Positive definite at the origin · <code>couplingPotential_posDef</code></summary>
+<summary><b>PhyslibAlpha</b> · Positive Hessian at the origin · <code>couplingPotential_posDef</code></summary>
 
 ```lean
 /-
@@ -229,9 +229,9 @@ for every h. A zero-dimensional space contains only the point a, and
 Lean handles it separately.
 
 <details>
-<summary><b>PhyslibAlpha</b> · 2 statements: Second derivative as a quadratic map; Positive definite gives a lower bound</summary>
+<summary><b>PhyslibAlpha</b> · 3 statements: The Hessian quadratic form; Positive Hessian lower bound; Local minimum on a singleton</summary>
 
-**Second derivative as a quadratic map** · `iteratedFDerivQuadraticMap`
+**The Hessian quadratic form** · `iteratedFDerivQuadraticMap`
 
 ```lean
 /-- The second iterated Frechét derivative as a quadratic map. -/
@@ -259,7 +259,7 @@ noncomputable def iteratedFDerivQuadraticMap {V : Type*} [NormedAddCommGroup V]
 
 Copied whole from [PartialDerivativeTest.lean, lines 107–126][iteratedFDerivQuadraticMap] in Physlib at be0a9ee.
 
-**Positive definite gives a lower bound** · `coercive_of_posdef`
+**Positive Hessian lower bound** · `coercive_of_posdef`
 
 ```lean
 /-- Positive definiteness implies coercivity. -/
@@ -271,6 +271,15 @@ lemma coercive_of_posdef {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
 ```
 
 Statement copied from [PartialDerivativeTest.lean, lines 455–505][coercive_of_posdef] in Physlib at be0a9ee; the proof is at the link.
+
+**Local minimum on a singleton** · `isLocalMin.of_subsingleton`
+
+```lean
+lemma isLocalMin.of_subsingleton {V : Type*} [TopologicalSpace V]
+    [Subsingleton V] {f : V → ℝ} {x₀ : V} : IsLocalMin f x₀ := by
+```
+
+Statement copied from [PartialDerivativeTest.lean, lines 571–573][isLocalMin.of_subsingleton] in Physlib at be0a9ee; the proof is at the link.
 
 </details>
 
@@ -426,8 +435,9 @@ for −1 < t < 0 and zero at t = −1, and they decrease without bound as t
 decreases further. For example W(−2, 0) = −4 < W(0), which Lean also checks,
 so W has no global minimum. On the negative half of this axis the
 inequality W ≥ W(0) holds out to t = −1, twice as far as the region the
-test guarantees. Whether the origin is a minimum of W follows from K
-alone, and the cubic changes only the size of the neighbourhood.
+test guarantees. Given the zero gradient and analyticity, whether the
+origin is a local minimum of W is settled by K alone, and the cubic
+changes only the size of the neighbourhood.
 
 <details>
 <summary><b>Supplementary Lean</b> · The origin is not a global minimum after adding `x₀³`: the value at `(-2, 0)` is `-4` · <code>cubicPerturbation_not_global</code></summary>
@@ -445,7 +455,7 @@ Lean accepted this supplementary proof, written with AI for this page. [checks/C
 
 </details>
 
-## 4. A hypothesis the proof never uses
+## 4. A hypothesis the proof does not need
 
 PhyslibAlpha's remainder lemma, `isLocalMin_of_posDef_of_littleo`, takes
 the little-o estimate, the zero gradient and positive definiteness, and
@@ -457,9 +467,9 @@ from the first. The rest of the proof uses only the values Q(h), and the
 first call already bounds those.
 
 <details>
-<summary><b>PhyslibAlpha</b> · 2 statements: The test from a Taylor error bound; Lower bound for a smooth function</summary>
+<summary><b>PhyslibAlpha</b> · 2 statements: Minimum from the Taylor remainder; Lower bound under smoothness</summary>
 
-**The test from a Taylor error bound** · `isLocalMin_of_posDef_of_littleo`
+**Minimum from the Taylor remainder** · `isLocalMin_of_posDef_of_littleo`
 
 ```lean
 /-- Second partial derivative test, "little oh" form. -/
@@ -474,7 +484,7 @@ Statement copied from [PartialDerivativeTest.lean, lines 534–554][isLocalMin_o
 
 **Comparison with the page, made by AI and not reviewed: lean is weaker.** The page's argument needs the Taylor estimate, a zero gradient and a positive definite second derivative. The Lean statement also assumes ContDiffAt ℝ ⊤ f x₀, so it says less than the argument gives. Its proof obtains the lower bound from coercive_of_posdef and again from coercive_of_posdef_of_contdiff, and only the second uses the extra hypothesis. The supplementary Lean proof reaches the same conclusion without it.
 
-**Lower bound for a smooth function** · `coercive_of_posdef_of_contdiff`
+**Lower bound under smoothness** · `coercive_of_posdef_of_contdiff`
 
 ```lean
 /-- Positive definiteness implies coercivity.
@@ -500,7 +510,7 @@ that Q(h) = B(h, h). Expanding B(u + v, u + v) gives the polar identity
 Q(u + v) − Q(u) − Q(v) = B(u, v) + B(v, u).
 
 <details>
-<summary><b>PhyslibAlpha</b> · Polar form of the second derivative · <code>polarBilin_iteratedFDerivQuadraticMap</code></summary>
+<summary><b>PhyslibAlpha</b> · Polar form of the Hessian · <code>polarBilin_iteratedFDerivQuadraticMap</code></summary>
 
 ```lean
 /--
@@ -523,6 +533,22 @@ If B is symmetric, the right side is 2B(u, v), so half the polar form
 recovers B itself. PhyslibAlpha proves that symmetry from smoothness,
 by Schwarz's theorem. On the diagonal the two terms are equal whether or not B is
 symmetric, and the minimum argument evaluates B only on the diagonal.
+
+<details>
+<summary><b>PhyslibAlpha</b> · The second derivative is symmetric · <code>iteratedFDeriv_two_swap</code></summary>
+
+```lean
+/--
+Symmetry of the second iterated Fréchet derivative (Schwarz's theorem).
+-/
+lemma iteratedFDeriv_two_swap {V : Type*} [NormedAddCommGroup V] [NormedSpace ℝ V]
+    {f : V → ℝ} {x₀ : V} (hf : ContDiffAt ℝ ⊤ f x₀) (x y : V) :
+    iteratedFDeriv ℝ 2 f x₀ ![y, x] = iteratedFDeriv ℝ 2 f x₀ ![x, y] := by
+```
+
+Statement copied from [PartialDerivativeTest.lean, lines 415–425][iteratedFDeriv_two_swap] in Physlib at be0a9ee; the proof is at the link.
+
+</details>
 
 A supplementary Lean proof keeps the little-o estimate, the zero gradient
 and positive definiteness, drops the smoothness hypothesis, and reaches the
@@ -573,7 +599,7 @@ that class would also need the remainder estimate, which is not formalised
 here.
 
 <details>
-<summary><b>PhyslibAlpha</b> · The test for a power series · <code>second_derivative_test</code></summary>
+<summary><b>PhyslibAlpha</b> · Power series minimum test · <code>second_derivative_test</code></summary>
 
 ```lean
 /-- The second partial derivative test. -/
@@ -753,18 +779,18 @@ The statements on this page that were compared with a Lean declaration, and the 
 | --- | --- | --- |
 | The coupled spring potential equals `(x₀ + x₁/2)² + (3/4) x₁²` at every point | [`couplingPotential_eq_sq_add_sq`][couplingPotential_eq_sq_add_sq] | Written by AI for this page; not in Physlib |
 | Local minimum at the origin | [`coupled_spring_potential`][coupled_spring_potential] | Same statement |
-| The second-derivative test | [`second_derivative_test_analyticAt`][second_derivative_test_analyticAt] | Same statement |
+| Analytic second derivative test | [`second_derivative_test_analyticAt`][second_derivative_test_analyticAt] | Same statement |
 | The potential is analytic | [`couplingPotential_analyticAt`][couplingPotential_analyticAt] | Same statement |
 | Derivative of the potential | [`couplingPotential_hasFDerivAt`][couplingPotential_hasFDerivAt] | Same statement |
 | Zero gradient at the origin | [`couplingPotential_gradient_zero`][couplingPotential_gradient_zero] | Same statement |
 | Second derivative of the potential | [`couplingPotential_iteratedFDeriv_two`][couplingPotential_iteratedFDeriv_two] | Same statement |
-| Positive definite at the origin | [`couplingPotential_posDef`][couplingPotential_posDef] | Same statement |
+| Positive Hessian at the origin | [`couplingPotential_posDef`][couplingPotential_posDef] | Same statement |
 | Adding `x₀³` keeps a local minimum at the origin. The proof applies the analytic second-derivative test from PhyslibAlpha, the test that proves the original theorem | [`cubicPerturbation_isLocalMin`][cubicPerturbation_isLocalMin] | Written by AI for this page; not in Physlib |
 | The cubic `x₀³` has zero second derivative at the origin | [`cube_iteratedFDeriv_two_zero`][cube_iteratedFDeriv_two_zero] | Written by AI for this page; not in Physlib |
 | Near the origin the minimum is strict: if `|x₀| < 1/4` and `x ≠ 0`, the perturbed potential is positive, because it is at least `(x₁ + x₀/2)² + x₀²/2` | [`cubicPerturbation_strict_near_origin`][cubicPerturbation_strict_near_origin] | Written by AI for this page; not in Physlib |
 | The origin is not a global minimum after adding `x₀³`: the value at `(-2, 0)` is `-4` | [`cubicPerturbation_not_global`][cubicPerturbation_not_global] | Written by AI for this page; not in Physlib |
-| The test from a Taylor error bound | [`isLocalMin_of_posDef_of_littleo`][isLocalMin_of_posDef_of_littleo] | Lean is weaker |
-| Polar form of the second derivative | [`polarBilin_iteratedFDerivQuadraticMap`][polarBilin_iteratedFDerivQuadraticMap] | Same statement |
+| Minimum from the Taylor remainder | [`isLocalMin_of_posDef_of_littleo`][isLocalMin_of_posDef_of_littleo] | Lean is weaker |
+| Polar form of the Hessian | [`polarBilin_iteratedFDerivQuadraticMap`][polarBilin_iteratedFDerivQuadraticMap] | Same statement |
 | The little-o form of the second-derivative test holds without the smoothness hypothesis: the proof of `isLocalMin_of_posDef_of_littleo` with its use of that hypothesis removed | [`isLocalMin_of_posDef_of_littleo_without_smoothness`][isLocalMin_of_posDef_of_littleo_without_smoothness] | Written by AI for this page; not in Physlib |
 | At every point other than the origin the coupled spring potential is larger than at the origin | [`couplingPotential_origin_lt`][couplingPotential_origin_lt] | Written by AI for this page; not in Physlib |
 | Away from the origin the coupled spring potential is strictly positive | [`couplingPotential_pos`][couplingPotential_pos] | Written by AI for this page; not in Physlib |
@@ -780,6 +806,7 @@ The statements on this page that were compared with a Lean declaration, and the 
 [couplingPotential_posDef]: https://github.com/leanprover-community/physlib/blob/be0a9eef7dac78da524bfbde91c812340b194610/PhyslibAlpha/ClassicalMechanics/CoupledSpringPotential.lean#L142-L151
 [iteratedFDerivQuadraticMap]: https://github.com/leanprover-community/physlib/blob/be0a9eef7dac78da524bfbde91c812340b194610/PhyslibAlpha/Mathematics/PartialDerivativeTest.lean#L107-L126
 [coercive_of_posdef]: https://github.com/leanprover-community/physlib/blob/be0a9eef7dac78da524bfbde91c812340b194610/PhyslibAlpha/Mathematics/PartialDerivativeTest.lean#L455-L505
+[isLocalMin.of_subsingleton]: https://github.com/leanprover-community/physlib/blob/be0a9eef7dac78da524bfbde91c812340b194610/PhyslibAlpha/Mathematics/PartialDerivativeTest.lean#L571-L573
 [littleO_of_powerseries]: https://github.com/leanprover-community/physlib/blob/be0a9eef7dac78da524bfbde91c812340b194610/PhyslibAlpha/Mathematics/PartialDerivativeTest.lean#L558-L568
 [le_of_littleO]: https://github.com/leanprover-community/physlib/blob/be0a9eef7dac78da524bfbde91c812340b194610/PhyslibAlpha/Mathematics/PartialDerivativeTest.lean#L514-L530
 [cubicPerturbation_isLocalMin]: https://github.com/wcook04/proof-reader/blob/31e15e8d604c9feb9c17594cc57fad3d2f95e0af/papers/coupled-spring/checks/CubicPerturbation.lean#L66-L71
@@ -789,6 +816,7 @@ The statements on this page that were compared with a Lean declaration, and the 
 [isLocalMin_of_posDef_of_littleo]: https://github.com/leanprover-community/physlib/blob/be0a9eef7dac78da524bfbde91c812340b194610/PhyslibAlpha/Mathematics/PartialDerivativeTest.lean#L534-L554
 [coercive_of_posdef_of_contdiff]: https://github.com/leanprover-community/physlib/blob/be0a9eef7dac78da524bfbde91c812340b194610/PhyslibAlpha/Mathematics/PartialDerivativeTest.lean#L432-L452
 [polarBilin_iteratedFDerivQuadraticMap]: https://github.com/leanprover-community/physlib/blob/be0a9eef7dac78da524bfbde91c812340b194610/PhyslibAlpha/Mathematics/PartialDerivativeTest.lean#L402-L410
+[iteratedFDeriv_two_swap]: https://github.com/leanprover-community/physlib/blob/be0a9eef7dac78da524bfbde91c812340b194610/PhyslibAlpha/Mathematics/PartialDerivativeTest.lean#L415-L425
 [isLocalMin_of_posDef_of_littleo_without_smoothness]: https://github.com/wcook04/proof-reader/blob/31e15e8d604c9feb9c17594cc57fad3d2f95e0af/papers/coupled-spring/checks/WithoutSmoothness.lean#L5-L26
 [second_derivative_test]: https://github.com/leanprover-community/physlib/blob/be0a9eef7dac78da524bfbde91c812340b194610/PhyslibAlpha/Mathematics/PartialDerivativeTest.lean#L576-L594
 [couplingPotential_origin_lt]: https://github.com/wcook04/proof-reader/blob/31e15e8d604c9feb9c17594cc57fad3d2f95e0af/papers/coupled-spring/checks/GlobalMinimum.lean#L48-L53

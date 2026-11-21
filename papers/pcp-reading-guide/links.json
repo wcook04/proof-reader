@@ -11,6 +11,186 @@
    ]
   }
  ],
+ "families": [
+  {
+   "id": "np-and-pcp",
+   "name": "NP and PCP"
+  },
+  {
+   "id": "polynomials-and-grids",
+   "name": "Polynomials and grids"
+  },
+  {
+   "id": "hadamard-encoding",
+   "name": "Hadamard encoding"
+  },
+  {
+   "id": "verifier-model-and-resources",
+   "name": "Verifier model and resources"
+  },
+  {
+   "id": "three-colouring-verifier",
+   "name": "Three-colouring verifier"
+  },
+  {
+   "id": "binary-low-degree-testing",
+   "name": "Binary low-degree testing"
+  },
+  {
+   "id": "local-correction-and-grid-testing",
+   "name": "Local correction and grid testing"
+  },
+  {
+   "id": "field-low-degree-testing",
+   "name": "Low-degree testing over fields"
+  }
+ ],
+ "topics": [
+  {
+   "id": "pcp-characterization",
+   "family": "np-and-pcp",
+   "name": "PCP theorem",
+   "description": "Polynomial-time verification with logarithmic randomness and a constant number of proof-bit queries characterizes NP."
+  },
+  {
+   "id": "polynomial-distance",
+   "family": "polynomials-and-grids",
+   "name": "Polynomial distance",
+   "description": "The Schwartz–Zippel bound limits the fraction of points where a nonzero polynomial vanishes."
+  },
+  {
+   "id": "grid-interpolation",
+   "family": "polynomials-and-grids",
+   "name": "Low-degree extension",
+   "description": "Interpolation represents a table on a grid by a unique polynomial with a degree bound in each variable."
+  },
+  {
+   "id": "hadamard-labels",
+   "family": "hadamard-encoding",
+   "name": "Labels and encoding",
+   "description": "Polynomial labels turn field values and their polynomial expressions into bits and distinguish full, affine and homogeneous observations."
+  },
+  {
+   "id": "verifier-model",
+   "family": "verifier-model-and-resources",
+   "name": "Verifier and query trees",
+   "description": "A verifier selects an adaptive query tree from its input and random seed, with explicit acceptance probabilities and proof-address bounds."
+  },
+  {
+   "id": "machine-implementation",
+   "family": "verifier-model-and-resources",
+   "name": "Polynomial-time implementation",
+   "description": "A finite multi-stack machine implements the verifier or witness checker with polynomial running time."
+  },
+  {
+   "id": "colouring-constraints",
+   "family": "three-colouring-verifier",
+   "name": "Colouring constraints",
+   "description": "Vertex values and edge differences satisfy polynomial equations exactly when they define a proper three-colouring."
+  },
+  {
+   "id": "vanishing-certificates",
+   "family": "polynomials-and-grids",
+   "name": "Vanishing certificates",
+   "description": "A polynomial vanishing on a grid admits a decomposition using the coordinate vanishing polynomials and a certificate expressed by two identities."
+  },
+  {
+   "id": "linearity-self-correction",
+   "family": "hadamard-encoding",
+   "name": "Linearity and self-correction",
+   "description": "Linearity testing finds a nearby linear word, and two randomly shifted queries recover a requested value with controlled error."
+  },
+  {
+   "id": "resource-bounds",
+   "family": "verifier-model-and-resources",
+   "name": "Queries, randomness and repetition",
+   "description": "Query counts, fair-bit sampling, proof length and independent repetition give the resource bounds and final soundness error."
+  },
+  {
+   "id": "proof-tables-checks",
+   "family": "three-colouring-verifier",
+   "name": "Proof tables and checks",
+   "description": "Four pairs of points and lines tables supply the answers read by four low-degree tests, two grid tests and a difference check."
+  },
+  {
+   "id": "binary-low-degree-test",
+   "family": "binary-low-degree-testing",
+   "name": "Binary low-degree test",
+   "description": "Small rejection gives one polynomial whose encoding is close to the points table on both full and homogeneous labels."
+  },
+  {
+   "id": "zero-on-grid-test",
+   "family": "local-correction-and-grid-testing",
+   "name": "Zero-on-grid test",
+   "description": "Corrected certificate queries test vanishing identities at prescribed points and relate failure on the grid to rejection."
+  },
+  {
+   "id": "colouring-guarantees",
+   "family": "three-colouring-verifier",
+   "name": "Completeness and soundness",
+   "description": "An honest colouring passes every check, while sufficiently small rejection forces four nearby polynomials to describe a proper colouring."
+  },
+  {
+   "id": "np-reduction",
+   "family": "np-and-pcp",
+   "name": "Reduction to three-colouring",
+   "description": "Accepting computations become finite constraints, Boolean clauses and graphs while preserving the existence of a witness."
+  },
+  {
+   "id": "np-witnesses",
+   "family": "np-and-pcp",
+   "name": "NP witness verification",
+   "description": "A language belongs to NP when membership is witnessed by a polynomial-length string accepted by a polynomial-time checker."
+  },
+  {
+   "id": "standard-low-degree-test",
+   "family": "field-low-degree-testing",
+   "name": "Standard low-degree test",
+   "description": "Weighted interpolation at generator powers tests low degree, with plurality correction turning small rejection into polynomial agreement."
+  },
+  {
+   "id": "field-local-correction",
+   "family": "local-correction-and-grid-testing",
+   "name": "Local correction over fields",
+   "description": "Random line queries recover a polynomial value at a prescribed point or bound the probability of accepting a wrong value."
+  },
+  {
+   "id": "bivariate-agreement",
+   "family": "field-low-degree-testing",
+   "name": "Bivariate agreement",
+   "description": "Agreement between low-degree row and column polynomials produces a nearby bivariate polynomial and consistent values at selected crossings."
+  },
+  {
+   "id": "point-line-test",
+   "family": "field-low-degree-testing",
+   "name": "Point-versus-line test",
+   "description": "Agreement with supplied line polynomials at random points yields one nearby polynomial of bounded total degree."
+  },
+  {
+   "id": "set-multilinear-encoding",
+   "family": "binary-low-degree-testing",
+   "name": "Set-multilinear encoding",
+   "description": "Writing exponents in a fixed number of base digits replaces a line polynomial by a polynomial of fixed total degree."
+  },
+  {
+   "id": "hadamard-testing",
+   "family": "hadamard-encoding",
+   "name": "Hadamard test",
+   "description": "Linearity, unit, product and affine consistency checks test whether a word is close to the encoding of one field value."
+  },
+  {
+   "id": "inner-low-degree-test",
+   "family": "binary-low-degree-testing",
+   "name": "Inner low-degree test",
+   "description": "A random choice between Hadamard testing and a binary weighted identity tests one encoded line entry for low degree."
+  },
+  {
+   "id": "binary-local-correction",
+   "family": "local-correction-and-grid-testing",
+   "name": "Local correction on bits",
+   "description": "Weighted bit queries and tests of encoded line entries recover a homogeneous observation at a prescribed point, allowing rejection."
+  }
+ ],
  "passages": [
   {
    "id": "language-code",
@@ -27,6 +207,14 @@
    "lines": [
     15,
     15
+   ],
+   "topic": "np-witnesses",
+   "comparisons": [
+    {
+     "lean": "PCP.Language",
+     "fidelity": "same",
+     "note": "The formal definition is exactly the quoted one: a language is a set of finite binary strings, represented by its membership condition."
+    }
    ]
   },
   {
@@ -44,6 +232,14 @@
    "lines": [
     30,
     39
+   ],
+   "topic": "np-witnesses",
+   "comparisons": [
+    {
+     "lean": "PCP.NPCertificate",
+     "fidelity": "same",
+     "note": "The formal definition gives a polynomial witness bound, a checker satisfying the chosen time condition, and $x\\in L$ exactly when some accepted witness has length at most $p(|x|)$."
+    }
    ]
   },
   {
@@ -61,6 +257,14 @@
    "lines": [
     42,
     43
+   ],
+   "topic": "np-witnesses",
+   "comparisons": [
+    {
+     "lean": "PCP.InNP",
+     "fidelity": "same",
+     "note": "The formal definition says that a certificate of membership exists, relative to the chosen condition on witness checkers, exactly as the quoted code does."
+    }
    ]
   },
   {
@@ -78,6 +282,14 @@
    "lines": [
     66,
     67
+   ],
+   "topic": "machine-implementation",
+   "comparisons": [
+    {
+     "lean": "PCP.Machine.PolyTimeRel",
+     "fidelity": "same",
+     "note": "The formal definition requires a finite multi-stack Turing machine to compute the witness checker in polynomial time, using the specified input-pair and one-bit output encodings."
+    }
    ]
   },
   {
@@ -95,6 +307,14 @@
    "lines": [
     28,
     28
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.ProofOracle",
+     "fidelity": "same",
+     "note": "The formal definition is an infinite sequence of bits indexed by the natural numbers, exactly the proof oracle described by the quoted code."
+    }
    ]
   },
   {
@@ -112,6 +332,14 @@
    "lines": [
     33,
     37
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.QueryTree",
+     "fidelity": "same",
+     "note": "The formal definition gives an adaptive binary decision tree of depth at most $d$: a leaf may occur before the budget is exhausted, and each query consumes one level."
+    }
    ]
   },
   {
@@ -129,6 +357,14 @@
    "lines": [
     42,
     44
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.QueryTree.eval",
+     "fidelity": "same",
+     "note": "The formal definition follows the branch selected by the proof bit at each queried address and returns the decision at the resulting leaf."
+    }
    ]
   },
   {
@@ -146,6 +382,14 @@
    "lines": [
     47,
     49
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.QueryTree.addresses",
+     "fidelity": "same",
+     "note": "The formal definition collects the current query address together with the addresses in both subtrees; a leaf contributes no address."
+    }
    ]
   },
   {
@@ -163,6 +407,14 @@
    "lines": [
     85,
     91
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier",
+     "fidelity": "same",
+     "note": "The formal definition specifies a random-bit budget depending on input length, a fixed query bound, and a bounded decision tree for every input and every random string."
+    }
    ]
   },
   {
@@ -180,6 +432,14 @@
    "lines": [
     98,
     99
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.acceptingRandomness",
+     "fidelity": "same",
+     "note": "The formal definition selects precisely the random strings for which the verifier accepts the fixed input and proof."
+    }
    ]
   },
   {
@@ -197,6 +457,14 @@
    "lines": [
     103,
     104
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.accProb",
+     "fidelity": "same",
+     "note": "The formal definition divides the number of accepting random strings by $2^k$, where $k$ is the random-bit budget at the input length."
+    }
    ]
   },
   {
@@ -214,6 +482,14 @@
    "lines": [
     131,
     131
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.CompleteAt",
+     "fidelity": "same",
+     "note": "The formal definition says that some proof is accepted with probability $1$ at the given input; the proof may depend on that input."
+    }
    ]
   },
   {
@@ -231,6 +507,14 @@
    "lines": [
     134,
     134
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.SoundAt",
+     "fidelity": "same",
+     "note": "The formal definition requires every proof to have acceptance probability at most $s$ at the given input."
+    }
    ]
   },
   {
@@ -248,6 +532,14 @@
    "lines": [
     118,
     119
+   ],
+   "topic": "resource-bounds",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.ReadsBelow",
+     "fidelity": "same",
+     "note": "The formal definition requires every query address in every branch of every random-string tree to be less than $N$."
+    }
    ]
   },
   {
@@ -265,6 +557,14 @@
    "lines": [
     154,
     155
+   ],
+   "topic": "resource-bounds",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.CanonicalRandomness",
+     "fidelity": "same",
+     "note": "The formal definition fixes the budget to exactly $a\\lceil\\log_2(n+2)\\rceil+b$ for every input length $n$, using natural-number constants $a$ and $b$."
+    }
    ]
   },
   {
@@ -282,6 +582,14 @@
    "lines": [
     24,
     24
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.VerifierAlg",
+     "fidelity": "same",
+     "note": "The formal definition takes the input, random bits and previous answers, and returns either an accept-or-reject decision or the next proof address."
+    }
    ]
   },
   {
@@ -299,6 +607,14 @@
    "lines": [
     62,
     64
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.ImplementedBy",
+     "fidelity": "same",
+     "note": "The formal definition is exactly the quoted equality: unfolding the algorithm with the verifier's query budget gives its decision tree, for every input and random string. A further query after that budget becomes rejection."
+    }
    ]
   },
   {
@@ -316,6 +632,14 @@
    "lines": [
     71,
     73
+   ],
+   "topic": "machine-implementation",
+   "comparisons": [
+    {
+     "lean": "PCP.Machine.PolyTimeAlg",
+     "fidelity": "same",
+     "note": "The formal definition requires a finite multi-stack Turing machine to compute one verifier step in polynomial time in the encoded input, random string and answer history."
+    }
    ]
   },
   {
@@ -333,6 +657,14 @@
    "lines": [
     25,
     33
+   ],
+   "topic": "pcp-characterization",
+   "comparisons": [
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "same",
+     "note": "The formal statement is the quoted theorem: each language in the concrete NP class has one polynomial-time verifier with constant queries, exact logarithmic randomness, polynomial proof length, perfect completeness and soundness $1/2$."
+    }
    ]
   },
   {
@@ -350,6 +682,14 @@
    "lines": [
     15,
     15
+   ],
+   "topic": "np-witnesses",
+   "comparisons": [
+    {
+     "lean": "PCP.Language",
+     "fidelity": "same",
+     "note": "The formal definition makes a language a membership condition on finite binary strings, exactly as the sentence says."
+    }
    ]
   },
   {
@@ -364,7 +704,20 @@
    "anchor": {
     "heading": "Languages and NP",
     "block": 3
-   }
+   },
+   "topic": "np-witnesses",
+   "comparisons": [
+    {
+     "lean": "PCP.NPCertificate",
+     "fidelity": "same",
+     "note": "The formal definition has exactly the stated ingredients: a polynomial $p$, an allowed checker, and the equivalence between $x\\in L$ and an accepted witness of length at most $p(|x|)$."
+    },
+    {
+     "lean": "PCP.InNP",
+     "fidelity": "different",
+     "note": "The passage describes the components of a membership certificate; the formal definition says that such a certificate exists. The certificate definition, also cited here, gives the components."
+    }
+   ]
   },
   {
    "id": "np-parameter-prose",
@@ -373,13 +726,37 @@
    "lean": [
     "PCP.InNP",
     "PCP.NPCertificate",
-    "PCP.Machine.PolyTimeRel"
+    "PCP.Machine.PolyTimeRel",
+    "PCP.np_subset_pcp"
    ],
    "quote": "The notion of polynomial time is a\nparameter here. The main theorem fixes it to the concrete machine model below.",
    "anchor": {
     "heading": "Languages and NP",
     "block": 3
-   }
+   },
+   "topic": "np-witnesses",
+   "comparisons": [
+    {
+     "lean": "PCP.InNP",
+     "fidelity": "same",
+     "note": "The formal definition leaves the condition on witness checkers as a parameter, as the first sentence says; the main theorem supplies the concrete polynomial-time condition."
+    },
+    {
+     "lean": "PCP.NPCertificate",
+     "fidelity": "same",
+     "note": "The formal definition permits a chosen condition on witness checkers, as the passage explains. It does not by itself require that condition to be the concrete machine model."
+    },
+    {
+     "lean": "PCP.Machine.PolyTimeRel",
+     "fidelity": "different",
+     "note": "The passage says that the main theorem fixes a previously variable notion of polynomial time; this formal definition gives the chosen machine-based notion. The choice itself appears in the main theorem."
+    },
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "same",
+     "note": "The formal theorem assumes that the language is in NP with the witness checker required to run in polynomial time on Turing machines. This is where the main theorem fixes the otherwise variable notion of polynomial time, as the second sentence says."
+    }
+   ]
   },
   {
    "id": "polynomial-time-prose",
@@ -392,7 +769,15 @@
    "anchor": {
     "heading": "Polynomial time",
     "block": 3
-   }
+   },
+   "topic": "machine-implementation",
+   "comparisons": [
+    {
+     "lean": "PCP.Machine.PolyTimeRel",
+     "fidelity": "same",
+     "note": "The formal definition requires the witness checker to be computed by a finite multi-stack Turing machine within a polynomial bound in the encoded input length, matching the passage."
+    }
+   ]
   },
   {
    "id": "pair-encoding-prose",
@@ -405,7 +790,15 @@
    "anchor": {
     "heading": "Polynomial time",
     "block": 3
-   }
+   },
+   "topic": "machine-implementation",
+   "comparisons": [
+    {
+     "lean": "PCP.Machine.encodePair",
+     "fidelity": "same",
+     "note": "The formal definition writes the first string, one separator, and the second string, in exactly the order stated."
+    }
+   ]
   },
   {
    "id": "proof-oracle-prose",
@@ -422,6 +815,14 @@
    "lines": [
     28,
     28
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.ProofOracle",
+     "fidelity": "same",
+     "note": "The formal definition is an infinite bit sequence $\\pi$ indexed by nonnegative integers; it imposes no computability condition on that sequence."
+    }
    ]
   },
   {
@@ -436,7 +837,20 @@
    "anchor": {
     "heading": "Verifiers",
     "block": 3
-   }
+   },
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.QueryTree",
+     "fidelity": "same",
+     "note": "The formal definition permits a leaf at any remaining depth and gives every query two successor trees, so the bound is at most $d$ queries, as the passage says."
+    },
+    {
+     "lean": "PCP.QueryTree.eval",
+     "fidelity": "same",
+     "note": "The formal definition implements the stated behavior: read one proof bit at an internal node, follow its branch, and use the decision at a leaf."
+    }
+   ]
   },
   {
    "id": "verifier-prose",
@@ -449,21 +863,36 @@
    "anchor": {
     "heading": "Verifiers",
     "block": 3
-   }
+   },
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier",
+     "fidelity": "same",
+     "note": "The formal definition has exactly these three parts: a budget determined by input length, a fixed query bound, and a decision tree for every input and random string."
+    }
+   ]
   },
   {
    "id": "acceptance-probability-prose",
    "section": "3",
    "role": "explains",
    "lean": [
-    "PCP.Verifier.accProb",
-    "PCP.Verifier.acceptingRandomness"
+    "PCP.Verifier.accProb"
    ],
    "quote": "`accProb` is the exact fraction of random strings on which V accepts x with\n  proof π.",
    "anchor": {
     "heading": "Verifiers",
     "block": 5
-   }
+   },
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.accProb",
+     "fidelity": "same",
+     "note": "The formal definition is the exact rational fraction of equally likely random strings on which the fixed input and proof are accepted."
+    }
+   ]
   },
   {
    "id": "completeness-prose",
@@ -480,6 +909,14 @@
    "lines": [
     131,
     131
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.CompleteAt",
+     "fidelity": "same",
+     "note": "The formal definition requires the existence of a proof accepted with probability $1$ at this input, exactly as stated."
+    }
    ]
   },
   {
@@ -497,6 +934,14 @@
    "lines": [
     134,
     134
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.SoundAt",
+     "fidelity": "same",
+     "note": "The formal definition bounds acceptance by $s$ for every proof at this input, exactly as stated."
+    }
    ]
   },
   {
@@ -504,14 +949,21 @@
    "section": "3",
    "role": "explains",
    "lean": [
-    "PCP.Verifier.ReadsBelow",
-    "PCP.QueryTree.addresses"
+    "PCP.Verifier.ReadsBelow"
    ],
    "quote": "`ReadsBelow x N`: on input x, no tree ever queries an address ≥ N, whatever\n  the random string and the answers. This is how \"a proof of length N\" is\n  expressed.",
    "anchor": {
     "heading": "Verifiers",
     "block": 5
-   }
+   },
+   "topic": "resource-bounds",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.ReadsBelow",
+     "fidelity": "same",
+     "note": "The formal definition bounds every address in both branches of every decision tree by $N$, for every random string. It therefore has the stated meaning of a proof prefix of length $N$."
+    }
+   ]
   },
   {
    "id": "randomness-budget-prose",
@@ -528,6 +980,14 @@
    "lines": [
     154,
     155
+   ],
+   "topic": "resource-bounds",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.CanonicalRandomness",
+     "fidelity": "same",
+     "note": "The formal definition fixes exactly $a\\lceil\\log_2(n+2)\\rceil+b$ bits for every $n$. This matches the passage and removes the freedom to choose an arbitrary length-dependent budget below an upper bound."
+    }
    ]
   },
   {
@@ -537,13 +997,37 @@
    "lean": [
     "PCP.Verifier",
     "PCP.VerifierAlg",
-    "PCP.Verifier.ImplementedBy"
+    "PCP.Verifier.ImplementedBy",
+    "PCP.Machine.PolyTimeAlg"
    ],
    "quote": "A `Verifier` is a mathematical object: a family of decision trees. Its\nefficiency is certified separately, by an algorithm.",
    "anchor": {
     "heading": "Efficient verifiers",
     "block": 3
-   }
+   },
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier",
+     "fidelity": "same",
+     "note": "The formal definition specifies a family of bounded decision trees and does not include a running-time requirement, matching the distinction made in the passage."
+    },
+    {
+     "lean": "PCP.VerifierAlg",
+     "fidelity": "different",
+     "note": "The passage distinguishes a verifier from its efficient implementation; this formal definition specifies possible step functions only. A separate polynomial-time condition is needed to certify efficiency."
+    },
+    {
+     "lean": "PCP.Verifier.ImplementedBy",
+     "fidelity": "different",
+     "note": "The passage refers to certifying efficiency; this formal definition requires the bounded algorithm execution to match the verifier tree. It supplies the behavioral correspondence, while polynomial running time is a separate condition."
+    },
+    {
+     "lean": "PCP.Machine.PolyTimeAlg",
+     "fidelity": "same",
+     "note": "The formal definition is the separate efficiency condition the passage refers to: some Turing machine computes the algorithm's step function, from the input, the random string and the answers so far, in time polynomial in the encoded length of these inputs."
+    }
+   ]
   },
   {
    "id": "algorithm-step-prose",
@@ -560,6 +1044,14 @@
    "lines": [
     24,
     24
+   ],
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.VerifierAlg",
+     "fidelity": "same",
+     "note": "The formal definition takes exactly the three stated bit strings and returns either a decision or a proof address. Its definition alone places no running-time bound on that operation."
+    }
    ]
   },
   {
@@ -567,14 +1059,21 @@
    "section": "3",
    "role": "explains",
    "lean": [
-    "PCP.Verifier.ImplementedBy",
-    "PCP.QueryTree.ofStep"
+    "PCP.Verifier.ImplementedBy"
    ],
    "quote": "`ImplementedBy` says that unfolding `alg` reproduces exactly the tree\n`V.run x r`, for every x and r.",
    "anchor": {
     "heading": "Efficient verifiers",
     "block": 3
-   }
+   },
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.ImplementedBy",
+     "fidelity": "weaker",
+     "note": "The passage describes unfolding the algorithm without mentioning a cutoff; the formal definition compares the verifier with unfolding capped at its query bound. A further query is replaced by rejection, so this equality does not assert that unrestricted execution halts within the budget."
+    }
+   ]
   },
   {
    "id": "algorithm-time-prose",
@@ -591,6 +1090,14 @@
    "lines": [
     71,
     73
+   ],
+   "topic": "machine-implementation",
+   "comparisons": [
+    {
+     "lean": "PCP.Machine.PolyTimeAlg",
+     "fidelity": "same",
+     "note": "The formal definition requires polynomial time for one step on the encoded input, random string and previous answers. With the fixed query bound in the main theorem, this supplies the stated verifier efficiency."
+    }
    ]
   },
   {
@@ -607,7 +1114,30 @@
    "anchor": {
     "heading": "4. The PCP theorem",
     "block": 4
-   }
+   },
+   "topic": "np-witnesses",
+   "comparisons": [
+    {
+     "lean": "PCP.Language",
+     "fidelity": "different",
+     "note": "The passage assumes a binary language belongs to NP; the formal definition gives the ambient class of all binary languages. NP membership is a separate condition."
+    },
+    {
+     "lean": "PCP.InNP",
+     "fidelity": "same",
+     "note": "In the concrete machine model fixed by the table, the formal definition expresses precisely the assumed membership of the binary language in NP through polynomially bounded accepted witnesses."
+    },
+    {
+     "lean": "PCP.Machine.PolyTimeRel",
+     "fidelity": "different",
+     "note": "The passage assumes language membership in NP; this formal definition specifies polynomial time for a witness checker. The witness bound and the equivalence defining the language are supplied separately."
+    },
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "different",
+     "note": "The passage states the hypothesis that the language is in NP; the formal theorem assumes that hypothesis and constructs a PCP verifier. It does not prove NP membership for an arbitrary language."
+    }
+   ]
   },
   {
    "id": "clause-witnesses",
@@ -622,7 +1152,25 @@
    "anchor": {
     "heading": "4. The PCP theorem",
     "block": 4
-   }
+   },
+   "topic": "pcp-characterization",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier",
+     "fidelity": "different",
+     "note": "The passage asserts the existence of a verifier with further guarantees; this formal definition specifies what a verifier consists of. The existence and guarantees come from the main theorem."
+    },
+    {
+     "lean": "PCP.VerifierAlg",
+     "fidelity": "different",
+     "note": "The passage asserts the existence of an algorithm and common resource bounds; this formal definition specifies the inputs and outputs of a step function. The main theorem supplies the required algorithm."
+    },
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The passage introduces witnesses independent of the input; the formal theorem supplies those same witnesses together with polynomial time, the resource bounds, perfect completeness and soundness. Their simultaneous validity is part of its conclusion."
+    }
+   ]
   },
   {
    "id": "clause-algorithm-time",
@@ -636,7 +1184,20 @@
    "anchor": {
     "heading": "4. The PCP theorem",
     "block": 4
-   }
+   },
+   "topic": "machine-implementation",
+   "comparisons": [
+    {
+     "lean": "PCP.Machine.PolyTimeAlg",
+     "fidelity": "same",
+     "note": "The formal definition gives the polynomial-time property explained by this table entry: a machine computes one step within a polynomial bound in the encoded input length."
+    },
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The passage gives the polynomial-time clause; the formal theorem supplies the same algorithm together with its verifier correspondence, resource bounds, perfect completeness and soundness $1/2$."
+    }
+   ]
   },
   {
    "id": "clause-implementation",
@@ -650,7 +1211,20 @@
    "anchor": {
     "heading": "4. The PCP theorem",
     "block": 4
-   }
+   },
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.ImplementedBy",
+     "fidelity": "weaker",
+     "note": "The passage says that the algorithm computes the verifier exactly; the formal definition requires this only after execution is capped at the query bound. A request beyond the bound is treated as rejection, rather than a further algorithm step."
+    },
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "different",
+     "note": "The passage describes exact computation without stating the query cutoff; the formal theorem supplies exact correspondence after that cutoff and additional resource and probability guarantees. It does not assert unrestricted execution agrees with the verifier."
+    }
+   ]
   },
   {
    "id": "clause-query-bound",
@@ -665,7 +1239,25 @@
    "anchor": {
     "heading": "4. The PCP theorem",
     "block": 4
-   }
+   },
+   "topic": "resource-bounds",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier",
+     "fidelity": "same",
+     "note": "The formal definition makes the query bound a fixed natural number and assigns a tree with that depth bound to every input and random string. In the table that number is $q$."
+    },
+    {
+     "lean": "PCP.QueryTree",
+     "fidelity": "same",
+     "note": "The formal definition bounds the depth of a query tree by $q$ when instantiated at the table's query bound. Leaves may occur earlier, so the phrase “at most” is correct."
+    },
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The passage gives the constant query bound; the formal theorem supplies that bound for one verifier and also proves polynomial time, logarithmic randomness, polynomial proof length and the completeness and soundness guarantees."
+    }
+   ]
   },
   {
    "id": "clause-randomness",
@@ -679,7 +1271,20 @@
    "anchor": {
     "heading": "4. The PCP theorem",
     "block": 4
-   }
+   },
+   "topic": "resource-bounds",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.CanonicalRandomness",
+     "fidelity": "same",
+     "note": "The formal definition is exactly the budget $a\\lceil\\log_2(n+2)\\rceil+b$ explained by the table, for every input length $n$."
+    },
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The passage gives the randomness formula; the formal theorem supplies its fixed constants together with one verifier satisfying all the other resource, time, completeness and soundness requirements."
+    }
+   ]
   },
   {
    "id": "clause-proof-bound",
@@ -693,7 +1298,20 @@
    "anchor": {
     "heading": "4. The PCP theorem",
     "block": 4
-   }
+   },
+   "topic": "resource-bounds",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.ReadsBelow",
+     "fidelity": "same",
+     "note": "With $N=p(|x|)$, the formal definition says that every address in every branch lies below the stated polynomial bound, exactly the property explained in the table."
+    },
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The passage gives the polynomial proof-address bound; the formal theorem supplies one polynomial valid for every input together with all the other verifier guarantees."
+    }
+   ]
   },
   {
    "id": "clause-completeness",
@@ -707,7 +1325,20 @@
    "anchor": {
     "heading": "4. The PCP theorem",
     "block": 4
-   }
+   },
+   "topic": "pcp-characterization",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.CompleteAt",
+     "fidelity": "same",
+     "note": "The formal definition is the property explained in the conclusion: some proof is accepted with probability $1$ at the input. The main theorem requires this property whenever $x\\in L$."
+    },
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The passage gives perfect completeness on members of $L$; the formal theorem supplies it for the same verifier that also has soundness $1/2$, polynomial time and the stated resource bounds."
+    }
+   ]
   },
   {
    "id": "clause-soundness",
@@ -721,7 +1352,20 @@
    "anchor": {
     "heading": "4. The PCP theorem",
     "block": 4
-   }
+   },
+   "topic": "pcp-characterization",
+   "comparisons": [
+    {
+     "lean": "PCP.Verifier.SoundAt",
+     "fidelity": "same",
+     "note": "With $s=1/2$, the formal definition is the universal acceptance bound explained in the conclusion. The main theorem requires it whenever $x\\notin L$."
+    },
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The passage bounds every proof's acceptance by $1/2$ on nonmembers; the formal theorem gives this bound together with perfect completeness and all time and resource guarantees for one verifier."
+    }
+   ]
   },
   {
    "id": "pcp-summary",
@@ -738,6 +1382,14 @@
    "lines": [
     25,
     33
+   ],
+   "topic": "pcp-characterization",
+   "comparisons": [
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "same",
+     "note": "The formal statement establishes the stated inclusion with perfect completeness and a polynomial-time verifier; it makes the logarithmic budget, fixed query bound, polynomial proof-address bound and soundness $1/2$ explicit."
+    }
    ]
   },
   {
@@ -757,7 +1409,25 @@
     "heading": "4. The PCP theorem",
     "block": 4
    },
-   "quote": "`(L : Language) (hL : InNP Machine.PolyTimeRel L)`"
+   "quote": "`(L : Language) (hL : InNP Machine.PolyTimeRel L)`",
+   "topic": "np-witnesses",
+   "comparisons": [
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "different",
+     "note": "The quoted fragment gives the input language and its NP-membership hypothesis; the formal theorem assumes these and concludes the existence of the PCP verifier. The fragment is a hypothesis, not the theorem's conclusion."
+    },
+    {
+     "lean": "PCP.InNP",
+     "fidelity": "same",
+     "note": "With the concrete machine model shown in the fragment, the formal definition is exactly the NP-membership condition being assumed."
+    },
+    {
+     "lean": "PCP.Machine.PolyTimeRel",
+     "fidelity": "same",
+     "note": "The formal definition supplies exactly the machine-based polynomial-time condition selected for the witness checker in this hypothesis."
+    }
+   ]
   },
   {
    "id": "lean-witnesses",
@@ -776,7 +1446,25 @@
     "heading": "4. The PCP theorem",
     "block": 4
    },
-   "quote": "`∃ (V : Verifier) (alg : VerifierAlg) (a b q : ℕ) (p : Polynomial ℕ),`"
+   "quote": "`∃ (V : Verifier) (alg : VerifierAlg) (a b q : ℕ) (p : Polynomial ℕ),`",
+   "topic": "pcp-characterization",
+   "comparisons": [
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The quoted fragment introduces the verifier, algorithm, constants and polynomial; the formal theorem supplies these witnesses and all the properties listed in the following clauses."
+    },
+    {
+     "lean": "PCP.Verifier",
+     "fidelity": "different",
+     "note": "The quoted fragment asserts existence of the required verifier; this formal definition specifies a random-bit budget, fixed query bound and family of decision trees. It supplies the meaning of the object rather than the existence claim."
+    },
+    {
+     "lean": "PCP.VerifierAlg",
+     "fidelity": "different",
+     "note": "The quoted fragment asserts existence of the required algorithm; this formal definition specifies a step function from input, randomness and prior answers to a decision or query. The theorem supplies the existence claim."
+    }
+   ]
   },
   {
    "id": "lean-algorithm-time",
@@ -794,7 +1482,20 @@
     "heading": "4. The PCP theorem",
     "block": 4
    },
-   "quote": "`Machine.PolyTimeAlg alg ∧`"
+   "quote": "`Machine.PolyTimeAlg alg ∧`",
+   "topic": "machine-implementation",
+   "comparisons": [
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The quoted fragment gives only the polynomial-time clause; the formal theorem supplies an algorithm satisfying it together with all the other clauses."
+    },
+    {
+     "lean": "PCP.Machine.PolyTimeAlg",
+     "fidelity": "same",
+     "note": "The formal definition is exactly the polynomial-time condition appearing in this clause, measured for a single verifier step on its encoded arguments."
+    }
+   ]
   },
   {
    "id": "lean-implementation",
@@ -812,7 +1513,20 @@
     "heading": "4. The PCP theorem",
     "block": 4
    },
-   "quote": "`V.ImplementedBy alg ∧`"
+   "quote": "`V.ImplementedBy alg ∧`",
+   "topic": "verifier-model",
+   "comparisons": [
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The quoted fragment requires correspondence between the bounded execution and the verifier; the formal theorem supplies that correspondence together with efficiency, resource bounds, completeness and soundness."
+    },
+    {
+     "lean": "PCP.Verifier.ImplementedBy",
+     "fidelity": "same",
+     "note": "The formal definition is exactly the correspondence required here: the execution capped at the query bound equals the verifier tree for every input and random string."
+    }
+   ]
   },
   {
    "id": "lean-query-bound",
@@ -830,7 +1544,20 @@
     "heading": "4. The PCP theorem",
     "block": 4
    },
-   "quote": "`V.queries = q ∧`"
+   "quote": "`V.queries = q ∧`",
+   "topic": "resource-bounds",
+   "comparisons": [
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The quoted fragment names the fixed query bound; the formal theorem supplies a verifier satisfying this and all the remaining time, resource and probability conditions."
+    },
+    {
+     "lean": "PCP.Verifier",
+     "fidelity": "same",
+     "note": "The formal definition gives each verifier a fixed query bound, which the quoted clause names $q$; every associated decision tree has depth at most that bound."
+    }
+   ]
   },
   {
    "id": "lean-randomness",
@@ -848,7 +1575,20 @@
     "heading": "4. The PCP theorem",
     "block": 4
    },
-   "quote": "`V.CanonicalRandomness a b ∧`"
+   "quote": "`V.CanonicalRandomness a b ∧`",
+   "topic": "resource-bounds",
+   "comparisons": [
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The quoted fragment gives the randomness condition; the formal theorem supplies its constants and the same verifier satisfying all the remaining clauses."
+    },
+    {
+     "lean": "PCP.Verifier.CanonicalRandomness",
+     "fidelity": "same",
+     "note": "The formal definition is exactly the condition in the fragment: for every $n$, the number of random bits equals $a\\lceil\\log_2(n+2)\\rceil+b$."
+    }
+   ]
   },
   {
    "id": "lean-proof-bound",
@@ -866,7 +1606,20 @@
     "heading": "4. The PCP theorem",
     "block": 4
    },
-   "quote": "`(∀ x : List Bool, V.ReadsBelow x (p.eval x.length)) ∧`"
+   "quote": "`(∀ x : List Bool, V.ReadsBelow x (p.eval x.length)) ∧`",
+   "topic": "resource-bounds",
+   "comparisons": [
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The quoted fragment gives a polynomial proof-address bound for every input; the formal theorem supplies that polynomial and all the other verifier guarantees at once."
+    },
+    {
+     "lean": "PCP.Verifier.ReadsBelow",
+     "fidelity": "same",
+     "note": "The formal definition is the address-bound condition used here; taking $N=p(|x|)$ gives the displayed polynomial proof bound, required for every input."
+    }
+   ]
   },
   {
    "id": "lean-completeness",
@@ -884,7 +1637,20 @@
     "heading": "4. The PCP theorem",
     "block": 4
    },
-   "quote": "`(∀ x : List Bool, L x → V.CompleteAt x) ∧`"
+   "quote": "`(∀ x : List Bool, L x → V.CompleteAt x) ∧`",
+   "topic": "pcp-characterization",
+   "comparisons": [
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The quoted fragment gives perfect completeness; the formal theorem supplies it together with soundness, efficiency and the resource bounds for one verifier."
+    },
+    {
+     "lean": "PCP.Verifier.CompleteAt",
+     "fidelity": "same",
+     "note": "The formal definition is the perfect-completeness property in this fragment: a proof accepted with probability $1$ exists at $x$. The fragment requires it for every member of $L$."
+    }
+   ]
   },
   {
    "id": "lean-soundness",
@@ -902,93 +1668,253 @@
     "heading": "4. The PCP theorem",
     "block": 4
    },
-   "quote": "`(∀ x : List Bool, ¬ L x → V.SoundAt x (1 / 2))`"
+   "quote": "`(∀ x : List Bool, ¬ L x → V.SoundAt x (1 / 2))`",
+   "topic": "pcp-characterization",
+   "comparisons": [
+    {
+     "lean": "PCP.np_subset_pcp",
+     "fidelity": "stronger",
+     "note": "The quoted fragment gives soundness on nonmembers; the formal theorem supplies it together with perfect completeness, efficiency and the resource bounds."
+    },
+    {
+     "lean": "PCP.Verifier.SoundAt",
+     "fidelity": "same",
+     "note": "The formal definition is the soundness condition in the fragment: every proof has acceptance probability at most $1/2$ at each input outside $L$."
+    }
+   ]
   }
  ],
  "plain": {
-  "PCP.np_subset_pcp": "The PCP theorem",
-  "PCP.Language": "Binary languages",
-  "PCP.NPCertificate": "NP certificates",
-  "PCP.InNP": "Membership of NP",
-  "PCP.ProofOracle": "Proof bits",
-  "PCP.QueryTree": "Bounded query trees",
-  "PCP.QueryTree.eval": "Run a query tree",
-  "PCP.QueryTree.addresses": "Addresses in a query tree",
-  "PCP.Verifier": "Oracle verifiers",
+  "PCP.np_subset_pcp": "The forward PCP theorem",
+  "PCP.Language": "Languages over binary strings",
+  "PCP.NPCertificate": "Bounded witnesses and a checker",
+  "PCP.InNP": "Membership through bounded witnesses",
+  "PCP.ProofOracle": "The proof bit sequence",
+  "PCP.QueryTree": "Adaptive proof queries",
+  "PCP.QueryTree.eval": "Evaluating a proof query tree",
+  "PCP.QueryTree.addresses": "All queried proof addresses",
+  "PCP.Verifier": "Randomized proof query trees",
   "PCP.Verifier.acceptingRandomness": "Accepting random strings",
   "PCP.Verifier.accProb": "Acceptance probability",
-  "PCP.Verifier.ReadsBelow": "Bound the proof addresses",
-  "PCP.Verifier.CompleteAt": "Perfect completeness at an input",
-  "PCP.Verifier.SoundAt": "Soundness at an input",
-  "PCP.Verifier.CanonicalRandomness": "Exact logarithmic randomness",
-  "PCP.VerifierAlg": "The next verifier step",
-  "PCP.bitsOfFin": "A random index as bits",
-  "PCP.QueryTree.ofStep": "Build a bounded query tree",
-  "PCP.Verifier.ImplementedBy": "Match the algorithm to the tree",
-  "PCP.Machine.Sym": "Tape symbols",
-  "PCP.Machine.ofBits": "Write bits as tape symbols",
-  "PCP.Machine.encodePair": "Encode two bit strings",
-  "PCP.Machine.encodeTriple": "Encode three bit strings",
-  "PCP.Machine.encodeAnswer": "Encode a verifier response",
-  "PCP.Machine.encodeBool": "Encode a Boolean result",
-  "PCP.Machine.PolyTimeRel": "Polynomial time for a relation",
-  "PCP.Machine.PolyTimeAlg": "Polynomial time for one step"
+  "PCP.Verifier.ReadsBelow": "A bound on proof addresses",
+  "PCP.Verifier.CompleteAt": "A proof accepted with certainty",
+  "PCP.Verifier.SoundAt": "Acceptance bounds for all proofs",
+  "PCP.Verifier.CanonicalRandomness": "A fixed logarithmic randomness budget",
+  "PCP.VerifierAlg": "A query or a decision",
+  "PCP.bitsOfFin": "Random bits from an index",
+  "PCP.QueryTree.ofStep": "Capping a sequence of queries",
+  "PCP.Verifier.ImplementedBy": "Matching the bounded verifier tree",
+  "PCP.Machine.Sym": "Bits and separators",
+  "PCP.Machine.ofBits": "Writing a binary string",
+  "PCP.Machine.encodePair": "Separating input and witness",
+  "PCP.Machine.encodeTriple": "Separating input, randomness and answers",
+  "PCP.Machine.encodeAnswer": "Writing decisions and query addresses",
+  "PCP.Machine.encodeBool": "Writing an acceptance bit",
+  "PCP.Machine.PolyTimeRel": "Polynomial time for witness checking",
+  "PCP.Machine.PolyTimeAlg": "Polynomial time for each step"
  },
  "notes": {
-  "PCP.Verifier.ImplementedBy": {
-   "text": "The left side unfolds alg with budget V.queries. At budget zero, a request for a further query becomes a rejecting leaf (CostModel.lean, lines 42 to 44, as the comment above ofStep says), so the equation compares V.run x r with this capped unfolding.",
+  "PCP.np_subset_pcp": {
+   "text": "For every language $L$ in NP for the concrete machine model, the formal statement supplies one verifier and one polynomial-time step algorithm. The verifier uses at most a fixed number $q$ of proof-bit queries, exactly $a\\lceil\\log_2(n+2)\\rceil+b$ random bits and addresses below a polynomial in $n$. Members have a proof accepted with certainty; every proof for a nonmember is accepted with probability at most $1/2$. The verifier, algorithm, constants and polynomial are fixed before the input is chosen; the proof may depend on it. Algorithm correspondence uses execution capped at the query bound.",
    "because": [
-    "implementation-prose",
-    "implementation-code"
+    "headline-statement",
+    "pcp-summary",
+    "clause-witnesses"
+   ]
+  },
+  "PCP.Language": {
+   "text": "A language is a set of finite binary strings. The formal definition describes it by the condition $x\\in L$, rather than by an algorithm for testing that condition. It therefore includes undecidable languages. Membership in NP is a further property, supplied by a bounded-witness characterization and a polynomial-time checker.",
+   "because": [
+    "language-code",
+    "language-prose",
+    "clause-hypothesis"
+   ]
+  },
+  "PCP.NPCertificate": {
+   "text": "A certificate that a language belongs to NP specifies a polynomial $p$ with natural-number coefficients and a Boolean checker for pairs $(x,w)$. The checker must satisfy the chosen time condition, and for every input $x$ one has $x\\in L$ exactly when some witness $w$ of length at most $p(|x|)$ is accepted. The time condition is still a parameter in this definition; the main theorem chooses the concrete machine model.",
+   "because": [
+    "np-certificate-code",
+    "np-certificate-prose",
+    "np-parameter-prose"
+   ]
+  },
+  "PCP.InNP": {
+   "text": "The formal definition says that a certificate with the preceding properties exists. Its content depends on the chosen condition on checkers: membership means that polynomially bounded witnesses characterize the language and that their checker satisfies that condition. In the main theorem the condition requires an actual finite multi-stack Turing machine with a polynomial running-time bound.",
+   "because": [
+    "in-np-code",
+    "np-parameter-prose",
+    "clause-hypothesis"
+   ]
+  },
+  "PCP.ProofOracle": {
+   "text": "The proof is an arbitrary infinite sequence of bits $\\pi(0),\\pi(1),\\ldots$. There is no assumption that this sequence can be computed. Finiteness of the relevant proof is expressed elsewhere: if all queried addresses are below $N$, only the first $N$ bits can affect acceptance. Completeness chooses such an oracle, while soundness quantifies over every oracle.",
+   "because": [
+    "proof-oracle-code",
+    "proof-oracle-prose"
+   ]
+  },
+  "PCP.QueryTree": {
+   "text": "A tree with bound $d$ makes at most $d$ adaptive bit queries on any path. A leaf already contains an accept-or-reject decision, and may appear before the bound is exhausted. An internal node names a proof address and has separate continuations for answers $0$ and $1$. The bound counts queries along one run, rather than the number of addresses appearing across the entire tree.",
+   "because": [
+    "query-tree-code",
+    "query-tree-prose",
+    "clause-query-bound"
+   ]
+  },
+  "PCP.QueryTree.eval": {
+   "text": "To evaluate a tree against a proof $\\pi$, read the bit at the root query address and take the corresponding branch. Repeat until reaching a leaf, whose Boolean value is the decision. The input tree already has a finite depth bound, so evaluation follows at most that many queries. Adaptivity means later addresses may depend on earlier proof bits.",
+   "because": [
+    "tree-evaluation-code",
+    "query-tree-prose"
+   ]
+  },
+  "PCP.QueryTree.addresses": {
+   "text": "The address set contains the address at every query node in the tree, on both branches at each split. It can contain more addresses than a single run reads, because different answer histories follow different branches. A proof-length bound is imposed by requiring every element of this set to lie below $N$, for every random string. Collecting the set alone does not impose that bound.",
+   "because": [
+    "tree-addresses-code",
+    "proof-bound-prose"
+   ]
+  },
+  "PCP.Verifier": {
+   "text": "A verifier specifies a natural-number random-bit budget for each input length, one fixed natural-number query bound, and a bounded adaptive decision tree for each input and random string. These data describe which bits are read and how acceptance is decided. They do not include an efficiency assertion or a computability requirement on the budget. The main theorem adds a prescribed budget, algorithm correspondence and polynomial running time.",
+   "because": [
+    "verifier-code",
+    "verifier-prose",
+    "efficiency-separate-prose"
+   ]
+  },
+  "PCP.Verifier.acceptingRandomness": {
+   "text": "Fix an input $x$ and a proof $\\pi$. The formal definition selects the random strings for which the associated decision tree accepts when evaluated against $\\pi$. If the budget is $k$ bits, these strings form a subset of the $2^k$ possible random strings. This is a set; the acceptance probability is defined separately by dividing its size by $2^k$.",
+   "because": [
+    "accepting-randomness-code",
+    "acceptance-probability-prose"
+   ]
+  },
+  "PCP.Verifier.accProb": {
+   "text": "For fixed $x$ and $\\pi$, acceptance probability is the number of accepting random strings divided by $2^k$, where $k$ is the budget at input length $|x|$. This is an exact rational probability under independent fair random bits. The denominator is positive even when $k=0$, in which case there is one empty random string and acceptance is deterministic.",
+   "because": [
+    "acceptance-probability-code",
+    "acceptance-probability-prose"
    ]
   },
   "PCP.Verifier.ReadsBelow": {
-   "text": "QueryTree.addresses (Definition.lean, lines 47 to 49) collects the address of every query node on both branches, so ReadsBelow bounds the addresses on every branch of every tree, whatever the answers along the way.",
+   "text": "The formal definition bounds all addresses in every tree for input $x$, for every random string and on both answer branches. Each address must be strictly less than $N$, so the relevant positions are $0,\\ldots,N-1$. The supplied congruence theorem shows that proofs agreeing on this prefix have identical acceptance probability. This expresses finite proof length while retaining infinite proof oracles.",
    "because": [
+    "reads-below-code",
     "proof-bound-prose",
-    "reads-below-code"
+    "clause-proof-bound"
    ]
   },
-  "PCP.QueryTree.ofStep": {
-   "text": "Builds the tree by running the step function on the answers so far. While budget remains, a decision gives a leaf and a request for address a gives a query node at a, whose two branches continue with that answer appended and one less query. At budget zero a request gives a rejecting leaf.",
+  "PCP.Verifier.CompleteAt": {
+   "text": "At a fixed input $x$, perfect completeness means that there exists a single proof $\\pi$ whose acceptance probability is $1$. The proof is chosen before the random string. Since the probability is uniform on a finite random space, this is equivalent to acceptance for every random string. The main theorem supplies this property for every input in the language.",
    "because": [
-    "implementation-prose"
+    "complete-at-code",
+    "completeness-prose",
+    "clause-completeness"
+   ]
+  },
+  "PCP.Verifier.SoundAt": {
+   "text": "At a fixed input $x$, soundness with error $s$ means that every proof $\\pi$ is accepted with probability at most $s$. The universal quantifier includes arbitrary malformed or inconsistent proofs. The definition permits a rational parameter $s$; the main theorem uses $s=1/2$ on every input outside the language. The definition itself does not identify which inputs are outside the language.",
+   "because": [
+    "sound-at-code",
+    "soundness-prose",
+    "clause-soundness"
+   ]
+  },
+  "PCP.Verifier.CanonicalRandomness": {
+   "text": "The budget must equal $a\\lceil\\log_2(n+2)\\rceil+b$ at every input length $n$, for fixed natural-number constants $a$ and $b$. This equality determines the entire budget. A mere upper bound would leave an arbitrary length-dependent choice: a budget of either zero or one bit could encode any predicate of $n$. The prescribed formula removes that freedom; polynomial running time is still a separate requirement.",
+   "because": [
+    "canonical-randomness-code",
+    "randomness-budget-prose",
+    "clause-randomness"
+   ]
+  },
+  "PCP.VerifierAlg": {
+   "text": "One step receives three finite binary strings: the input, the random bits and the answers to earlier proof queries, in their original order. It returns either a Boolean decision or a natural-number proof address to query next. The formal definition allows arbitrary such functions. Their computability and polynomial running time are imposed later, and their connection to a particular verifier requires a separate equality of bounded decision trees.",
+   "because": [
+    "verifier-algorithm-code",
+    "algorithm-step-prose",
+    "efficiency-separate-prose"
    ]
   },
   "PCP.bitsOfFin": {
-   "text": "Writes the random string's index r as exactly k bits, least significant bit first, so alg always receives k random bits.",
+   "text": "A random-string index $r$ satisfying $0\\le r<2^k$ is written as exactly $k$ bits, beginning with its least significant bit. Zero high-order bits are retained, so the length does not depend on the numerical value of $r$. Consequently the step algorithm receives precisely the verifier's prescribed number of random bits, including the empty string when $k=0$.",
    "because": [
+    "implementation-code",
     "algorithm-step-prose"
    ]
   },
-  "PCP.Machine.encodeTriple": {
-   "text": "The tape a verifier step reads: the input x, a separator, the random bits, a separator, then the answers so far.",
+  "PCP.QueryTree.ofStep": {
+   "text": "Given a step function, an answer history and a query budget $d$, the formal definition constructs a decision tree. A decision gives a leaf. If a query is requested while budget remains, its two branches append the possible answers and continue with one fewer query. At budget zero, a further query request becomes a rejecting leaf. The construction therefore always gives a bounded tree, even when the unrestricted step function would continue querying.",
    "because": [
-    "polytime-algorithm-code"
+    "implementation-code",
+    "implementation-prose"
    ]
   },
-  "PCP.Machine.encodeAnswer": {
-   "text": "How a step's result is written: a decision is one bit, and a query is a separator followed by the address in binary (Nat.bits).",
+  "PCP.Verifier.ImplementedBy": {
+   "text": "For every input and random string, the formal definition equates the verifier's tree with the tree obtained by unfolding the algorithm from an empty answer history, using the verifier's query bound. The random index is first converted into a fixed-length binary string. The cutoff matters: after the last permitted query, another request is replaced by rejection. Thus the equality concerns bounded execution; it does not by itself prove that unrestricted execution halts within that many queries.",
    "because": [
-    "polytime-algorithm-code"
-   ]
-  },
-  "PCP.Machine.encodeBool": {
-   "text": "How the witness checker's answer is written: a single bit.",
-   "because": [
-    "polytime-relation-code"
-   ]
-  },
-  "PCP.Machine.ofBits": {
-   "text": "Writes a bit string on the tape, one bit symbol per bit, in order.",
-   "because": [
-    "pair-encoding-prose"
+    "implementation-code",
+    "implementation-prose",
+    "clause-implementation"
    ]
   },
   "PCP.Machine.Sym": {
-   "text": "The tape alphabet: a bit, or a separator that marks where one argument ends and the next begins.",
+   "text": "The input alphabet has three symbols: a symbol for $0$, a symbol for $1$, and one separator distinct from either bit. The separator marks the boundary between arguments placed on a single input tape. With two arguments there is one separator; with three there are two. No delimiter can be confused with a data bit.",
    "because": [
-    "pair-encoding-prose"
+    "pair-encoding-prose",
+    "polytime-algorithm-code"
+   ]
+  },
+  "PCP.Machine.ofBits": {
+   "text": "The formal definition writes a binary string as a sequence of bit symbols in the machine's alphabet, preserving its order and length. It introduces no separators and no length prefix. Boundaries between arguments are handled by the pair and triple encodings, which insert separator symbols between the resulting sequences.",
+   "because": [
+    "pair-encoding-prose",
+    "polytime-relation-code"
+   ]
+  },
+  "PCP.Machine.encodePair": {
+   "text": "The pair $(x,w)$ is encoded by the symbols for $x$, followed by one separator and then the symbols for $w$. Its length is $|x|+|w|+1$, including the separator even when one string is empty. This is the input representation used when polynomial time is required for the witness-checking relation.",
+   "because": [
+    "pair-encoding-prose",
+    "polytime-relation-code"
+   ]
+  },
+  "PCP.Machine.encodeTriple": {
+   "text": "A verifier step receives the input $x$, random bits $r$ and previous answers $h$ in that order, with one separator between each successive pair. The encoded length is $|x|+|r|+|h|+2$. The polynomial running-time bound for a step is measured in this combined length, so the random string and answer history are included in the cost.",
+   "because": [
+    "polytime-algorithm-code",
+    "algorithm-step-prose"
+   ]
+  },
+  "PCP.Machine.encodeAnswer": {
+   "text": "A halt decision is encoded as one bit symbol. A request to query address $a$ is encoded as a separator followed by the binary digits of $a$. These representations distinguish a decision from an address and use binary, rather than unary, addresses. The formal polynomial-time condition counts the work needed to produce this encoded result.",
+   "because": [
+    "polytime-algorithm-code",
+    "algorithm-step-prose"
+   ]
+  },
+  "PCP.Machine.encodeBool": {
+   "text": "The result of a witness check is represented by a single bit symbol: acceptance or rejection. The formal definition introduces no separator or further data in this output. Together with the separated input-pair encoding, it fixes the concrete input and output representation used to measure polynomial time for the witness-checking relation.",
+   "because": [
+    "polytime-relation-code",
+    "np-certificate-prose"
+   ]
+  },
+  "PCP.Machine.PolyTimeRel": {
+   "text": "The formal definition requires a finite multi-stack Turing machine that computes the Boolean relation on input pairs $(x,w)$ within a fixed polynomial bound in $|x|+|w|+1$. The pair is written with one separator and the answer is a single bit. This concrete condition is the checker requirement chosen in the main theorem's definition of NP.",
+   "because": [
+    "polytime-relation-code",
+    "polynomial-time-prose",
+    "np-parameter-prose"
+   ]
+  },
+  "PCP.Machine.PolyTimeAlg": {
+   "text": "The formal definition requires a finite multi-stack Turing machine that computes one verifier step in polynomial time in the length of the encoded input, random string and answer history. A step outputs either a decision bit or a binary query address. This property alone does not connect the function to a particular verifier; the main theorem also requires equality with its bounded decision trees.",
+   "because": [
+    "polytime-algorithm-code",
+    "algorithm-time-prose",
+    "efficiency-separate-prose"
    ]
   }
  },

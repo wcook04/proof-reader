@@ -137,6 +137,186 @@
       "section": "4"
     }
   ],
+  "families": [
+    {
+      "id": "np-and-pcp",
+      "name": "NP and PCP"
+    },
+    {
+      "id": "polynomials-and-grids",
+      "name": "Polynomials and grids"
+    },
+    {
+      "id": "hadamard-encoding",
+      "name": "Hadamard encoding"
+    },
+    {
+      "id": "verifier-model-and-resources",
+      "name": "Verifier model and resources"
+    },
+    {
+      "id": "three-colouring-verifier",
+      "name": "Three-colouring verifier"
+    },
+    {
+      "id": "binary-low-degree-testing",
+      "name": "Binary low-degree testing"
+    },
+    {
+      "id": "local-correction-and-grid-testing",
+      "name": "Local correction and grid testing"
+    },
+    {
+      "id": "field-low-degree-testing",
+      "name": "Low-degree testing over fields"
+    }
+  ],
+  "topics": [
+    {
+      "id": "pcp-characterization",
+      "family": "np-and-pcp",
+      "name": "PCP theorem",
+      "description": "Polynomial-time verification with logarithmic randomness and a constant number of proof-bit queries characterizes NP."
+    },
+    {
+      "id": "polynomial-distance",
+      "family": "polynomials-and-grids",
+      "name": "Polynomial distance",
+      "description": "The Schwartz–Zippel bound limits the fraction of points where a nonzero polynomial vanishes."
+    },
+    {
+      "id": "grid-interpolation",
+      "family": "polynomials-and-grids",
+      "name": "Low-degree extension",
+      "description": "Interpolation represents a table on a grid by a unique polynomial with a degree bound in each variable."
+    },
+    {
+      "id": "hadamard-labels",
+      "family": "hadamard-encoding",
+      "name": "Labels and encoding",
+      "description": "Polynomial labels turn field values and their polynomial expressions into bits and distinguish full, affine and homogeneous observations."
+    },
+    {
+      "id": "verifier-model",
+      "family": "verifier-model-and-resources",
+      "name": "Verifier and query trees",
+      "description": "A verifier selects an adaptive query tree from its input and random seed, with explicit acceptance probabilities and proof-address bounds."
+    },
+    {
+      "id": "machine-implementation",
+      "family": "verifier-model-and-resources",
+      "name": "Polynomial-time implementation",
+      "description": "A finite multi-stack machine implements the verifier or witness checker with polynomial running time."
+    },
+    {
+      "id": "colouring-constraints",
+      "family": "three-colouring-verifier",
+      "name": "Colouring constraints",
+      "description": "Vertex values and edge differences satisfy polynomial equations exactly when they define a proper three-colouring."
+    },
+    {
+      "id": "vanishing-certificates",
+      "family": "polynomials-and-grids",
+      "name": "Vanishing certificates",
+      "description": "A polynomial vanishing on a grid admits a decomposition using the coordinate vanishing polynomials and a certificate expressed by two identities."
+    },
+    {
+      "id": "linearity-self-correction",
+      "family": "hadamard-encoding",
+      "name": "Linearity and self-correction",
+      "description": "Linearity testing finds a nearby linear word, and two randomly shifted queries recover a requested value with controlled error."
+    },
+    {
+      "id": "resource-bounds",
+      "family": "verifier-model-and-resources",
+      "name": "Queries, randomness and repetition",
+      "description": "Query counts, fair-bit sampling, proof length and independent repetition give the resource bounds and final soundness error."
+    },
+    {
+      "id": "proof-tables-checks",
+      "family": "three-colouring-verifier",
+      "name": "Proof tables and checks",
+      "description": "Four pairs of points and lines tables supply the answers read by four low-degree tests, two grid tests and a difference check."
+    },
+    {
+      "id": "binary-low-degree-test",
+      "family": "binary-low-degree-testing",
+      "name": "Binary low-degree test",
+      "description": "Small rejection gives one polynomial whose encoding is close to the points table on both full and homogeneous labels."
+    },
+    {
+      "id": "zero-on-grid-test",
+      "family": "local-correction-and-grid-testing",
+      "name": "Zero-on-grid test",
+      "description": "Corrected certificate queries test vanishing identities at prescribed points and relate failure on the grid to rejection."
+    },
+    {
+      "id": "colouring-guarantees",
+      "family": "three-colouring-verifier",
+      "name": "Completeness and soundness",
+      "description": "An honest colouring passes every check, while sufficiently small rejection forces four nearby polynomials to describe a proper colouring."
+    },
+    {
+      "id": "np-reduction",
+      "family": "np-and-pcp",
+      "name": "Reduction to three-colouring",
+      "description": "Accepting computations become finite constraints, Boolean clauses and graphs while preserving the existence of a witness."
+    },
+    {
+      "id": "np-witnesses",
+      "family": "np-and-pcp",
+      "name": "NP witness verification",
+      "description": "A language belongs to NP when membership is witnessed by a polynomial-length string accepted by a polynomial-time checker."
+    },
+    {
+      "id": "standard-low-degree-test",
+      "family": "field-low-degree-testing",
+      "name": "Standard low-degree test",
+      "description": "Weighted interpolation at generator powers tests low degree, with plurality correction turning small rejection into polynomial agreement."
+    },
+    {
+      "id": "field-local-correction",
+      "family": "local-correction-and-grid-testing",
+      "name": "Local correction over fields",
+      "description": "Random line queries recover a polynomial value at a prescribed point or bound the probability of accepting a wrong value."
+    },
+    {
+      "id": "bivariate-agreement",
+      "family": "field-low-degree-testing",
+      "name": "Bivariate agreement",
+      "description": "Agreement between low-degree row and column polynomials produces a nearby bivariate polynomial and consistent values at selected crossings."
+    },
+    {
+      "id": "point-line-test",
+      "family": "field-low-degree-testing",
+      "name": "Point-versus-line test",
+      "description": "Agreement with supplied line polynomials at random points yields one nearby polynomial of bounded total degree."
+    },
+    {
+      "id": "set-multilinear-encoding",
+      "family": "binary-low-degree-testing",
+      "name": "Set-multilinear encoding",
+      "description": "Writing exponents in a fixed number of base digits replaces a line polynomial by a polynomial of fixed total degree."
+    },
+    {
+      "id": "hadamard-testing",
+      "family": "hadamard-encoding",
+      "name": "Hadamard test",
+      "description": "Linearity, unit, product and affine consistency checks test whether a word is close to the encoding of one field value."
+    },
+    {
+      "id": "inner-low-degree-test",
+      "family": "binary-low-degree-testing",
+      "name": "Inner low-degree test",
+      "description": "A random choice between Hadamard testing and a binary weighted identity tests one encoded line entry for low degree."
+    },
+    {
+      "id": "binary-local-correction",
+      "family": "local-correction-and-grid-testing",
+      "name": "Local correction on bits",
+      "description": "Weighted bit queries and tests of encoded line entries recover a homogeneous observation at a prescribed point, allowing rejection."
+    }
+  ],
   "passages": [
     {
       "id": "pcp-short-abstract",
@@ -149,7 +329,15 @@
       "anchor": {
         "heading": "Abstract",
         "block": 2
-      }
+      },
+      "topic": "pcp-characterization",
+      "comparisons": [
+        {
+          "lean": "PCP.np_subset_pcp",
+          "fidelity": "stronger",
+          "note": "The paper states logarithmic randomness and constant bit queries. The formal statement additionally fixes the exact budget $\\alpha\\lceil\\log_2(n+2)\\rceil+\\beta$ and a polynomial bound on every queried proof address, with one implemented verifier for the whole language."
+        }
+      ]
     },
     {
       "id": "pcp-short-theorem",
@@ -162,7 +350,15 @@
       "anchor": {
         "heading": "1. Introduction",
         "block": 4
-      }
+      },
+      "topic": "pcp-characterization",
+      "comparisons": [
+        {
+          "lean": "PCP.np_subset_pcp",
+          "fidelity": "same",
+          "note": "The formal statement gives one proof accepted with probability one for each yes-instance, and bounds every proof’s acceptance probability by $1/2$ on every no-instance. Since the random seed space is finite and uniform, probability one means acceptance for every seed."
+        }
+      ]
     },
     {
       "id": "pcp-short-colour-constraints",
@@ -170,12 +366,65 @@
       "role": "explains",
       "quote": "**Lemma 2.1 (colouring constraints).** The restriction $P|_{H^m}$ is a proper colouring of the padded graph exactly when $A_P|_{H^m}=0$ and $B_P|_{H^{2m}}=0$, and $Q_P,A_P,B_P$ have degrees at most $d_0,3d_0,5d_0$.",
       "lean": [
-        "PCP.Algebraic.ThreeColorGrid.colorable_iff_exists_constraints"
+        "PCP.Algebraic.ThreeColorGrid.colorable_iff_exists_constraints",
+        "PCP.Algebraic.ThreeColorGrid.constraints_iff_satisfies",
+        "PCP.Algebraic.ThreeColorGrid.totalDegree_validPolynomial_le",
+        "PCP.Algebraic.ThreeColorGrid.totalDegree_edgeExtension_le",
+        "PCP.Algebraic.ThreeColorGrid.totalDegree_properPolynomial_le"
       ],
       "anchor": {
         "heading": "2. Preliminaries",
         "block": 10
-      }
+      },
+      "topic": "colouring-constraints",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.ThreeColorGrid.colorable_iff_exists_constraints",
+          "fidelity": "different",
+          "note": "The paper describes a fixed $P$ and bounds the degrees of $Q_P,A_P,B_P$. The formal statement instead equates graph three-colourability with the existence of some $P$ of degree at most $d_0$ satisfying both grid equations; it does not state the fixed-$P$ equivalence or those three degree bounds."
+        },
+        {
+          "lean": "PCP.Algebraic.ThreeColorGrid.constraints_iff_satisfies",
+          "fidelity": "weaker",
+          "note": "For the given polynomial $P$, the formal statement proves that $A_P$ vanishes on $H^m$ and $B_P$ on $H^{2m}$ exactly when the grid values of $P$ satisfy $x^3=1$ at every vertex and $(P(a)-P(b))^3=1$ on every edge. That these equations describe a proper colouring is a separate step, and the degree bounds are separate statements."
+        },
+        {
+          "lean": "PCP.Algebraic.ThreeColorGrid.totalDegree_validPolynomial_le",
+          "fidelity": "weaker",
+          "note": "The formal statement bounds the degree of $A_P$ by three times the degree of $P$, which gives $3d_0$ when $\\deg P\\le d_0$. It is one of the lemma's three degree bounds."
+        },
+        {
+          "lean": "PCP.Algebraic.ThreeColorGrid.totalDegree_edgeExtension_le",
+          "fidelity": "weaker",
+          "note": "The formal statement bounds the degree of the interpolated adjacency polynomial by $2m(h-1)=2d_0$. This is an input to the bound $5d_0$ for $B_P$, not a bound the lemma states."
+        },
+        {
+          "lean": "PCP.Algebraic.ThreeColorGrid.totalDegree_properPolynomial_le",
+          "fidelity": "weaker",
+          "note": "The formal statement bounds the degree of $B_P$ by the degree of the adjacency polynomial plus three times that of $Q_P$. With the bound $2d_0$ above and $\\deg Q_P\\le d_0$ this gives $5d_0$; the bound on $Q_P$ itself is not among the statements tied here."
+        }
+      ]
+    },
+    {
+      "id": "pcp-short-digit-evaluation",
+      "section": "3",
+      "role": "states",
+      "quote": "$$\n\\Psi(T)(\\Phi(z))\n=\\sum_{j<b^c}t_jz^{\\sum_i j_i b^i}=T(z).\n\\tag{4}\n$$",
+      "lean": [
+        "PCP.Algebraic.SetMultilinear.eval_encode"
+      ],
+      "anchor": {
+        "heading": "3. Set-multilinear and Hadamard encodings",
+        "block": 5
+      },
+      "topic": "set-multilinear-encoding",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.SetMultilinear.eval_encode",
+          "fidelity": "stronger",
+          "note": "The formal statement gives $\\Psi(T)(\\Phi(z))=T(z)$ at every $z$ when $\\deg T<b^c$ and $b\\ge1$. It holds over any commutative semiring of coefficients; the field and finiteness assumptions in the paper are unnecessary for this identity."
+        }
+      ]
     },
     {
       "id": "pcp-short-weighted-test",
@@ -188,20 +437,36 @@
       "anchor": {
         "heading": "4. Low-degree tests over the binary alphabet",
         "block": 7
-      }
+      },
+      "topic": "standard-low-degree-test",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.GeneratorLowDegreeTest.exists_close",
+          "fidelity": "stronger",
+          "note": "The formal statement proves the same $2\\delta$ distance bound under $q>2c$ and $\\delta<1/[2(c+2)^2]$, using generator powers and Lagrange weights. It applies over every finite field, whereas the paper works throughout in characteristic two."
+        }
+      ]
     },
     {
       "id": "pcp-short-binary-decoding",
       "section": "4",
       "role": "explains",
-      "quote": "If $q>2c$ and the test rejects with probability $\\kappa$, some polynomial $U$ of total degree at most $c$ satisfies",
+      "quote": "$$\n\\Delta_{\\rm full}(w,\\mathcal H_r(U)),\\quad\n\\Delta_{\\rm hom}(w,\\mathcal H_r(U))\\le K\\kappa,\n\\qquad K=4(c+2)^2\\bigl(112(c+2)+60\\bigr).\n\\tag{11}\n$$",
       "lean": [
         "PCP.Algebraic.BinaryLocalRowDecoding.exists_polynomial_distance_le"
       ],
       "anchor": {
         "heading": "4. Low-degree tests over the binary alphabet",
-        "block": 16
-      }
+        "block": 17
+      },
+      "topic": "inner-low-degree-test",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.BinaryLocalRowDecoding.exists_polynomial_distance_le",
+          "fidelity": "same",
+          "note": "The display bounds both the full-label and the homogeneous-label distance of $w$ from $\\mathcal H_r(U)$ by $K\\kappa$, with $K=4(c+2)^2(112(c+2)+60)$. Under $q>2c$, generator nodes and $r\\ge1$, the formal statement proves that some $U$ of total degree at most $c$ satisfies both bounds, with no small-rejection hypothesis."
+        }
+      ]
     },
     {
       "id": "pcp-short-outer-decoding",
@@ -214,20 +479,36 @@
       "anchor": {
         "heading": "4. Low-degree tests over the binary alphabet",
         "block": 30
-      }
+      },
+      "topic": "binary-low-degree-test",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.EncodedLineLowDegreeTest.exists_close",
+          "fidelity": "same",
+          "note": "With $D=cb^c$, $q\\ge10^6D^3$ and $J\\kappa\\le1/(4\\cdot10^6)$, the formal statement supplies one degree-at-most-$D$ polynomial satisfying both distance bounds $S\\kappa$. The second bound averages homogeneous linear labels, not all affine labels; the lines table is arbitrary."
+        }
+      ]
     },
     {
       "id": "pcp-short-outer-correction",
       "section": "5",
       "role": "explains",
-      "quote": "If the local corrector rejects at $a$ with probability $\\kappa_a$, the probability over all its randomness, $L$ included, of rejection or a returned bit other than $L(P(a))$ satisfies",
+      "quote": "$$\n\\Pr[\\text{failure at }a]\n\\le C \\kappa_a+\\delta+\\frac{D}{2(q-1)},\n\\qquad C=2+2(c+1)K.\n\\tag{14}\n$$",
       "lean": [
         "PCP.Algebraic.BinaryLocalCorrection.failure_le"
       ],
       "anchor": {
         "heading": "5. Local correction and the zero-on-grid test",
-        "block": 4
-      }
+        "block": 5
+      },
+      "topic": "binary-local-correction",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.BinaryLocalCorrection.failure_le",
+          "fidelity": "same",
+          "note": "The display bounds the probability of rejection or a wrong returned bit at $a$ by $C\\kappa_a+\\delta+D/[2(q-1)]$, with $C=2+2(c+1)K$. The formal statement proves this bound, averaged over all the corrector's randomness including the label, for $P$ of degree at most $D\\ge cb^c$ within homogeneous distance $\\delta$, under $q>2c$ and the node conditions."
+        }
+      ]
     },
     {
       "id": "pcp-short-zero",
@@ -240,7 +521,15 @@
       "anchor": {
         "heading": "5. Local correction and the zero-on-grid test",
         "block": 13
-      }
+      },
+      "topic": "zero-on-grid-test",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.BinaryZeroOnGridCorrection.rejectionRate_lower_bound",
+          "fidelity": "same",
+          "note": "The formal statement gives exactly (15): $(1-Dh/q)/2\\le(1+2C)\\kappa+\\delta_A+2\\delta_M+D/(q-1)$. It assumes a nonempty grid, $q>2c$, degree bounds for both polynomials, $D\\ge cb^c$, and global homogeneous-distance bounds; the certificate’s lines table is arbitrary."
+        }
+      ]
     },
     {
       "id": "linked-source-12",
@@ -248,12 +537,26 @@
       "role": "explains",
       "quote": "For completeness, a proper colouring, its low-degree extension, exact vanishing certificates and honest lines tables, with degrees below $b^c$, pass every check for every seed: one fixed eight-table proof with perfect completeness.",
       "lean": [
-        "PCP.Algebraic.ThreeColorVerifier.exists_proof_test_eq_true"
+        "PCP.Algebraic.ThreeColorVerifier.exists_proof_test_eq_true",
+        "PCP.Algebraic.ThreeColorVerifier.test_honestProof"
       ],
       "anchor": {
         "heading": "6. Soundness of the verifier",
         "block": 13
-      }
+      },
+      "topic": "colouring-guarantees",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.ThreeColorVerifier.exists_proof_test_eq_true",
+          "fidelity": "weaker",
+          "note": "The paper describes acceptance of the specified honest proof whenever its actual polynomial degrees are below $b^c$. The cited formal statement proves existence of an accepting proof under the stronger sufficient condition $5m(h-1)<b^c$; the direct theorem for the specified honest proof is a better tie."
+        },
+        {
+          "lean": "PCP.Algebraic.ThreeColorVerifier.test_honestProof",
+          "fidelity": "stronger",
+          "note": "The formal statement proves that the honest eight-table proof built from $P$ and two vanishing certificates passes every check on every seed, when $P$ and both certificates have degree below $b^c$ and the nodes are distinct, with distinct nonzero correction nodes. It assumes the certificates directly, so it does not require $P$ to extend a colouring."
+        }
+      ]
     },
     {
       "id": "linked-source-13",
@@ -266,7 +569,15 @@
       "anchor": {
         "heading": "7. Resources, implementation and the reverse inclusion",
         "block": 10
-      }
+      },
+      "topic": "resource-bounds",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.ThreeColorAmplifiedVerifier.verification_guarantees",
+          "fidelity": "different",
+          "note": "The paper states the gap before repetition and its amplification. The formal statement gives the final verifier’s completeness, error $1/2$, polynomial address bound, $187R$ queries and exact randomness $32000000R(\\lceil\\log_2(n+2)\\rceil+1)$ for the construction’s chosen positive repetition count $R$; it does not state the preceding gap calculation."
+        }
+      ]
     },
     {
       "id": "pcp-short-complexity",
@@ -279,7 +590,15 @@
       "anchor": {
         "heading": "7. Resources, implementation and the reverse inclusion",
         "block": 13
-      }
+      },
+      "topic": "machine-implementation",
+      "comparisons": [
+        {
+          "lean": "PCP.Lang.ThreeColorRuntime.polyTimeAlg",
+          "fidelity": "weaker",
+          "note": "The paper specifies bounded field and root searches and their machine implementation. The formal statement establishes polynomial running time for the concrete amplified graph-verification algorithm; the particular search and compilation procedures occur in imported constructions, rather than in this statement."
+        }
+      ]
     },
     {
       "id": "linked-source-14",
@@ -292,7 +611,15 @@
       "anchor": {
         "heading": "7. Resources, implementation and the reverse inclusion",
         "block": 17
-      }
+      },
+      "topic": "pcp-characterization",
+      "comparisons": [
+        {
+          "lean": "PCP.pcp_subset_np_concrete",
+          "fidelity": "same",
+          "note": "The formal statement derives NP membership from a polynomial-time implemented verifier, the exact logarithmic randomness budget, polynomially bounded proof addresses, perfect completeness and error $1/2$. These are precisely the assumptions used by the paper’s finite-prefix and random-seed enumeration argument."
+        }
+      ]
     },
     {
       "id": "pcp-short-derived-zero",
@@ -309,7 +636,15 @@
         "heading": "5. Local correction and the zero-on-grid test",
         "block": 20
       },
-      "section": "5"
+      "section": "5",
+      "topic": "zero-on-grid-test",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.DerivedZeroOnGrid.rejectionRate_lower_bound",
+          "fidelity": "same",
+          "note": "The formal statement gives (16), with the primary table’s full-label error $\\epsilon$ entering as $2\\epsilon$ inside $(1+2C)(\\kappa+2\\epsilon)$. It allows a point-dependent polynomial transformation of degree at most $r$, covering both $u^3-1$ and $E(x)(u^3-1)$."
+        }
+      ]
     },
     {
       "id": "pcp-short-reference-np",
@@ -322,7 +657,15 @@
         "heading": "Formalization and sources",
         "block": 2
       },
-      "section": "Formalization and sources"
+      "section": "Formalization and sources",
+      "topic": "np-witnesses",
+      "comparisons": [
+        {
+          "lean": "PCP.ReferenceNP.inNP_iff_mem",
+          "fidelity": "same",
+          "note": "The formal statement identifies languages with concrete polynomial-time witness checkers and polynomial witness bounds with the reference NP class, in both directions. No additional machine-simulation assumption is supplied by the reader."
+        }
+      ]
     },
     {
       "id": "pcp-short-reference-np-context",
@@ -335,7 +678,15 @@
         "heading": "1. Introduction",
         "block": 2
       },
-      "section": "1"
+      "section": "1",
+      "topic": "np-witnesses",
+      "comparisons": [
+        {
+          "lean": "PCP.ReferenceNP.inNP_iff_mem",
+          "fidelity": "different",
+          "note": "The paper’s phrase assumes that $\\mathcal L$ belongs to NP. The formal statement instead proves that two definitions of NP describe exactly the same languages; it explains the meaning of the hypothesis but does not assert membership for an arbitrary language."
+        }
+      ]
     },
     {
       "id": "pcp-short-proof-table-type",
@@ -348,13 +699,21 @@
       "anchor": {
         "heading": "3. Set-multilinear and Hadamard encodings",
         "block": 29
-      }
+      },
+      "topic": "proof-tables-checks",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.ThreeColorVerifier.Proof",
+          "fidelity": "same",
+          "note": "The formal definition specifies four received points tables and their four lines tables. The points tables use cubic labels for the colouring and its difference, and affine labels for the two certificates; the definition permits arbitrary received bits, as required for soundness."
+        }
+      ]
     },
     {
       "id": "pcp-short-query-type",
       "section": "3",
       "role": "uses",
-      "quote": "An address is a point $x$ and a label $R\\in\\mathcal B_r$; an honest table stores $R(\\rho(u))$ for the encoded value $u$.",
+      "quote": "An address is a point $x$ and a label $R\\in\\mathcal B_r$;",
       "lean": [
         "PCP.Algebraic.ThreeColorVerifier.Query",
         "PCP.Algebraic.ThreeColorVerifier.read"
@@ -362,7 +721,41 @@
       "anchor": {
         "heading": "3. Set-multilinear and Hadamard encodings",
         "block": 31
-      }
+      },
+      "topic": "proof-tables-checks",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.ThreeColorVerifier.Query",
+          "fidelity": "different",
+          "note": "The paper describes a points-table address as a point and a label. The formal definition describes addresses in all eight tables: it names the table and, for a lines table, adds a line and an inner point. A points-table address is the special case the sentence describes."
+        },
+        {
+          "lean": "PCP.Algebraic.ThreeColorVerifier.read",
+          "fidelity": "different",
+          "note": "The formal definition returns the bit that a received proof, honest or not, stores at a given address. The sentence only says what an address consists of; it does not describe reading."
+        }
+      ]
+    },
+    {
+      "id": "pcp-short-honest-value",
+      "section": "3",
+      "role": "explains",
+      "quote": "an honest table stores $R(\\rho(u))$ for the encoded value $u$.",
+      "lean": [
+        "PCP.Algebraic.ThreeColorVerifier.honestProof"
+      ],
+      "anchor": {
+        "heading": "3. Set-multilinear and Hadamard encodings",
+        "block": 31
+      },
+      "topic": "proof-tables-checks",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.ThreeColorVerifier.honestProof",
+          "fidelity": "same",
+          "note": "The formal definition builds the honest eight-table proof. Each points table holds at $x$ the encoding of $\\rho(u)$, where $u$ is the value at $x$ of that table's polynomial, so its bit at label $R$ is $R(\\rho(u))$; each lines table holds the encoded line restrictions."
+        }
+      ]
     },
     {
       "id": "pcp-short-forward-statement",
@@ -375,7 +768,15 @@
       "anchor": {
         "heading": "1. Introduction",
         "block": 2
-      }
+      },
+      "topic": "pcp-characterization",
+      "comparisons": [
+        {
+          "lean": "PCP.np_subset_pcp",
+          "fidelity": "same",
+          "note": "For each NP language, the formal statement supplies a verifier, its polynomial-time implementation, fixed natural-number resource constants and one polynomial proof-address bound. The constants and implementation are chosen before the input, as the theorem requires."
+        }
+      ]
     },
     {
       "id": "pcp-short-concrete-reference-np",
@@ -388,7 +789,15 @@
       "anchor": {
         "heading": "Formalization and sources",
         "block": 2
-      }
+      },
+      "topic": "np-witnesses",
+      "comparisons": [
+        {
+          "lean": "PCP.ReferenceNP.inNP_iff_mem",
+          "fidelity": "same",
+          "note": "The formal statement equates the concrete polynomial-witness definition of NP with the reference nondeterministic-machine definition, for every binary language. Both directions are conclusions, not assumed simulations."
+        }
+      ]
     },
     {
       "id": "pcp-short-vanishing-certificate",
@@ -401,7 +810,15 @@
         "heading": "2. Preliminaries",
         "block": 14
       },
-      "section": "2"
+      "section": "2",
+      "topic": "vanishing-certificates",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.GridVanishing.vanishesOn_iff_exists_certificate",
+          "fidelity": "different",
+          "note": "The selected words stop before the certificate identities. The formal statement equates grid vanishing with a certificate of degree at most $\\deg A$ satisfying $M(X,0)=0$ and $M(X,Z_H(X))=A(X)$; include (2), and note that the formal result works over any integral domain when $H$ is nonempty."
+        }
+      ]
     },
     {
       "id": "pcp-short-point-line",
@@ -414,114 +831,352 @@
         "heading": "4. Low-degree tests over the binary alphabet",
         "block": 25
       },
-      "section": "4"
+      "section": "4",
+      "topic": "point-line-test",
+      "comparisons": [
+        {
+          "lean": "PCP.Algebraic.PointLineTest.exists_close_of_small_rejection",
+          "fidelity": "stronger",
+          "note": "The formal statement gives the same $2\\theta$ distance bound under $q\\ge10^6D^3$ and $\\theta\\le1/(4\\cdot10^6)$. It holds over every finite field, includes degree zero and zero-dimensional domains, and does not require consistency among different indices of the same line."
+        }
+      ]
     }
   ],
   "plain": {
-    "PCP.np_subset_pcp": "The forward PCP theorem",
-    "PCP.Algebraic.ThreeColorGrid.constraints_iff_satisfies": "Colouring constraints on the grid",
-    "PCP.Algebraic.SetMultilinear.eval_encode": "Set-multilinear encoding: evaluation",
-    "PCP.Algebraic.GeneratorLowDegreeTest.exists_close": "Standard low-degree test",
-    "PCP.Algebraic.BinaryLocalRowDecoding.exists_polynomial_distance_le": "Inner low-degree test",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.exists_close": "Binary low-degree test",
-    "PCP.Algebraic.BinaryLocalCorrection.failure_le": "Local correction error bound",
-    "PCP.Algebraic.BinaryZeroOnGridCorrection.rejectionRate_ge": "Soundness of the grid test",
-    "PCP.Algebraic.ThreeColorFields.chosen_parameters": "Choosing field parameters",
-    "PCP.Reduction.NPThreeColorRuntime.of_inNP_program": "Reducing NP to three-colouring",
-    "PCP.Algebraic.ThreeColorVerifier.exists_proof_rejectionRate_eq_zero": "A proof for a proper colouring",
-    "PCP.Algebraic.ThreeColorAmplifiedVerifier.verification_guarantees": "Verifier resource and soundness bounds",
-    "PCP.pcp_subset_np_concrete": "The converse PCP theorem",
-    "PCP.Algebraic.GridVanishing.vanishesOn_iff_exists_certificate": "A certificate for grid vanishing",
-    "PCP.Algebraic.PointLineTest.exists_close_of_small_rejection": "Point and line agreement",
-    "PCP.Language": "Binary languages",
-    "PCP.NPCertificate": "NP certificates",
-    "PCP.InNP": "Membership of NP",
-    "PCP.ProofOracle": "Proof bits",
-    "PCP.QueryTree": "Bounded query trees",
-    "PCP.QueryTree.eval": "Run a query tree",
-    "PCP.QueryTree.addresses": "Addresses in a query tree",
-    "PCP.Verifier": "Oracle verifiers",
-    "PCP.Verifier.acceptingRandomness": "Accepting random strings",
-    "PCP.Verifier.accProb": "Acceptance probability",
-    "PCP.Verifier.ReadsBelow": "Bound the proof addresses",
-    "PCP.Verifier.CompleteAt": "Perfect completeness at an input",
-    "PCP.Verifier.SoundAt": "Soundness at an input",
-    "PCP.Verifier.CanonicalRandomness": "Exact logarithmic randomness",
-    "PCP.VerifierAlg": "The next verifier step",
-    "PCP.bitsOfFin": "A random index as bits",
-    "PCP.QueryTree.ofStep": "Build a bounded query tree",
-    "PCP.Verifier.ImplementedBy": "Match the algorithm to the tree",
-    "PCP.Machine.Sym": "Tape symbols",
-    "PCP.Machine.ofBits": "Write bits as tape symbols",
-    "PCP.Machine.encodePair": "Encode two bit strings",
-    "PCP.Machine.encodeTriple": "Encode three bit strings",
-    "PCP.Machine.encodeAnswer": "Encode a verifier response",
-    "PCP.Machine.encodeBool": "Encode a Boolean result",
-    "PCP.Machine.PolyTimeRel": "Polynomial time for a relation",
-    "PCP.Machine.PolyTimeAlg": "Polynomial time for one step",
-    "PCP.Algebraic.ThreeColorGrid.colorable_iff_exists_constraints": "Grid constraints and colouring",
-    "PCP.Algebraic.ThreeColorParameterChoice.volume_le_log_add_one": "Logarithmic parameter volume",
-    "PCP.Lang.ThreeColorRuntime.polyTimeAlg": "Polynomial-time graph verifier",
-    "PCP.Algebraic.ThreeColorVerifier.exists_proof_test_eq_true": "The honest verifier always accepts",
-    "PCP.Algebraic.BinaryZeroOnGridCorrection.rejectionRate_lower_bound": "Zero-on-grid rejection lower bound",
-    "PCP.Algebraic.GridVanishing.vanishesOn_iff_exists_decomposition": "Grid vanishing decomposition",
-    "PCP.Algebraic.DerivedZeroOnGrid.rejectionRate_lower_bound": "Grid test with self-corrected reads",
-    "PCP.ReferenceNP.inNP_iff_mem": "Equivalence with reference NP",
-    "PCP.Algebraic.SetMultilinear.evaluationPoint": "The substitution point for a parameter",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.Auxiliary": "Lines-table type",
-    "PCP.Algebraic.ThreeColorVerifier.Proof": "The eight proof tables",
-    "PCP.Algebraic.ThreeColorVerifier.Query": "Eight physical query tags",
-    "PCP.Algebraic.ThreeColorVerifier.read": "Read a tagged proof bit",
-    "PCP.Algebraic.BinaryLocalCorrection.soundnessConstant": "Loss constant of local correction",
-    "PCP.Algebraic.BinaryLocalCorrection.rejectionRate": "Rejection rate of local correction",
-    "PCP.Algebraic.BinaryLocalRowDecoding.decodingConstant": "Inner low-degree test constant",
-    "PCP.Algebraic.DerivedZeroOnGrid.GridRandomness": "Grid-test randomness besides the point",
-    "PCP.Algebraic.DerivedZeroOnGrid.TestSample": "Randomness of the grid test with reads",
-    "PCP.Algebraic.DerivedZeroOnGrid.gridSeed": "Drop the fresh correction seed",
-    "PCP.Algebraic.DerivedZeroOnGrid.withPrimaryBit": "Grid test given its constraint bit",
-    "PCP.Algebraic.DerivedZeroOnGrid.check": "The grid check with self-corrected reads",
-    "PCP.Algebraic.DerivedZeroOnGrid.instFintypeInnerPoint": "Finitely many inner points (grid test)",
-    "PCP.Algebraic.DerivedZeroOnGrid.instFintypeInnerSeed": "Finitely many inner seeds (grid test)",
-    "PCP.Algebraic.DerivedZeroOnGrid.instFintypeCallSeedSumFin": "Finitely many call seeds (grid test)",
-    "PCP.Algebraic.DerivedZeroOnGrid.instFintypeGridRandomness": "Finitely many grid seeds (grid test)",
-    "PCP.Algebraic.DerivedZeroOnGrid.rejectionRate": "Rejection rate of the grid test",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.lineErrorConstant": "Line error factor of the line test",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.soundnessConstant": "Distance factor of the binary test",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.Lines": "Lines as point and direction",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.Sample": "Randomness of the binary low-degree test",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.corrected": "Corrected comparison bit",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.test": "The binary low-degree test",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.instFintypeInnerPoint": "Finitely many inner points (line test)",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.instFintypeInnerSeed": "Finitely many inner seeds (line test)",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.instFintypeProdTestRandomnessInnerSeed": "Finitely many seed pairs (line test)",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.instFintypeSample": "Finitely many samples (line test)",
-    "PCP.Algebraic.EncodedLineLowDegreeTest.rejectionRate": "Rejection rate of the binary test",
-    "PCP.Algebraic.GeneratorLowDegreeTest.nodes": "Powers of the generator as nodes",
-    "PCP.Algebraic.GeneratorLowDegreeTest.weights": "Lagrange weights at zero",
-    "PCP.Algebraic.GeneratorLowDegreeTest.IsGeneratorNodes": "Nodes from a primitive root",
-    "PCP.Algebraic.GeneratorLowDegreeTest.rejectionRate": "Standard low-degree test rejection rate",
-    "PCP.Algebraic.GridVanishing.VanishesOn": "Vanishing on the grid",
-    "PCP.Algebraic.SetMultilinear.Variables": "Set-multilinear encoding variables",
-    "PCP.Algebraic.ThreeColorAmplifiedVerifier.repetitions": "Fixed repetition count",
-    "PCP.Algebraic.ThreeColorAmplifiedVerifier.verifier": "The amplified verifier",
-    "PCP.Algebraic.ThreeColorGrid.validPolynomial": "Vertex constraint polynomial",
-    "PCP.Algebraic.ThreeColorGrid.properPolynomial": "Edge constraint polynomial",
-    "PCP.Algebraic.ThreeColorGrid.edgeExtension": "Low-degree extension of the edges",
-    "PCP.Algebraic.ThreeColorVerifier.Vertex": "Points for one vertex",
-    "PCP.Algebraic.ThreeColorVerifier.PairPoint": "Points for a pair of vertices",
-    "PCP.Algebraic.ThreeColorVerifier.ProperPoint": "Points for the edge certificate",
-    "PCP.Algebraic.ThreeColorVerifier.flatten": "Flattening two vertex blocks",
-    "PCP.Algebraic.ThreeColorVerifier.edgeValue": "Adjacency extension at a point",
-    "PCP.Algebraic.ThreeColorVerifier.flatDifference": "Difference table on flat coordinates",
-    "PCP.Algebraic.ThreeColorVerifier.validAuxiliary": "Lines tables for the vertex certificate",
-    "PCP.Algebraic.ThreeColorVerifier.properAuxiliary": "Lines tables for the edge certificate",
-    "PCP.Algebraic.ThreeColorVerifier.BranchSeed": "Seven branch seed types",
-    "PCP.Algebraic.ThreeColorVerifier.Sample": "Randomness of the graph verifier",
-    "PCP.Algebraic.ThreeColorVerifier.branchTest": "Seven concrete branch tests",
-    "PCP.Algebraic.ThreeColorVerifier.test": "Conjunction of the seven checks",
-    "PCP.Algebraic.GridVanishing.IsCertificate": "Conditions for a vanishing certificate",
-    "PCP.Algebraic.GridVanishing.coordinate": "Vanishing polynomial of one coordinate",
-    "PCP.Algebraic.GridVanishing.substitute": "Substitute into the second block"
+    "PCP.np_subset_pcp": "Constant-query verification for NP",
+    "PCP.Algebraic.ThreeColorGrid.constraints_iff_satisfies": "Grid vanishing matches colouring",
+    "PCP.Algebraic.SetMultilinear.eval_encode": "Encoding preserves evaluations",
+    "PCP.Algebraic.GeneratorLowDegreeTest.exists_close": "Low rejection gives polynomial proximity",
+    "PCP.Algebraic.BinaryLocalRowDecoding.exists_polynomial_distance_le": "A nearby inner polynomial",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.exists_close": "One polynomial fits both label sets",
+    "PCP.Algebraic.BinaryLocalCorrection.failure_le": "Failure bound for binary correction",
+    "PCP.Algebraic.BinaryZeroOnGridCorrection.rejectionRate_ge": "Rejection bound off the zero set",
+    "PCP.Algebraic.ThreeColorFields.chosen_parameters": "Finite fields with required roots",
+    "PCP.Reduction.NPThreeColorRuntime.of_inNP_program": "Polynomial reduction, NP to 3-colouring",
+    "PCP.Algebraic.ThreeColorVerifier.exists_proof_rejectionRate_eq_zero": "Colourings yield zero-rejection proofs",
+    "PCP.Algebraic.ThreeColorAmplifiedVerifier.verification_guarantees": "Amplified verifier with error $1/2$",
+    "PCP.pcp_subset_np_concrete": "Efficient PCP verification implies NP",
+    "PCP.Algebraic.GridVanishing.vanishesOn_iff_exists_certificate": "Bounded-degree vanishing certificates",
+    "PCP.Algebraic.PointLineTest.exists_close_of_small_rejection": "Point-versus-line test gives proximity",
+    "PCP.Language": "Languages of binary strings",
+    "PCP.NPCertificate": "Polynomial-length witnesses and checker",
+    "PCP.InNP": "NP relative to a checking model",
+    "PCP.ProofOracle": "An infinite string of proof bits",
+    "PCP.QueryTree": "Decision trees with bounded query depth",
+    "PCP.QueryTree.eval": "Evaluating a proof-query decision tree",
+    "PCP.QueryTree.addresses": "Proof addresses across every branch",
+    "PCP.Verifier": "Randomized proof-bit verification",
+    "PCP.Verifier.acceptingRandomness": "Seeds accepting a fixed proof",
+    "PCP.Verifier.accProb": "Fraction of random seeds accepting",
+    "PCP.Verifier.ReadsBelow": "All proof addresses below a bound",
+    "PCP.Verifier.CompleteAt": "One proof accepted on every seed",
+    "PCP.Verifier.SoundAt": "Every proof has bounded acceptance",
+    "PCP.Verifier.CanonicalRandomness": "The exact logarithmic seed length",
+    "PCP.VerifierAlg": "Next query or final verdict",
+    "PCP.bitsOfFin": "Binary expansion of a seed index",
+    "PCP.QueryTree.ofStep": "Query truncation, rejecting on overflow",
+    "PCP.Verifier.ImplementedBy": "Algorithm and query-tree agreement",
+    "PCP.Machine.Sym": "Bits and separators for machine inputs",
+    "PCP.Machine.ofBits": "Representing input bits as symbols",
+    "PCP.Machine.encodePair": "Two strings separated by a delimiter",
+    "PCP.Machine.encodeTriple": "Three strings separated by delimiters",
+    "PCP.Machine.encodeAnswer": "Encoding a verdict or proof address",
+    "PCP.Machine.encodeBool": "Encoding the Boolean machine result",
+    "PCP.Machine.PolyTimeRel": "Polynomial-time checking by a machine",
+    "PCP.Machine.PolyTimeAlg": "Polynomial-time verifier steps",
+    "PCP.Algebraic.ThreeColorGrid.colorable_iff_exists_constraints": "Colourability as solvable grid equations",
+    "PCP.Algebraic.ThreeColorParameterChoice.volume_le_log_add_one": "Grid parameter volume is logarithmic",
+    "PCP.Lang.ThreeColorRuntime.polyTimeAlg": "Polynomial time for amplified verifier",
+    "PCP.Algebraic.ThreeColorVerifier.exists_proof_test_eq_true": "Colourings give an always-accepted proof",
+    "PCP.Algebraic.GridVanishing.vanishesOn_iff_exists_decomposition": "Grid vanishing and bounded decomposition",
+    "PCP.Algebraic.DerivedZeroOnGrid.rejectionRate_lower_bound": "Soundness with self-corrected reads",
+    "PCP.ReferenceNP.inNP_iff_mem": "Witness NP equals nondeterministic NP",
+    "PCP.Algebraic.SetMultilinear.evaluationPoint": "Power substitution at a parameter",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.Auxiliary": "Lines tables with affine labels",
+    "PCP.Algebraic.ThreeColorVerifier.Proof": "Eight points and lines tables",
+    "PCP.Algebraic.ThreeColorVerifier.Query": "Locations across the eight proof tables",
+    "PCP.Algebraic.ThreeColorVerifier.read": "Answering from the selected proof table",
+    "PCP.Algebraic.BinaryLocalCorrection.soundnessConstant": "The local correction constant $C$",
+    "PCP.Algebraic.BinaryLocalCorrection.rejectionRate": "Local-correction rejection probability",
+    "PCP.Algebraic.BinaryLocalRowDecoding.decodingConstant": "The inner decoding constant $K$",
+    "PCP.Algebraic.DerivedZeroOnGrid.GridRandomness": "Grid randomness after fixing the point",
+    "PCP.Algebraic.DerivedZeroOnGrid.TestSample": "Grid randomness with a fresh label",
+    "PCP.Algebraic.DerivedZeroOnGrid.gridSeed": "Recovering the original grid-test seed",
+    "PCP.Algebraic.DerivedZeroOnGrid.withPrimaryBit": "Grid check with the constraint bit",
+    "PCP.Algebraic.DerivedZeroOnGrid.check": "Grid check via a self-corrected bit",
+    "PCP.Algebraic.DerivedZeroOnGrid.instFintypeInnerPoint": "Finite inner space for grid verification",
+    "PCP.Algebraic.DerivedZeroOnGrid.instFintypeInnerSeed": "Finite inner seeds for grid verification",
+    "PCP.Algebraic.DerivedZeroOnGrid.instFintypeCallSeedSumFin": "Finite certificate-correction seed space",
+    "PCP.Algebraic.DerivedZeroOnGrid.instFintypeGridRandomness": "Finite grid-test randomness per point",
+    "PCP.Algebraic.DerivedZeroOnGrid.rejectionRate": "Rejection with randomized reads",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.lineErrorConstant": "The decoded-line error factor $J$",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.soundnessConstant": "The binary proximity factor $S$",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.Lines": "Lines indexed by points and slopes",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.Sample": "All seeds for binary low-degree testing",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.corrected": "Correcting the line's comparison value",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.test": "Accepting when all three checks pass",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.instFintypeInnerPoint": "Finite inner space for line testing",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.instFintypeInnerSeed": "Finite inner-test seeds for line testing",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.instFintypeProdTestRandomnessInnerSeed": "Finite pairs of independent test seeds",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.instFintypeSample": "Finite binary low-degree test seeds",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.rejectionRate": "Binary low-degree rejection probability",
+    "PCP.Algebraic.GeneratorLowDegreeTest.nodes": "Successive powers used as test nodes",
+    "PCP.Algebraic.GeneratorLowDegreeTest.weights": "Interpolation weights for value at zero",
+    "PCP.Algebraic.GeneratorLowDegreeTest.IsGeneratorNodes": "Nodes from a multiplicative generator",
+    "PCP.Algebraic.GeneratorLowDegreeTest.rejectionRate": "Weighted-test rejection probability",
+    "PCP.Algebraic.GridVanishing.VanishesOn": "Zero at every grid point",
+    "PCP.Algebraic.SetMultilinear.Variables": "Variables for digits within blocks",
+    "PCP.Algebraic.ThreeColorAmplifiedVerifier.repetitions": "Repetition count fixed before the input",
+    "PCP.Algebraic.ThreeColorAmplifiedVerifier.verifier": "Repeating one verifier on one proof",
+    "PCP.Algebraic.ThreeColorGrid.validPolynomial": "The vertex constraint $P^3-1$",
+    "PCP.Algebraic.ThreeColorGrid.properPolynomial": "The edge constraint $E(Q^3-1)$",
+    "PCP.Algebraic.ThreeColorGrid.edgeExtension": "Interpolated adjacency function",
+    "PCP.Algebraic.ThreeColorVerifier.Vertex": "Field points for the colour table",
+    "PCP.Algebraic.ThreeColorVerifier.PairPoint": "Two vertex-coordinate blocks",
+    "PCP.Algebraic.ThreeColorVerifier.ProperPoint": "Four coordinate blocks for edge checks",
+    "PCP.Algebraic.ThreeColorVerifier.flatten": "Joining two vertex-coordinate blocks",
+    "PCP.Algebraic.ThreeColorVerifier.edgeValue": "Evaluating the adjacency polynomial",
+    "PCP.Algebraic.ThreeColorVerifier.flatDifference": "Difference queries in joined coordinates",
+    "PCP.Algebraic.ThreeColorVerifier.validAuxiliary": "Vertex-certificate lines reused",
+    "PCP.Algebraic.ThreeColorVerifier.properAuxiliary": "Edge-certificate lines reused",
+    "PCP.Algebraic.ThreeColorVerifier.BranchSeed": "The seed spaces of seven checks",
+    "PCP.Algebraic.ThreeColorVerifier.Sample": "Independent randomness for seven checks",
+    "PCP.Algebraic.ThreeColorVerifier.branchTest": "The seven component decisions",
+    "PCP.Algebraic.ThreeColorVerifier.test": "Acceptance requires all seven checks",
+    "PCP.Algebraic.GridVanishing.IsCertificate": "Identities of a vanishing certificate",
+    "PCP.Algebraic.GridVanishing.coordinate": "One-coordinate grid vanishing polynomial",
+    "PCP.Algebraic.GridVanishing.substitute": "Substituting into certificate variables",
+    "PCP.Algebraic.BinaryZeroOnGridCorrection.rejectionRate_lower_bound": "The grid-test rejection inequality",
+    "PCP.Algebraic.ThreeColorGrid.totalDegree_validPolynomial_le": "Degree bound for the vertex polynomial",
+    "PCP.Algebraic.ThreeColorGrid.totalDegree_edgeExtension_le": "Degree bound for adjacency polynomial",
+    "PCP.Algebraic.ThreeColorGrid.totalDegree_properPolynomial_le": "Degree bound for the edge polynomial",
+    "PCP.Algebraic.ThreeColorVerifier.test_honestProof": "The honest proof passes on every seed",
+    "PCP.Algebraic.ThreeColorVerifier.honestProof": "The honest eight-table proof",
+    "PCP.Algebraic.EncodedLineLowDegreeTest.honestTable": "Encoding every line restriction",
+    "PCP.Algebraic.SetMultilinear.digitMonomial": "Encoding one monomial by digits",
+    "PCP.Algebraic.SetMultilinear.encode": "Linear encoding through digit monomials"
   },
-  "fidelity_held": "Sentence-by-sentence comparisons of this page's statements with their Lean have not been written yet. Comparator has judged the three headline statements; papers/pcp-full-argument/source-review.md records that run."
+  "fidelity_held": "Sentence-by-sentence comparisons of this page's statements with their Lean have not been written yet. Comparator has judged the three headline statements; papers/pcp-full-argument/source-review.md records that run.",
+  "notes": {
+    "PCP.np_subset_pcp": {
+      "text": "For each NP language, the formal statement chooses one verifier and one polynomial-time implementation. On every input of length $n$, it uses exactly $\\alpha\\lceil\\log_2(n+2)\\rceil+\\beta$ fair bits, asks at most a fixed $\\ell$ proof-bit queries and reads only addresses below $p(n)$. The implementation, constants and polynomial are fixed before the input. Completeness chooses one proof before the random seed; soundness bounds every fixed proof’s acceptance probability by $1/2$.",
+      "because": [
+        "pcp-short-abstract",
+        "pcp-short-theorem",
+        "pcp-short-forward-statement"
+      ]
+    },
+    "PCP.Algebraic.ThreeColorGrid.colorable_iff_exists_constraints": {
+      "text": "The formal statement concerns existence: a graph on $H^m$ is three-colourable exactly when there exists a polynomial $P$ of degree at most $d_0=m(h-1)$ whose vertex and edge constraints vanish on their grids. It assumes characteristic two and a primitive cube root of unity. The fixed-$P$ characterization and the separate bounds $d_0,3d_0,5d_0$ require the neighbouring constraint and degree results; they are not conclusions of this one statement.",
+      "because": [
+        "pcp-short-colour-constraints"
+      ]
+    },
+    "PCP.Algebraic.GeneratorLowDegreeTest.exists_close": {
+      "text": "Let $F$ be any finite field with $q>2c$, and use the first $c+1$ nonzero powers of a generator of $F^\\times$, with their Lagrange weights at zero. If the weighted test rejects with probability at most $\\delta<1/[2(c+2)^2]$, some polynomial of total degree at most $c$ is within distance $2\\delta$ of the received function. The claim is existential and imposes no computational requirement on finding that polynomial.",
+      "because": [
+        "pcp-short-weighted-test"
+      ]
+    },
+    "PCP.Algebraic.BinaryLocalRowDecoding.exists_polynomial_distance_le": {
+      "text": "Assume characteristic two, a binary coordinate isomorphism, label degree $r\\ge1$, generator-based interpolation nodes and $q>2c$. Every received table has one degree-at-most-$c$ polynomial whose encoding is within $K\\kappa$ on both the full-label and homogeneous-label distributions. Here $\\kappa$ is the rejection probability of the fair mixture defining the inner test. There is no small-rejection premise: when the estimate exceeds one, the universal distance bound suffices.",
+      "because": [
+        "pcp-short-binary-decoding"
+      ]
+    },
+    "PCP.Algebraic.EncodedLineLowDegreeTest.exists_close": {
+      "text": "The input is an arbitrary points table and an arbitrary lines table; no agreement among line indices is assumed. With positive base $b$, degree bound $D=cb^c$, label degree $r\\ge1$, the stated interpolation nodes, $q\\ge10^6D^3$ and $J\\kappa\\le1/(4\\cdot10^6)$, the formal statement produces one polynomial of degree at most $D$. Its encoding satisfies both full-label and homogeneous error bounds $S\\kappa$. The homogeneous estimate concerns linear labels with zero constant term.",
+      "because": [
+        "pcp-short-outer-decoding"
+      ]
+    },
+    "PCP.Algebraic.BinaryLocalCorrection.failure_le": {
+      "text": "Fix a target $a$ and a polynomial $P$ of degree at most $D\\ge cb^c$. Assume $q>2c$, the stated interpolation nodes and homogeneous distance at most $\\delta$ between the points table and the affine encoding of $P$; the lines table can be arbitrary. The failure event includes both rejection and returning a wrong bit. Its probability is at most $C\\kappa_a+\\delta+D/[2(q-1)]$, averaging all randomness, including the homogeneous label. The estimate applies separately at every target, without a uniform bound on $\\kappa_a$.",
+      "because": [
+        "pcp-short-outer-correction"
+      ]
+    },
+    "PCP.Algebraic.BinaryZeroOnGridCorrection.rejectionRate_lower_bound": {
+      "text": "For a nonempty grid, let $A$ and $M$ have degrees at most $D\\ge cb^c$, and assume $q>2c$ and the stated interpolation nodes. The points tables need only be globally close on homogeneous labels, with errors $\\delta_A$ and $\\delta_M$; the certificate’s lines table remains arbitrary. If $A$ is nonzero somewhere on the grid, the formal statement gives (15). Each corrector’s rejection is averaged over the targets requested by the test, not bounded separately at every target.",
+      "because": [
+        "pcp-short-zero"
+      ]
+    },
+    "PCP.Algebraic.ThreeColorVerifier.exists_proof_test_eq_true": {
+      "text": "The formal statement starts with a three-colourable graph on a nonempty grid and assumes $5m(h-1)<b^c$, characteristic two, the binary coordinates, a primitive cube root and suitable interpolation nodes. It constructs one eight-table proof accepted for every seed. The degree condition is a sufficient bound for the colouring extension and both certificates. When the polynomials and certificates are already supplied with their actual degrees below $b^c$, the direct perfect-completeness statement applies under that more specific information.",
+      "because": [
+        "linked-source-12"
+      ]
+    },
+    "PCP.Algebraic.ThreeColorAmplifiedVerifier.verification_guarantees": {
+      "text": "For the particular positive repetition count $R$ chosen by the construction, the formal statement combines all probability and resource guarantees of the amplified graph verifier: at most $187R$ queries, exactly $32000000R(\\lceil\\log_2(n+2)\\rceil+1)$ random bits, polynomially bounded proof addresses, perfect completeness and soundness error at most $1/2$. It concerns three-colourability of the graph decoded from the input. Polynomial running time and the reduction from an arbitrary NP language are established separately.",
+      "because": [
+        "linked-source-13"
+      ]
+    },
+    "PCP.Lang.ThreeColorRuntime.polyTimeAlg": {
+      "text": "The formal statement certifies polynomial running time for the concrete step algorithm of the amplified three-colourability verifier, measured by a finite multi-stack machine. Its proof combines a program-cost bound with the implementation of amplification. This is the runtime fact used when assembling the final PCP theorem. The details of finding a finite field and roots, and translating the program into machine steps, lie in imported constructions that are not all included in this packet.",
+      "because": [
+        "pcp-short-complexity"
+      ]
+    },
+    "PCP.pcp_subset_np_concrete": {
+      "text": "Suppose one verifier has a polynomial-time implementation, the exact randomness budget $\\alpha\\lceil\\log_2(n+2)\\rceil+\\beta$, a polynomial bound on all proof addresses, perfect completeness and soundness error at most $1/2$. The formal statement concludes that its language has a concrete polynomial-time witness checker with polynomially bounded witnesses. The machine model is fixed. The paper’s witness is the accessible proof prefix, and logarithmic randomness makes exhaustive seed enumeration polynomial in the input length.",
+      "because": [
+        "linked-source-14"
+      ]
+    },
+    "PCP.Algebraic.DerivedZeroOnGrid.rejectionRate_lower_bound": {
+      "text": "Assume $b\\ge1$, $q>2c$, generator test nodes and distinct nonzero correction nodes. At each point $x$, let $A_x$ have degree at most $r$, and assume the function $x\\mapsto A_x(g(x))$ is represented by a polynomial $A$ of degree at most $D\\ge cb^c$. Let the certificate polynomial $M$ also have degree at most $D$, with homogeneous table error $\\delta_M$, and suppose $A$ does not vanish on the nonempty grid. The primary full-label error $\\epsilon$ contributes $2\\epsilon$ to rejection before the grid estimate, so it is multiplied by $1+2C$ in (16).",
+      "because": [
+        "pcp-short-derived-zero"
+      ]
+    },
+    "PCP.ReferenceNP.inNP_iff_mem": {
+      "text": "The formal statement identifies two classes of binary languages: those with polynomially bounded witnesses checked in polynomial time by the concrete machine model, and the reference class defined by nondeterministic machines. It proves both implications for every language. Thus the NP hypothesis and conclusion in Theorem 1.1 can be read in the reference sense. The equality is a mathematical theorem; the separate claim that a vendored source tree is unchanged requires repository provenance.",
+      "because": [
+        "pcp-short-reference-np",
+        "pcp-short-reference-np-context",
+        "pcp-short-concrete-reference-np"
+      ]
+    },
+    "PCP.Algebraic.ThreeColorVerifier.Proof": {
+      "text": "Four points tables carry the colouring, its difference and the two vanishing certificates. Their domains are $F^m,F^{2m},F^{2m},F^{4m}$, with cubic labels for the first two polynomial roles and affine labels for the certificates. Each has one associated encoded lines table. The definition places no honesty or consistency requirement on received bits. The same certificate lines table is used by its low-degree test and by later local-correction calls.",
+      "because": [
+        "pcp-short-proof-table-type"
+      ]
+    },
+    "PCP.Algebraic.ThreeColorVerifier.Query": {
+      "text": "A full proof address selects one of eight tables. A points-table address then supplies an outer point and a label; a lines-table address supplies the line’s base point and slope, an inner point and an affine label. The allowed label degree is three for colouring and difference points, and one for all certificate points and lines tables. This specifies locations only; honest values require the separate encoding construction.",
+      "because": [
+        "pcp-short-query-type"
+      ]
+    },
+    "PCP.Algebraic.ThreeColorVerifier.read": {
+      "text": "The formal definition reads one bit from the table selected by a full address. It accepts arbitrary received tables and does not impose polynomiality or agreement between them. For an honest proof, the encoding construction supplies the value $R(\\rho(u))$ at a points-table address, so the read operation returns that value. Keeping this distinction explicit matters in soundness, where the verifier must also operate on inconsistent proofs.",
+      "because": [
+        "pcp-short-query-type"
+      ]
+    },
+    "PCP.Algebraic.GridVanishing.vanishesOn_iff_exists_certificate": {
+      "text": "Let $H$ be a nonempty finite subset of an integral domain and use finitely many variables. The formal statement equates vanishing of $A$ on $H^k$ with existence of a polynomial $M(X,Y)$ of total degree at most $\\deg A$ satisfying the polynomial identities $M(X,0)=0$ and $M(X,Z_H(X))=A(X)$. The identities impose no linearity requirement on $M$ in $Y$. Nonemptiness is needed for the degree-preserving certificate construction.",
+      "because": [
+        "pcp-short-vanishing-certificate"
+      ]
+    },
+    "PCP.Algebraic.PointLineTest.exists_close_of_small_rejection": {
+      "text": "Over any finite field, let each ordered base-point and slope pair have an arbitrary univariate polynomial of degree at most $D$. If its disagreement probability with the points function is $\\theta\\le1/(4\\cdot10^6)$ and $q\\ge10^6D^3$, the formal statement gives a multivariate polynomial of total degree at most $D$ at distance at most $2\\theta$. Parameters range over all of $F$, zero slopes are allowed, and the conclusion also covers $D=0$ and dimension zero.",
+      "because": [
+        "pcp-short-point-line"
+      ]
+    },
+    "PCP.NPCertificate": {
+      "text": "The definition supplies a Boolean relation $\\mathcal R$ and polynomial $p_{\\rm w}$ with $x\\in\\mathcal L$ exactly when some $w$ of length at most $p_{\\rm w}(|x|)$ satisfies $\\mathcal R(x,w)=1$. Polynomial-time checkability is a parameter of this definition. The forward theorem supplies the concrete machine notion of polynomial time; it does not prove the PCP theorem for an arbitrary choice of what counts as an efficient relation.",
+      "because": [
+        "pcp-short-forward-statement"
+      ]
+    },
+    "PCP.InNP": {
+      "text": "Membership means that there exists a polynomial witness bound and a witness-checking relation satisfying the chosen notion of polynomial time. This definition alone does not select a machine model. In the forward and reverse PCP theorems, the notion is fixed to concrete finite-machine polynomial time, and the reference-NP equivalence identifies that resulting class with the reference nondeterministic-machine class.",
+      "because": [
+        "pcp-short-forward-statement"
+      ]
+    },
+    "PCP.QueryTree": {
+      "text": "A decision tree has an upper bound on the number of proof bits read along a branch. Each internal node names a natural-number address and branches on its Boolean answer; a leaf accepts or rejects. Leaves may occur before the bound is exhausted. Consequently the fixed query parameter is a worst-case upper bound, not a requirement that every run performs exactly that many reads.",
+      "because": [
+        "pcp-short-forward-statement"
+      ]
+    },
+    "PCP.Verifier.ReadsBelow": {
+      "text": "The proof-address bound quantifies over every seed and every address occurring on any branch of the selected query tree. Thus it is independent of the proof’s answers. Taking the bound to be $p(n)$ means that only the first $p(n)$ bits of an infinite proof oracle can matter. This is the formal form of polynomial proof length used in both directions of Theorem 1.1.",
+      "because": [
+        "pcp-short-forward-statement"
+      ]
+    },
+    "PCP.Verifier.ImplementedBy": {
+      "text": "The formal condition identifies the verifier’s tree with the algorithm expanded only up to the allowed query depth. It compares every input, seed and possible answer branch. At depth zero, a further query request is converted into rejection, so the condition does not require the algorithm itself to halt within the query budget. A separate polynomial-time condition bounds the machine computation of each step. Together they give the implemented bounded verifier used in Theorem 1.1.",
+      "because": [
+        "pcp-short-forward-statement"
+      ]
+    },
+    "PCP.Machine.PolyTimeAlg": {
+      "text": "Polynomial time is measured for one verifier step as a function of the total encoded length of the input, random string and proof answers received so far. A step either returns a final Boolean decision or the next natural-number proof address. The formal definition requires an actual finite multi-stack machine computing this operation within a polynomial number of steps, rather than treating field arithmetic or table indexing as unit-cost black boxes.",
+      "because": [
+        "pcp-short-complexity"
+      ]
+    },
+    "PCP.Algebraic.ThreeColorGrid.constraints_iff_satisfies": {
+      "text": "For a fixed polynomial $P$, the formal statement equates vanishing of $P^3-1$ on $H^m$ and of $E(X,Y)(P(X)-P(Y))^3-E(X,Y)$ on $H^{2m}$ with the corresponding vertex and edge equations for its grid values. It imposes no degree bound. The separate facts about cube roots turn these equations into a proper three-colouring in characteristic two.",
+      "because": [
+        "pcp-short-colour-constraints"
+      ]
+    },
+    "PCP.Algebraic.SetMultilinear.eval_encode": {
+      "text": "For a univariate polynomial $T$ of degree below $b^c$, substituting the point $\\Phi(z)_{i,s}=z^{s b^i}$ into its set-multilinear encoding recovers $T(z)$ exactly. The degree hypothesis is strict. This is the identity used for honest line restrictions; it does not say that every polynomial of total degree at most $c$ in the inner variables is the encoding of an honest low-degree line polynomial.",
+      "because": [
+        "pcp-short-outer-decoding"
+      ]
+    },
+    "PCP.Algebraic.EncodedLineLowDegreeTest.Auxiliary": {
+      "text": "A lines table assigns a binary function to every ordered pair consisting of a base point and a slope. Each function is indexed by an inner point in $F^{cb}$ and an affine label in $\\mathcal B_1$. This applies even when the associated points table uses cubic labels. Arbitrary received entries need not represent polynomials and need not agree when two indices describe the same geometric line.",
+      "because": [
+        "pcp-short-proof-table-type"
+      ]
+    },
+    "PCP.Algebraic.BinaryLocalCorrection.soundnessConstant": {
+      "text": "The constant in the local-correction estimate is $C=2+2(c+1)K$. The two terms involving $K$ account for replacing the corrected answers at the sampled point and at the target by their decoded polynomial values. The remaining two units multiply rejection losses. The formula depends only on the fixed inner degree $c$, not on the target, graph size, outer dimension or received proof.",
+      "because": [
+        "pcp-short-outer-correction"
+      ]
+    },
+    "PCP.Algebraic.BinaryLocalRowDecoding.decodingConstant": {
+      "text": "The inner decoding constant is $K=4(c+2)^2(112(c+2)+60)$. It gives a single bound valid at every rejection probability for both full-label and homogeneous distances. Its size accommodates the transition from the small-error low-degree theorem to the trivial distance bound of one. It is a sufficient uniform constant; the formal definition does not assert that it is optimal.",
+      "because": [
+        "pcp-short-binary-decoding"
+      ]
+    },
+    "PCP.Algebraic.EncodedLineLowDegreeTest.lineErrorConstant": {
+      "text": "The field-valued point-versus-line disagreement is bounded by $J\\kappa$, where $J=2((c+1)K+29)$. The correction replacement contributes $(c+1)K$, the tested comparison contributes one and decoding the points table contributes $28$. Passing from the disagreement of homogeneous observations to field-valued disagreement contributes the factor two. This is the error budget to which the point-versus-line threshold is applied.",
+      "because": [
+        "pcp-short-outer-decoding"
+      ]
+    },
+    "PCP.Algebraic.EncodedLineLowDegreeTest.soundnessConstant": {
+      "text": "The final distance factor is $S=28+J$, with $J$ defined by the preceding line-disagreement estimate. The point-versus-line theorem gives field distance at most $2J\\kappa$; encoding halves that contribution, and the original points-table decoding contributes at most $28\\kappa$. Both full-label and homogeneous distances are bounded by $S\\kappa$ for the same polynomial, which lets subsequent tests use a single fixed choice.",
+      "because": [
+        "pcp-short-outer-decoding"
+      ]
+    },
+    "PCP.Algebraic.DerivedZeroOnGrid.TestSample": {
+      "text": "The test samples an outer point, a homogeneous label shared by the two certificate requests, independent randomness for those two local-corrector calls, and a fresh uniform label from $\\mathcal B_r$ for the primary self-corrected read. The last label supplies the randomness in (9). Independence of that fresh choice is what permits the $2\\epsilon$ replacement estimate even when the requested primary label depends on the point and the homogeneous label.",
+      "because": [
+        "pcp-short-derived-zero"
+      ]
+    },
+    "PCP.Algebraic.ThreeColorVerifier.validAuxiliary": {
+      "text": "The vertex-certificate corrector uses exactly the lines table paired with the vertex-certificate points table in its binary low-degree test. At a prescribed target, it selects an entry by that target and the sampled slope. This reuse keeps the proof to eight tables. Each correction call still tests its selected entry, and the generic correction estimate permits arbitrary received lines tables while accounting for that call’s own rejection probability.",
+      "because": [
+        "pcp-short-proof-table-type"
+      ]
+    },
+    "PCP.Algebraic.ThreeColorVerifier.properAuxiliary": {
+      "text": "The edge-certificate corrector uses the same received lines table that accompanies the edge-certificate points table in its low-degree test. Its targets have two blocks of $2m$ coordinates after the pair of vertex-coordinate blocks is placed in one list. This is only a change of coordinate indexing; no additional proof entries are introduced, and the table remains arbitrary in the soundness analysis.",
+      "because": [
+        "pcp-short-proof-table-type"
+      ]
+    },
+    "PCP.Algebraic.ThreeColorVerifier.Sample": {
+      "text": "A full graph-verifier seed supplies a separate seed for each of the seven checks. These are four binary low-degree tests, two zero-on-grid tests using self-corrected primary reads, and the difference-consistency check. Uniform sampling from the product makes the check seeds independent. The verifier accepts only when all checks accept; no random choice selects just one of the seven checks.",
+      "because": [
+        "pcp-short-proof-table-type"
+      ]
+    },
+    "PCP.Algebraic.GridVanishing.IsCertificate": {
+      "text": "A vanishing certificate satisfies the two polynomial identities $M(X,0)=0$ and $M(X,Z_H(X))=A(X)$. These are equalities of polynomials, not merely agreement of their evaluations on field points. The definition contains no degree restriction and does not require $M$ to be linear in its second block. Degree bounds are hypotheses or conclusions of the separate certificate theorems.",
+      "because": [
+        "pcp-short-vanishing-certificate"
+      ]
+    }
+  }
 }

@@ -1,449 +1,884 @@
 {
-  "schema": 1,
-  "claims": [
-    {
-      "id": "local-minimum",
-      "title": "The coupled spring potential has a local minimum at the origin",
-      "section": "1",
-      "passage": "local-minimum",
-      "lean": [
-        "coupled_spring_potential"
-      ]
-    },
-    {
-      "id": "global-minimum",
-      "title": "The origin is the unique global minimum",
-      "section": "5",
-      "passage": "global-minimum",
-      "lean": [],
-      "checks": [
-        "couplingPotential_origin_lt"
-      ]
-    },
-    {
-      "id": "second-derivative-test",
-      "title": "The analytic second-derivative test",
-      "section": "1",
-      "passage": "test-statement",
-      "lean": [
-        "second_derivative_test_analyticAt"
-      ]
-    },
-    {
-      "id": "cubic-local-not-global",
-      "title": "Adding x₀³ keeps the local minimum, by the same test",
-      "section": "3",
-      "passage": "cubic-local-minimum",
-      "lean": [],
-      "checks": [
-        "cubicPerturbation_isLocalMin"
-      ]
-    }
-  ],
-  "passages": [
-    {
-      "id": "potential-definition",
-      "section": "The minimum of the coupled spring potential",
-      "role": "defines",
-      "lean": [
-        "couplingPotential"
-      ],
-      "quote": "$U(x_0,x_1)=x_0^2+x_0x_1+x_1^2$",
-      "anchor": {
-        "heading": "The minimum of the coupled spring potential",
-        "block": 1
-      }
-    },
-    {
-      "id": "completed-square",
-      "section": "The minimum of the coupled spring potential",
-      "role": "states",
-      "lean": [],
-      "quote": "$$U(x)=\\left(x_0+\\tfrac12x_1\\right)^2+\\tfrac34x_1^2,$$",
-      "anchor": {
-        "heading": "The minimum of the coupled spring potential",
-        "block": 2
-      },
-      "checks": [
-        "couplingPotential_eq_sq_add_sq"
-      ]
-    },
-    {
-      "id": "local-minimum",
-      "section": "1. What the test requires",
-      "role": "states",
-      "lean": [
-        "coupled_spring_potential"
-      ],
-      "quote": "The coupled spring potential $U$ has a local minimum\nat the origin.",
-      "anchor": {
-        "heading": "1. What the test requires",
-        "block": 1
-      }
-    },
-    {
-      "id": "test-statement",
-      "section": "1. What the test requires",
-      "role": "states",
-      "lean": [
-        "second_derivative_test_analyticAt"
-      ],
-      "quote": "If $f$ is analytic at $a$, its\ngradient vanishes at $a$, and $D^2f(a)[h,h]>0$ for every $h\\ne0$, then $f$\nhas a local minimum at $a$.",
-      "anchor": {
-        "heading": "1. What the test requires",
-        "block": 2
-      }
-    },
-    {
-      "id": "potential-analytic",
-      "section": "1. What the test requires",
-      "role": "states",
-      "lean": [
-        "couplingPotential_analyticAt"
-      ],
-      "quote": "$U$ is a polynomial, so it is analytic at every point.",
-      "anchor": {
-        "heading": "1. What the test requires",
-        "block": 3
-      }
-    },
-    {
-      "id": "potential-derivative",
-      "section": "1. What the test requires",
-      "role": "states",
-      "lean": [
-        "couplingPotential_hasFDerivAt"
-      ],
-      "quote": "$$DU(x)[h]=(2x_0+x_1)h_0+(x_0+2x_1)h_1.$$",
-      "anchor": {
-        "heading": "1. What the test requires",
-        "block": 4
-      }
-    },
-    {
-      "id": "potential-gradient",
-      "section": "1. What the test requires",
-      "role": "states",
-      "lean": [
-        "couplingPotential_gradient_zero"
-      ],
-      "quote": "so the gradient at the origin is zero.",
-      "anchor": {
-        "heading": "1. What the test requires",
-        "block": 7
-      }
-    },
-    {
-      "id": "potential-second-derivative",
-      "section": "1. What the test requires",
-      "role": "states",
-      "lean": [
-        "couplingPotential_iteratedFDeriv_two"
-      ],
-      "quote": "$$K=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}.$$",
-      "anchor": {
-        "heading": "1. What the test requires",
-        "block": 8
-      }
-    },
-    {
-      "id": "potential-positive-definite",
-      "section": "1. What the test requires",
-      "role": "states",
-      "lean": [
-        "couplingPotential_posDef"
-      ],
-      "quote": "The Hessian at the origin is positive definite.",
-      "anchor": {
-        "heading": "1. What the test requires",
-        "block": 11
-      }
-    },
-    {
-      "id": "test-quadratic-map",
-      "section": "2. How the test turns a positive Hessian into a minimum",
-      "role": "explains",
-      "lean": [
-        "iteratedFDerivQuadraticMap"
-      ],
-      "quote": "Lean packages $Q$ as a quadratic map",
-      "anchor": {
-        "heading": "2. How the test turns a positive Hessian into a minimum",
-        "block": 1
-      }
-    },
-    {
-      "id": "test-lower-bound",
-      "section": "2. How the test turns a positive Hessian into a minimum",
-      "role": "explains",
-      "lean": [
-        "coercive_of_posdef"
-      ],
-      "quote": "scaling gives $Q(h)\\ge C\\lVert h\\rVert^2$",
-      "anchor": {
-        "heading": "2. How the test turns a positive Hessian into a minimum",
-        "block": 1
-      }
-    },
-    {
-      "id": "test-taylor-error",
-      "section": "2. How the test turns a positive Hessian into a minimum",
-      "role": "explains",
-      "lean": [
-        "littleO_of_powerseries"
-      ],
-      "quote": "$R(h)=o(\\lVert h\\rVert^2)$.",
-      "anchor": {
-        "heading": "2. How the test turns a positive Hessian into a minimum",
-        "block": 2
-      }
-    },
-    {
-      "id": "test-inequality",
-      "section": "2. How the test turns a positive Hessian into a minimum",
-      "role": "explains",
-      "lean": [
-        "le_of_littleO"
-      ],
-      "quote": "so $f(a+h)\\ge f(a)$ throughout that neighbourhood",
-      "anchor": {
-        "heading": "2. How the test turns a positive Hessian into a minimum",
-        "block": 2
-      }
-    },
-    {
-      "id": "cubic-local-minimum",
-      "section": "3. A remainder that matters",
-      "role": "states",
-      "lean": [],
-      "quote": "A supplementary Lean proof applies\nKjos-Hanssen's analytic test to $W$ unchanged. Its only new step shows\nthat the second derivative of $x_0^3$ vanishes at the origin.",
-      "anchor": {
-        "heading": "3. A remainder that matters",
-        "block": 1
-      },
-      "checks": [
-        "cubicPerturbation_isLocalMin",
-        "cube_iteratedFDeriv_two_zero"
-      ]
-    },
-    {
-      "id": "cubic-strict",
-      "section": "3. A remainder that matters",
-      "role": "states",
-      "lean": [],
-      "quote": "A second supplementary proof\nchecks the strict inequality near the origin in Lean.",
-      "anchor": {
-        "heading": "3. A remainder that matters",
-        "block": 4
-      },
-      "checks": [
-        "cubicPerturbation_strict_near_origin"
-      ]
-    },
-    {
-      "id": "cubic-not-global",
-      "section": "3. A remainder that matters",
-      "role": "states",
-      "lean": [],
-      "quote": "For example $W(-2,0)=-4<W(0)$, which Lean also checks,",
-      "anchor": {
-        "heading": "3. A remainder that matters",
-        "block": 5
-      },
-      "checks": [
-        "cubicPerturbation_not_global"
-      ]
-    },
-    {
-      "id": "lean-smoothness",
-      "section": "4. A hypothesis the proof never uses",
-      "role": "explains",
-      "lean": [
-        "isLocalMin_of_posDef_of_littleo",
-        "coercive_of_posdef_of_contdiff"
-      ],
-      "quote": "Its proof\nobtains the lower bound $Q(h)\\ge C\\lVert h\\rVert^2$ twice.",
-      "anchor": {
-        "heading": "4. A hypothesis the proof never uses",
-        "block": 1
-      }
-    },
-    {
-      "id": "hessian-polar-form",
-      "section": "4. A hypothesis the proof never uses",
-      "role": "states",
-      "lean": [
-        "polarBilin_iteratedFDerivQuadraticMap"
-      ],
-      "quote": "$$Q(u+v)-Q(u)-Q(v)=B(u,v)+B(v,u).$$",
-      "anchor": {
-        "heading": "4. A hypothesis the proof never uses",
-        "block": 3
-      }
-    },
-    {
-      "id": "without-smoothness",
-      "section": "4. A hypothesis the proof never uses",
-      "role": "explains",
-      "lean": [],
-      "quote": "A supplementary Lean proof keeps the little-o estimate, the zero gradient\nand positive definiteness, drops the smoothness hypothesis, and reaches the\nsame conclusion with the first call alone.",
-      "anchor": {
-        "heading": "4. A hypothesis the proof never uses",
-        "block": 5
-      },
-      "checks": [
-        "isLocalMin_of_posDef_of_littleo_without_smoothness"
-      ]
-    },
-    {
-      "id": "power-series-caller",
-      "section": "4. A hypothesis the proof never uses",
-      "role": "explains",
-      "lean": [
-        "second_derivative_test"
-      ],
-      "quote": "which passes `h₁.analyticAt.contDiffAt` to the\nremainder lemma.",
-      "anchor": {
-        "heading": "4. A hypothesis the proof never uses",
-        "block": 6
-      }
-    },
-    {
-      "id": "global-minimum",
-      "section": "5. Where the three squares come from",
-      "role": "states",
-      "lean": [],
-      "quote": "For every nonzero $x\\in\\mathbb R^2$, $U(x)>U(0)$.",
-      "anchor": {
-        "heading": "5. Where the three squares come from",
-        "block": 6
-      },
-      "checks": [
-        "couplingPotential_origin_lt"
-      ]
-    },
-    {
-      "id": "strict-positivity",
-      "section": "5. Where the three squares come from",
-      "role": "proves",
-      "lean": [],
-      "quote": "the\nsecond term forces $x_1=0$. The first then forces $x_0=0$.",
-      "anchor": {
-        "heading": "5. Where the three squares come from",
-        "block": 6
-      },
-      "checks": [
-        "couplingPotential_pos"
-      ]
-    }
-  ],
-  "plain": {
-    "couplingPotential": "The coupled spring potential",
-    "couplingPotential_analyticAt": "The potential is analytic",
-    "couplingPotential_hasFDerivAt": "Derivative of the potential",
-    "couplingPotential_gradient_zero": "Zero gradient at the origin",
-    "couplingPotential_iteratedFDeriv_two": "Second derivative of the potential",
-    "couplingPotential_posDef": "Positive definite at the origin",
-    "coupled_spring_potential": "Local minimum at the origin",
-    "Function.update₀": "Update the first entry of a pair",
-    "Function.update₁": "Update the second entry of a pair",
-    "hessianBilinearCompanion": "Symmetrised second derivative",
-    "iteratedFDerivQuadraticMap": "Second derivative as a quadratic map",
-    "continuousBilinearMapOfContinuousMultilinearMap": "Bilinear map from a two-input map",
-    "QuadraticMap.toMultilinearMap": "Quadratic map as a two-input map",
-    "QuadraticMap.toMultilinearMapHalfPolarBilin": "Half the polar form, as a two-input map",
-    "QuadraticMap.toMultilinearMap_continuous": "The two-input map is continuous",
-    "QuadraticMap.toMultilinearMapHalfPolarBilin_continuous": "The half polar form is continuous",
-    "QuadraticMap.toContinuousMultilinearMap": "Continuous two-input map of a form",
-    "QuadraticMap.toContinuousMultilinearMapHalfPolarBilin": "Continuous half polar form",
-    "QuadraticMap.toContinuousMultilinearMap_apply": "Value of the continuous two-input map",
-    "QuadraticMap.toContinuousMultilinearMap_applyHalf": "Value of the continuous half polar form",
-    "coercive_of_posdefHalf": "Lower bound for the half polar form",
-    "polarBilin_iteratedFDerivQuadraticMap": "Polar form of the second derivative",
-    "iteratedFDeriv_two_swap": "The second derivative is symmetric",
-    "coercive_of_posdef_of_contdiff": "Lower bound for a smooth function",
-    "coercive_of_posdef": "Positive definite gives a lower bound",
-    "le_of_littleO": "Comparison from the Taylor error",
-    "isLocalMin_of_posDef_of_littleo": "The test from a Taylor error bound",
-    "littleO_of_powerseries": "Taylor error from a power series",
-    "isLocalMin.of_subsingleton": "Local minimum on a one-point space",
-    "second_derivative_test": "The test for a power series",
-    "second_derivative_test_analyticAt": "The second-derivative test"
+ "schema": 1,
+ "claims": [
+  {
+   "id": "local-minimum",
+   "title": "The coupled spring potential has a local minimum at the origin",
+   "section": "1",
+   "passage": "local-minimum",
+   "lean": [
+    "coupled_spring_potential"
+   ]
   },
-  "fidelity": {
-    "coupled_spring_potential": {
-      "verdict": "same",
-      "text": "The Lean theorem writes out the polynomial in a let expression and states IsLocalMin at the zero vector. That means U(0) ≤ U(x) on a neighbourhood. The global inequality has its own passage and proof.",
-      "because": [
-        "local-minimum"
-      ],
-      "checks": []
-    },
-    "second_derivative_test_analyticAt": {
-      "verdict": "same",
-      "text": "Lean takes a finite-dimensional real inner product space, analyticity and zero gradient at the point, and PosDef of the map h ↦ D²f(a)[h,h]. Its conclusion is IsLocalMin, with a weak inequality on a neighbourhood.",
-      "because": [
-        "test-statement"
-      ],
-      "checks": []
-    },
-    "couplingPotential_analyticAt": {
-      "verdict": "same",
-      "text": "The point z is arbitrary in EuclideanSpace ℝ (Fin 2). Lean proves analyticity at each such point.",
-      "because": [
-        "potential-analytic"
-      ],
-      "checks": []
-    },
-    "couplingPotential_hasFDerivAt": {
-      "verdict": "same",
-      "text": "Lean defines the continuous linear map as (2x₀+x₁) times the first coordinate projection plus (x₀+2x₁) times the second. Applying that map to h gives the displayed derivative.",
-      "because": [
-        "potential-derivative"
-      ],
-      "checks": []
-    },
-    "couplingPotential_gradient_zero": {
-      "verdict": "same",
-      "text": "Lean states gradient couplingPotential !₂[0, 0] = 0. The vector !₂[0, 0] is the origin of the Euclidean plane.",
-      "because": [
-        "potential-gradient"
-      ],
-      "checks": []
-    },
-    "couplingPotential_iteratedFDeriv_two": {
-      "verdict": "same",
-      "text": "Lean evaluates the second derivative on two arbitrary vectors. The four coefficients of the resulting bilinear expression give the entries of K, independent of the base point z.",
-      "because": [
-        "potential-second-derivative"
-      ],
-      "checks": []
-    },
-    "couplingPotential_posDef": {
-      "verdict": "same",
-      "text": "Lean asserts positivity of the Hessian quadratic map at the origin on nonzero vectors. The lower bound by ‖h‖² in the next sentence follows from the displayed squares.",
-      "because": [
-        "potential-positive-definite"
-      ],
-      "checks": []
-    },
-    "isLocalMin_of_posDef_of_littleo": {
-      "verdict": "weaker",
-      "because": [
-        "lean-smoothness"
-      ],
-      "checks": [
-        "isLocalMin_of_posDef_of_littleo_without_smoothness"
-      ],
-      "text": "The page's argument needs the Taylor estimate, a zero gradient and a positive definite second derivative. The Lean statement also assumes ContDiffAt ℝ ⊤ f x₀, so it says less than the argument gives. Its proof obtains the lower bound from coercive_of_posdef and again from coercive_of_posdef_of_contdiff, and only the second uses the extra hypothesis. The supplementary Lean proof reaches the same conclusion without it."
-    },
-    "polarBilin_iteratedFDerivQuadraticMap": {
-      "verdict": "same",
-      "text": "The full polar form sums the second derivative on the ordered pairs (u,v) and (v,u). Recovering the Hessian off the diagonal requires halving the sum and using symmetry.",
-      "because": [
-        "hessian-polar-form"
-      ],
-      "checks": []
-    }
+  {
+   "id": "global-minimum",
+   "title": "The origin is the unique global minimum",
+   "section": "5",
+   "passage": "global-minimum",
+   "lean": [],
+   "checks": [
+    "couplingPotential_origin_lt"
+   ]
+  },
+  {
+   "id": "second-derivative-test",
+   "title": "The analytic second-derivative test",
+   "section": "1",
+   "passage": "test-statement",
+   "lean": [
+    "second_derivative_test_analyticAt"
+   ]
+  },
+  {
+   "id": "cubic-local-not-global",
+   "title": "Adding x₀³ keeps the local minimum, by the same test",
+   "section": "3",
+   "passage": "cubic-local-minimum",
+   "lean": [],
+   "checks": [
+    "cubicPerturbation_isLocalMin"
+   ]
   }
+ ],
+ "families": [
+  {
+   "id": "the-potential",
+   "name": "The potential"
+  },
+  {
+   "id": "second-derivative-test",
+   "name": "The second derivative test"
+  },
+  {
+   "id": "cubic-perturbation",
+   "name": "The cubic perturbation"
+  },
+  {
+   "id": "smoothness-and-symmetry",
+   "name": "Smoothness and symmetry"
+  }
+ ],
+ "topics": [
+  {
+   "id": "potential-and-minimum",
+   "family": "the-potential",
+   "name": "Potential and its minimum",
+   "description": "The potential $U(x)=x_0^2+x_0x_1+x_1^2$ is studied through local and global minimum arguments at the origin."
+  },
+  {
+   "id": "analytic-minimum-test",
+   "family": "second-derivative-test",
+   "name": "Analytic minimum test",
+   "description": "Analyticity, a zero gradient and a positive definite Hessian give a local minimum."
+  },
+  {
+   "id": "potential-derivatives",
+   "family": "the-potential",
+   "name": "Analyticity and derivatives",
+   "description": "The polynomial $U$ has a zero gradient at the origin and a constant positive definite Hessian."
+  },
+  {
+   "id": "quadratic-lower-bound",
+   "family": "second-derivative-test",
+   "name": "Quadratic lower bound",
+   "description": "Positive definiteness gives a positive lower bound proportional to the squared norm in finite dimensions."
+  },
+  {
+   "id": "taylor-remainder",
+   "family": "second-derivative-test",
+   "name": "Taylor remainder",
+   "description": "The Taylor remainder becomes small enough for the quadratic term to control the change in the function."
+  },
+  {
+   "id": "cubic-local-minimum",
+   "family": "cubic-perturbation",
+   "name": "Cubic local minimum",
+   "description": "Adding $x_0^3$ preserves the gradient and Hessian at the origin, so the local minimum persists."
+  },
+  {
+   "id": "failure-of-global-minimality",
+   "family": "cubic-perturbation",
+   "name": "Failure of global minimality",
+   "description": "The cubic perturbation takes values below its value at the origin away from the local minimum."
+  },
+  {
+   "id": "smoothness-assumption",
+   "family": "smoothness-and-symmetry",
+   "name": "The smoothness assumption",
+   "description": "The page identifies a use of smoothness that can be avoided by keeping an earlier quadratic lower bound."
+  },
+  {
+   "id": "polar-form",
+   "family": "smoothness-and-symmetry",
+   "name": "Polar form and symmetry",
+   "description": "The polar form sums the second derivative in both orders, and symmetry makes half that sum equal to the Hessian."
+  }
+ ],
+ "passages": [
+  {
+   "id": "potential-definition",
+   "section": "The minimum of the coupled spring potential",
+   "role": "defines",
+   "lean": [
+    "couplingPotential"
+   ],
+   "quote": "$U(x_0,x_1)=x_0^2+x_0x_1+x_1^2$",
+   "anchor": {
+    "heading": "The minimum of the coupled spring potential",
+    "block": 1
+   },
+   "topic": "potential-and-minimum",
+   "comparisons": [
+    {
+     "lean": "couplingPotential",
+     "fidelity": "same",
+     "note": "The formal definition is exactly $U(x_0,x_1)=x_0^2+x_0x_1+x_1^2$ on the real plane."
+    }
+   ]
+  },
+  {
+   "id": "completed-square",
+   "section": "The minimum of the coupled spring potential",
+   "role": "states",
+   "lean": [],
+   "quote": "$$U(x)=\\left(x_0+\\tfrac12x_1\\right)^2+\\tfrac34x_1^2,$$",
+   "anchor": {
+    "heading": "The minimum of the coupled spring potential",
+    "block": 2
+   },
+   "checks": [
+    "couplingPotential_eq_sq_add_sq"
+   ],
+   "topic": "potential-and-minimum"
+  },
+  {
+   "id": "local-minimum",
+   "section": "1. What the test requires",
+   "role": "states",
+   "lean": [
+    "coupled_spring_potential"
+   ],
+   "quote": "The coupled spring potential $U$ has a local minimum\nat the origin.",
+   "anchor": {
+    "heading": "1. What the test requires",
+    "block": 1
+   },
+   "topic": "potential-and-minimum",
+   "comparisons": [
+    {
+     "lean": "coupled_spring_potential",
+     "fidelity": "same",
+     "note": "The formal statement says $U(0)\\le U(x)$ throughout some neighbourhood of the origin, exactly the local minimum asserted here."
+    }
+   ]
+  },
+  {
+   "id": "test-statement",
+   "section": "1. What the test requires",
+   "role": "states",
+   "lean": [
+    "second_derivative_test_analyticAt"
+   ],
+   "quote": "If $f$ is analytic at $a$, its\ngradient vanishes at $a$, and $D^2f(a)[h,h]>0$ for every $h\\ne0$, then $f$\nhas a local minimum at $a$.",
+   "anchor": {
+    "heading": "1. What the test requires",
+    "block": 2
+   },
+   "topic": "analytic-minimum-test",
+   "comparisons": [
+    {
+     "lean": "second_derivative_test_analyticAt",
+     "fidelity": "same",
+     "note": "In the finite-dimensional real inner product space specified just before the quote, the formal statement assumes analyticity at $a$, zero gradient and $D^2f(a)[h,h]>0$ for every nonzero $h$, and concludes a local minimum."
+    }
+   ]
+  },
+  {
+   "id": "potential-analytic",
+   "section": "1. What the test requires",
+   "role": "states",
+   "lean": [
+    "couplingPotential_analyticAt"
+   ],
+   "quote": "$U$ is a polynomial, so it is analytic at every point.",
+   "anchor": {
+    "heading": "1. What the test requires",
+    "block": 3
+   },
+   "topic": "potential-derivatives",
+   "comparisons": [
+    {
+     "lean": "couplingPotential_analyticAt",
+     "fidelity": "same",
+     "note": "The formal statement proves that $U$ is analytic at every point of the real plane, using its polynomial expression."
+    }
+   ]
+  },
+  {
+   "id": "potential-derivative",
+   "section": "1. What the test requires",
+   "role": "states",
+   "lean": [
+    "couplingPotential_hasFDerivAt"
+   ],
+   "quote": "$$DU(x)[h]=(2x_0+x_1)h_0+(x_0+2x_1)h_1.$$",
+   "anchor": {
+    "heading": "1. What the test requires",
+    "block": 4
+   },
+   "topic": "potential-derivatives",
+   "comparisons": [
+    {
+     "lean": "couplingPotential_hasFDerivAt",
+     "fidelity": "same",
+     "note": "The formal statement gives $DU(x)[h]=(2x_0+x_1)h_0+(x_0+2x_1)h_1$ at every point $x$, exactly the displayed derivative."
+    }
+   ]
+  },
+  {
+   "id": "potential-gradient",
+   "section": "1. What the test requires",
+   "role": "states",
+   "lean": [
+    "couplingPotential_gradient_zero"
+   ],
+   "quote": "so the gradient at the origin is zero.",
+   "anchor": {
+    "heading": "1. What the test requires",
+    "block": 7
+   },
+   "topic": "potential-derivatives",
+   "comparisons": [
+    {
+     "lean": "couplingPotential_gradient_zero",
+     "fidelity": "same",
+     "note": "The formal statement says that the gradient of $U$ at the origin is the zero vector."
+    }
+   ]
+  },
+  {
+   "id": "potential-second-derivative",
+   "section": "1. What the test requires",
+   "role": "states",
+   "lean": [
+    "couplingPotential_iteratedFDeriv_two"
+   ],
+   "quote": "$$K=\\begin{pmatrix}2&1\\\\1&2\\end{pmatrix}.$$",
+   "anchor": {
+    "heading": "1. What the test requires",
+    "block": 8
+   },
+   "topic": "potential-derivatives",
+   "comparisons": [
+    {
+     "lean": "couplingPotential_iteratedFDeriv_two",
+     "fidelity": "same",
+     "note": "The display gives the constant Hessian $K$; the formal statement gives $D^2U(z)[u,v]=2u_0v_0+u_0v_1+u_1v_0+2u_1v_1$ for every $z,u,v$, which is exactly $u^TKv$."
+    }
+   ]
+  },
+  {
+   "id": "potential-positive-definite",
+   "section": "1. What the test requires",
+   "role": "states",
+   "lean": [
+    "couplingPotential_posDef"
+   ],
+   "quote": "The Hessian at the origin is positive definite.",
+   "anchor": {
+    "heading": "1. What the test requires",
+    "block": 11
+   },
+   "topic": "potential-derivatives",
+   "comparisons": [
+    {
+     "lean": "couplingPotential_posDef",
+     "fidelity": "same",
+     "note": "The formal statement gives $D^2U(0)[h,h]>0$ for every nonzero $h$, exactly positive definiteness at the origin; it does not state the sharper numerical lower bound in the next sentence."
+    }
+   ]
+  },
+  {
+   "id": "test-quadratic-map",
+   "section": "2. How the test turns a positive Hessian into a minimum",
+   "role": "explains",
+   "lean": [
+    "iteratedFDerivQuadraticMap"
+   ],
+   "quote": "Lean packages $Q$ as a quadratic map",
+   "anchor": {
+    "heading": "2. How the test turns a positive Hessian into a minimum",
+    "block": 1
+   },
+   "topic": "quadratic-lower-bound",
+   "comparisons": [
+    {
+     "lean": "iteratedFDerivQuadraticMap",
+     "fidelity": "same",
+     "note": "The formal definition makes $Q(h)=D^2f(a)[h,h]$ a quadratic map, as the passage describes."
+    }
+   ]
+  },
+  {
+   "id": "test-lower-bound",
+   "section": "2. How the test turns a positive Hessian into a minimum",
+   "role": "explains",
+   "lean": [
+    "coercive_of_posdef"
+   ],
+   "quote": "scaling gives $Q(h)\\ge C\\lVert h\\rVert^2$",
+   "anchor": {
+    "heading": "2. How the test turns a positive Hessian into a minimum",
+    "block": 1
+   },
+   "topic": "quadratic-lower-bound",
+   "comparisons": [
+    {
+     "lean": "coercive_of_posdef",
+     "fidelity": "same",
+     "note": "For $Q(h)=D^2f(a)[h,h]$ on a finite-dimensional real normed space, the formal statement assumes positivity on nonzero vectors and gives some $C>0$ with $Q(h)\\ge C\\lVert h\\rVert^2$ for every $h$."
+    }
+   ]
+  },
+  {
+   "id": "test-zero-dimensional",
+   "section": "2. How the test turns a positive Hessian into a minimum",
+   "role": "explains",
+   "lean": [
+    "isLocalMin.of_subsingleton"
+   ],
+   "quote": "A zero-dimensional space contains only the point $a$, and\nLean handles it separately.",
+   "anchor": {
+    "heading": "2. How the test turns a positive Hessian into a minimum",
+    "block": 1
+   },
+   "topic": "quadratic-lower-bound",
+   "comparisons": [
+    {
+     "lean": "isLocalMin.of_subsingleton",
+     "fidelity": "stronger",
+     "note": "The formal statement says that on any space with at most one point every real function has a local minimum at each point, so it covers the zero-dimensional case and more. The power-series test settles that case with it before the main argument; the lower-bound lemma also treats the case on its own, with $C=1$."
+    }
+   ]
+  },
+  {
+   "id": "test-taylor-error",
+   "section": "2. How the test turns a positive Hessian into a minimum",
+   "role": "explains",
+   "lean": [
+    "littleO_of_powerseries"
+   ],
+   "quote": "$R(h)=o(\\lVert h\\rVert^2)$.",
+   "anchor": {
+    "heading": "2. How the test turns a positive Hessian into a minimum",
+    "block": 2
+   },
+   "topic": "taylor-remainder",
+   "comparisons": [
+    {
+     "lean": "littleO_of_powerseries",
+     "fidelity": "stronger",
+     "note": "The page uses the remainder estimate at a critical point in finite dimensions; the formal statement gives it on any real normed space with a convergent power series near $a$, without a zero-gradient assumption. Away from critical points, the subtracted Taylor polynomial includes the linear term."
+    }
+   ]
+  },
+  {
+   "id": "test-inequality",
+   "section": "2. How the test turns a positive Hessian into a minimum",
+   "role": "explains",
+   "lean": [
+    "le_of_littleO"
+   ],
+   "quote": "so $f(a+h)\\ge f(a)$ throughout that neighbourhood",
+   "anchor": {
+    "heading": "2. How the test turns a positive Hessian into a minimum",
+    "block": 2
+   },
+   "topic": "taylor-remainder",
+   "comparisons": [
+    {
+     "lean": "le_of_littleO",
+     "fidelity": "weaker",
+     "note": "The passage concludes the inequality throughout a neighbourhood; the formal statement gives it at any one point satisfying the quadratic lower bound, $Df(a)[x-a]=0$, and the stated remainder bound. The separate local-minimum argument supplies these conditions throughout a neighbourhood."
+    }
+   ]
+  },
+  {
+   "id": "cubic-local-minimum",
+   "section": "3. A remainder that matters",
+   "role": "states",
+   "lean": [],
+   "quote": "A supplementary Lean proof applies\nKjos-Hanssen's analytic test to $W$ unchanged. Its only new step shows\nthat the second derivative of $x_0^3$ vanishes at the origin.",
+   "anchor": {
+    "heading": "3. A remainder that matters",
+    "block": 1
+   },
+   "checks": [
+    "cubicPerturbation_isLocalMin",
+    "cube_iteratedFDeriv_two_zero"
+   ],
+   "topic": "cubic-local-minimum"
+  },
+  {
+   "id": "cubic-strict",
+   "section": "3. A remainder that matters",
+   "role": "states",
+   "lean": [],
+   "quote": "A second supplementary proof\nchecks the strict inequality near the origin in Lean.",
+   "anchor": {
+    "heading": "3. A remainder that matters",
+    "block": 4
+   },
+   "checks": [
+    "cubicPerturbation_strict_near_origin"
+   ],
+   "topic": "cubic-local-minimum"
+  },
+  {
+   "id": "cubic-not-global",
+   "section": "3. A remainder that matters",
+   "role": "states",
+   "lean": [],
+   "quote": "For example $W(-2,0)=-4<W(0)$, which Lean also checks,",
+   "anchor": {
+    "heading": "3. A remainder that matters",
+    "block": 5
+   },
+   "checks": [
+    "cubicPerturbation_not_global"
+   ],
+   "topic": "failure-of-global-minimality"
+  },
+  {
+   "id": "lean-smoothness",
+   "section": "4. A hypothesis the proof does not need",
+   "role": "explains",
+   "lean": [
+    "isLocalMin_of_posDef_of_littleo",
+    "coercive_of_posdef_of_contdiff"
+   ],
+   "quote": "Its proof\nobtains the lower bound $Q(h)\\ge C\\lVert h\\rVert^2$ twice.",
+   "anchor": {
+    "heading": "4. A hypothesis the proof does not need",
+    "block": 1
+   },
+   "topic": "smoothness-assumption",
+   "comparisons": [
+    {
+     "lean": "isLocalMin_of_posDef_of_littleo",
+     "fidelity": "different",
+     "note": "The passage describes two calls made inside a proof; the formal statement instead concludes a local minimum from a quadratic Taylor remainder estimate, zero gradient, smoothness of all orders and positive definiteness. The proof text does contain both calls."
+    },
+    {
+     "lean": "coercive_of_posdef_of_contdiff",
+     "fidelity": "different",
+     "note": "The passage counts calls inside another proof; this formal statement gives a quadratic lower bound assuming smoothness of all orders and a positive definite Hessian. It supplies the second bound, but does not itself state that the bound is obtained twice."
+    }
+   ]
+  },
+  {
+   "id": "hessian-polar-form",
+   "section": "4. A hypothesis the proof does not need",
+   "role": "states",
+   "lean": [
+    "polarBilin_iteratedFDerivQuadraticMap"
+   ],
+   "quote": "$$Q(u+v)-Q(u)-Q(v)=B(u,v)+B(v,u).$$",
+   "anchor": {
+    "heading": "4. A hypothesis the proof does not need",
+    "block": 3
+   },
+   "topic": "polar-form",
+   "comparisons": [
+    {
+     "lean": "polarBilin_iteratedFDerivQuadraticMap",
+     "fidelity": "same",
+     "note": "For $Q(h)=D^2f(a)[h,h]$ and $B(u,v)=D^2f(a)[u,v]$, the formal statement is exactly $Q(u+v)-Q(u)-Q(v)=B(u,v)+B(v,u)$; symmetry is not assumed."
+    }
+   ]
+  },
+  {
+   "id": "hessian-symmetry",
+   "section": "4. A hypothesis the proof does not need",
+   "role": "states",
+   "lean": [
+    "iteratedFDeriv_two_swap"
+   ],
+   "quote": "PhyslibAlpha proves that symmetry from smoothness,\nby Schwarz's theorem.",
+   "anchor": {
+    "heading": "4. A hypothesis the proof does not need",
+    "block": 4
+   },
+   "topic": "polar-form",
+   "comparisons": [
+    {
+     "lean": "iteratedFDeriv_two_swap",
+     "fidelity": "same",
+     "note": "The formal statement assumes that $f$ is smooth of all orders at $a$ and concludes $D^2f(a)[u,v]=D^2f(a)[v,u]$ for all $u$ and $v$, the symmetry of $B$ described here. Its proof rests on the standard symmetry of second derivatives of smooth functions."
+    }
+   ]
+  },
+  {
+   "id": "without-smoothness",
+   "section": "4. A hypothesis the proof does not need",
+   "role": "explains",
+   "lean": [],
+   "quote": "A supplementary Lean proof keeps the little-o estimate, the zero gradient\nand positive definiteness, drops the smoothness hypothesis, and reaches the\nsame conclusion with the first call alone.",
+   "anchor": {
+    "heading": "4. A hypothesis the proof does not need",
+    "block": 5
+   },
+   "checks": [
+    "isLocalMin_of_posDef_of_littleo_without_smoothness"
+   ],
+   "topic": "smoothness-assumption"
+  },
+  {
+   "id": "power-series-caller",
+   "section": "4. A hypothesis the proof does not need",
+   "role": "explains",
+   "lean": [
+    "second_derivative_test"
+   ],
+   "quote": "which passes `h₁.analyticAt.contDiffAt` to the\nremainder lemma.",
+   "anchor": {
+    "heading": "4. A hypothesis the proof does not need",
+    "block": 6
+   },
+   "topic": "smoothness-assumption",
+   "comparisons": [
+    {
+     "lean": "second_derivative_test",
+     "fidelity": "different",
+     "note": "The quoted fragment describes a step inside the proof; the formal statement concludes a local minimum from a convergent power series near $a$, zero gradient and a positive definite Hessian. Its proof does pass the smoothness obtained from that power series to the remainder argument."
+    }
+   ]
+  },
+  {
+   "id": "global-minimum",
+   "section": "5. Where the three squares come from",
+   "role": "states",
+   "lean": [],
+   "quote": "For every nonzero $x\\in\\mathbb R^2$, $U(x)>U(0)$.",
+   "anchor": {
+    "heading": "5. Where the three squares come from",
+    "block": 6
+   },
+   "checks": [
+    "couplingPotential_origin_lt"
+   ],
+   "topic": "potential-and-minimum"
+  },
+  {
+   "id": "strict-positivity",
+   "section": "5. Where the three squares come from",
+   "role": "proves",
+   "lean": [],
+   "quote": "the\nsecond term forces $x_1=0$. The first then forces $x_0=0$.",
+   "anchor": {
+    "heading": "5. Where the three squares come from",
+    "block": 6
+   },
+   "checks": [
+    "couplingPotential_pos"
+   ],
+   "topic": "potential-and-minimum"
+  }
+ ],
+ "plain": {
+  "couplingPotential": "The coupled spring potential",
+  "couplingPotential_analyticAt": "The potential is analytic",
+  "couplingPotential_hasFDerivAt": "Derivative of the potential",
+  "couplingPotential_gradient_zero": "Zero gradient at the origin",
+  "couplingPotential_iteratedFDeriv_two": "Second derivative of the potential",
+  "couplingPotential_posDef": "Positive Hessian at the origin",
+  "coupled_spring_potential": "Local minimum at the origin",
+  "Function.update₀": "Replacing the first coordinate",
+  "Function.update₁": "Replacing the second coordinate",
+  "hessianBilinearCompanion": "Sum of reversed second derivatives",
+  "iteratedFDerivQuadraticMap": "The Hessian quadratic form",
+  "continuousBilinearMapOfContinuousMultilinearMap": "Evaluating a continuous bilinear form",
+  "QuadraticMap.toMultilinearMap": "The full polar form",
+  "QuadraticMap.toMultilinearMapHalfPolarBilin": "Half the polar form",
+  "QuadraticMap.toMultilinearMap_continuous": "Continuity of the polar form",
+  "QuadraticMap.toMultilinearMapHalfPolarBilin_continuous": "Continuity of half the polar form",
+  "QuadraticMap.toContinuousMultilinearMap": "Continuous polar form",
+  "QuadraticMap.toContinuousMultilinearMapHalfPolarBilin": "Continuous half polar form",
+  "QuadraticMap.toContinuousMultilinearMap_apply": "Evaluating the polar form",
+  "QuadraticMap.toContinuousMultilinearMap_applyHalf": "Evaluating half the polar form",
+  "coercive_of_posdefHalf": "Half polar form lower bound",
+  "polarBilin_iteratedFDerivQuadraticMap": "Polar form of the Hessian",
+  "iteratedFDeriv_two_swap": "The second derivative is symmetric",
+  "coercive_of_posdef_of_contdiff": "Lower bound under smoothness",
+  "coercive_of_posdef": "Positive Hessian lower bound",
+  "le_of_littleO": "Comparison from the Taylor error",
+  "isLocalMin_of_posDef_of_littleo": "Minimum from the Taylor remainder",
+  "littleO_of_powerseries": "Taylor error from a power series",
+  "isLocalMin.of_subsingleton": "Local minimum on a singleton",
+  "second_derivative_test": "Power series minimum test",
+  "second_derivative_test_analyticAt": "Analytic second derivative test"
+ },
+ "fidelity": {
+  "coupled_spring_potential": {
+   "verdict": "same",
+   "text": "The Lean theorem writes out the polynomial in a let expression and states IsLocalMin at the zero vector. That means U(0) ≤ U(x) on a neighbourhood. The global inequality has its own passage and proof.",
+   "because": [
+    "local-minimum"
+   ],
+   "checks": []
+  },
+  "second_derivative_test_analyticAt": {
+   "verdict": "same",
+   "text": "Lean takes a finite-dimensional real inner product space, analyticity and zero gradient at the point, and PosDef of the map h ↦ D²f(a)[h,h]. Its conclusion is IsLocalMin, with a weak inequality on a neighbourhood.",
+   "because": [
+    "test-statement"
+   ],
+   "checks": []
+  },
+  "couplingPotential_analyticAt": {
+   "verdict": "same",
+   "text": "The point z is arbitrary in EuclideanSpace ℝ (Fin 2). Lean proves analyticity at each such point.",
+   "because": [
+    "potential-analytic"
+   ],
+   "checks": []
+  },
+  "couplingPotential_hasFDerivAt": {
+   "verdict": "same",
+   "text": "Lean defines the continuous linear map as (2x₀+x₁) times the first coordinate projection plus (x₀+2x₁) times the second. Applying that map to h gives the displayed derivative.",
+   "because": [
+    "potential-derivative"
+   ],
+   "checks": []
+  },
+  "couplingPotential_gradient_zero": {
+   "verdict": "same",
+   "text": "Lean states gradient couplingPotential !₂[0, 0] = 0. The vector !₂[0, 0] is the origin of the Euclidean plane.",
+   "because": [
+    "potential-gradient"
+   ],
+   "checks": []
+  },
+  "couplingPotential_iteratedFDeriv_two": {
+   "verdict": "same",
+   "text": "Lean evaluates the second derivative on two arbitrary vectors. The four coefficients of the resulting bilinear expression give the entries of K, independent of the base point z.",
+   "because": [
+    "potential-second-derivative"
+   ],
+   "checks": []
+  },
+  "couplingPotential_posDef": {
+   "verdict": "same",
+   "text": "Lean asserts positivity of the Hessian quadratic map at the origin on nonzero vectors. The lower bound by ‖h‖² in the next sentence follows from the displayed squares.",
+   "because": [
+    "potential-positive-definite"
+   ],
+   "checks": []
+  },
+  "isLocalMin_of_posDef_of_littleo": {
+   "verdict": "weaker",
+   "because": [
+    "lean-smoothness"
+   ],
+   "checks": [
+    "isLocalMin_of_posDef_of_littleo_without_smoothness"
+   ],
+   "text": "The page's argument needs the Taylor estimate, a zero gradient and a positive definite second derivative. The Lean statement also assumes ContDiffAt ℝ ⊤ f x₀, so it says less than the argument gives. Its proof obtains the lower bound from coercive_of_posdef and again from coercive_of_posdef_of_contdiff, and only the second uses the extra hypothesis. The supplementary Lean proof reaches the same conclusion without it."
+  },
+  "polarBilin_iteratedFDerivQuadraticMap": {
+   "verdict": "same",
+   "text": "The full polar form sums the second derivative on the ordered pairs (u,v) and (v,u). Recovering the Hessian off the diagonal requires halving the sum and using symmetry.",
+   "because": [
+    "hessian-polar-form"
+   ],
+   "checks": []
+  }
+ },
+ "notes": {
+  "couplingPotential": {
+   "text": "The formal definition assigns $U(x)=x_0^2+x_0x_1+x_1^2$ to every point of the real plane. It contains no spring constant, mass or equation of motion. Those quantities belong to the mechanical interpretation later in the page, where the physical potential energy is $kU(x)$.",
+   "because": [
+    "potential-definition"
+   ]
+  },
+  "coupled_spring_potential": {
+   "text": "There is a neighbourhood of the origin on which $U(0)\\le U(x)$. The formal statement gives this non-strict local inequality. It does not state strictness away from the origin, uniqueness or a global inequality. The page presents those further conclusions separately through the completed-square argument and supplementary proofs.",
+   "because": [
+    "local-minimum",
+    "global-minimum"
+   ]
+  },
+  "second_derivative_test_analyticAt": {
+   "text": "Let $f$ be real-valued on a finite-dimensional real inner product space. The formal statement assumes that $f$ is analytic at $a$, that $\\nabla f(a)=0$, and that $D^2f(a)[h,h]>0$ whenever $h\\ne0$. It concludes $f(a)\\le f(x)$ throughout some neighbourhood of $a$. The conclusion does not include strictness or an explicit neighbourhood size.",
+   "because": [
+    "test-statement"
+   ]
+  },
+  "couplingPotential_analyticAt": {
+   "text": "The potential $U$ is analytic at every point of the real plane. The source obtains this from the coordinate functions by taking squares, a product and sums, matching the polynomial formula. No restriction to the origin and no hypothesis about a displacement being small appear in the formal statement.",
+   "because": [
+    "potential-analytic"
+   ]
+  },
+  "couplingPotential_hasFDerivAt": {
+   "text": "At an arbitrary point $x$, the derivative sends an increment $h$ to $(2x_0+x_1)h_0+(x_0+2x_1)h_1$. The formal statement identifies this linear functional as the derivative of $U$. It is the derivative on the whole real plane; the vanishing of its coefficients at the origin is established separately.",
+   "because": [
+    "potential-derivative"
+   ]
+  },
+  "couplingPotential_gradient_zero": {
+   "text": "The formal statement is $\\nabla U(0)=0$. Its proof uses the derivative formula and the correspondence between a derivative and a gradient in the Euclidean plane. This establishes the critical-point hypothesis for the minimum test; it does not by itself classify the critical point as a minimum.",
+   "because": [
+    "potential-gradient"
+   ]
+  },
+  "couplingPotential_iteratedFDeriv_two": {
+   "text": "For every base point $z$ and vectors $u,v$, the formal statement gives $D^2U(z)[u,v]=2u_0v_0+u_0v_1+u_1v_0+2u_1v_1$. These four coefficients are the entries of $K$. The formula is independent of $z$ and allows distinct vectors in the two positions, so it specifies the full Hessian rather than only its diagonal values.",
+   "because": [
+    "potential-second-derivative"
+   ]
+  },
+  "couplingPotential_posDef": {
+   "text": "The formal statement gives $D^2U(0)[h,h]>0$ for every nonzero vector $h$. The proof substitutes the explicit Hessian formula and uses nonnegativity of squares. It supplies the positivity hypothesis for the analytic test. The numerical estimate $D^2U(0)[h,h]\\ge\\lVert h\\rVert^2$ appears in the page but is not the conclusion of this theorem.",
+   "because": [
+    "potential-positive-definite"
+   ]
+  },
+  "hessianBilinearCompanion": {
+   "text": "Writing $B(u,v)=D^2f(a)[u,v]$, the formal definition forms the bilinear map $B(u,v)+B(v,u)$. This is a sum, not an average. When the Hessian is symmetric it equals $2B(u,v)$. It serves as the polar form of $Q(h)=B(h,h)$ and explains the factor of one half used later.",
+   "because": [
+    "test-quadratic-map",
+    "hessian-polar-form"
+   ]
+  },
+  "iteratedFDerivQuadraticMap": {
+   "text": "The formal definition is $Q(h)=D^2f(a)[h,h]$. It establishes the quadratic dependence on $h$ and the identity relating $Q(u+v)$ to $Q(u)$, $Q(v)$ and the associated polar form. This construction alone assumes neither analyticity nor positive definiteness; those are separate hypotheses in the subsequent minimum test.",
+   "because": [
+    "test-quadratic-map"
+   ]
+  },
+  "continuousBilinearMapOfContinuousMultilinearMap": {
+   "text": "The formal definition evaluates a continuous map that is linear in each of two vector arguments as a bilinear form, with the value at $(u,v)$ unchanged. Its setting is a finite-dimensional normed space over a complete nontrivially normed field, including the real spaces used here. It makes no positivity or symmetry assertion.",
+   "because": [
+    "test-lower-bound"
+   ]
+  },
+  "QuadraticMap.toMultilinearMap": {
+   "text": "For a real quadratic form $Q$, the formal definition uses the full polar form $P(u,v)=Q(u+v)-Q(u)-Q(v)$. It is linear in each argument. On the diagonal, $P(h,h)=2Q(h)$, so this definition must be distinguished from the half polar form that recovers $Q$ on the diagonal.",
+   "because": [
+    "hessian-polar-form"
+   ]
+  },
+  "QuadraticMap.toMultilinearMapHalfPolarBilin": {
+   "text": "The formal definition takes $\\tfrac12[Q(u+v)-Q(u)-Q(v)]$ for a real quadratic form $Q$. This is the half polar form. Its diagonal value is $Q(h)$, unlike the full polar form whose diagonal is $2Q(h)$. No finite-dimensional assumption or positivity assumption is needed for this algebraic construction.",
+   "because": [
+    "hessian-polar-form"
+   ]
+  },
+  "QuadraticMap.toMultilinearMap_continuous": {
+   "text": "On a finite-dimensional real normed space, the full polar form $P(u,v)=Q(u+v)-Q(u)-Q(v)$ of every quadratic form $Q$ is continuous in the pair of arguments. The statement uses finite dimensionality to obtain continuity. It does not require $Q$ to be positive definite or to arise from a Hessian.",
+   "because": [
+    "hessian-polar-form"
+   ]
+  },
+  "QuadraticMap.toMultilinearMapHalfPolarBilin_continuous": {
+   "text": "On a finite-dimensional real normed space, the half polar form $\\tfrac12[Q(u+v)-Q(u)-Q(v)]$ is continuous in both arguments jointly. This statement applies to every quadratic form $Q$, without a positivity assumption. Continuity is used later when the form is restricted to the compact unit sphere.",
+   "because": [
+    "hessian-polar-form",
+    "test-lower-bound"
+   ]
+  },
+  "QuadraticMap.toContinuousMultilinearMap": {
+   "text": "The formal definition takes the full polar form of a real quadratic form $Q$ and includes its continuity in finite dimensions. Its value remains $Q(u+v)-Q(u)-Q(v)$. In particular, the diagonal is $2Q(h)$; continuity does not change that factor or turn this construction into the half polar form.",
+   "because": [
+    "hessian-polar-form"
+   ]
+  },
+  "QuadraticMap.toContinuousMultilinearMapHalfPolarBilin": {
+   "text": "The formal definition uses the continuous half polar form of $Q$ on a finite-dimensional real normed space. Its value at $(u,v)$ is $\\tfrac12[Q(u+v)-Q(u)-Q(v)]$. At $(h,h)$ this is $Q(h)$, which is the normalization needed to transfer positive definiteness of $Q$ to the lower-bound argument.",
+   "because": [
+    "hessian-polar-form",
+    "test-lower-bound"
+   ]
+  },
+  "QuadraticMap.toContinuousMultilinearMap_apply": {
+   "text": "The formal statement identifies the value of the continuous full polar form with $Q(u+v)-Q(u)-Q(v)$. It assumes a finite-dimensional real normed space and an arbitrary quadratic form $Q$. This confirms that adding continuity to the construction leaves its values unchanged; no factor of one half is present.",
+   "because": [
+    "hessian-polar-form"
+   ]
+  },
+  "QuadraticMap.toContinuousMultilinearMap_applyHalf": {
+   "text": "The formal statement identifies the value of the continuous half polar form with $\\tfrac12[Q(u+v)-Q(u)-Q(v)]$. It assumes a finite-dimensional real normed space and an arbitrary quadratic form $Q$. For the Hessian quadratic form, the displayed polar identity therefore gives $\\tfrac12[B(u,v)+B(v,u)]$ at every pair of vectors.",
+   "because": [
+    "hessian-polar-form"
+   ]
+  },
+  "coercive_of_posdefHalf": {
+   "text": "For a positive definite quadratic form $Q$ on a finite-dimensional real normed space, the formal statement gives a constant $C>0$ such that its half polar form at $(h,h)$ is at least $C\\lVert h\\rVert^2$ for every $h$. Since that diagonal value is $Q(h)$, this is the required quadratic lower bound.",
+   "because": [
+    "test-lower-bound",
+    "hessian-polar-form"
+   ]
+  },
+  "polarBilin_iteratedFDerivQuadraticMap": {
+   "text": "With $B(u,v)=D^2f(a)[u,v]$ and $Q(h)=B(h,h)$, the formal statement is $Q(u+v)-Q(u)-Q(v)=B(u,v)+B(v,u)$. No smoothness assumption is needed for this identity on a real normed space. It gives the sum of the two orders; identifying half that sum with $B$ off the diagonal additionally requires symmetry.",
+   "because": [
+    "hessian-polar-form"
+   ]
+  },
+  "iteratedFDeriv_two_swap": {
+   "text": "The formal statement assumes that $f$ is smooth of all orders at $a$ in a real normed space. It concludes $D^2f(a)[u,v]=D^2f(a)[v,u]$ for every pair of vectors. This symmetry is the step used to identify half the polar form with the Hessian in the lower-bound proof that assumes smoothness.",
+   "because": [
+    "hessian-polar-form",
+    "lean-smoothness",
+    "hessian-symmetry"
+   ]
+  },
+  "coercive_of_posdef_of_contdiff": {
+   "text": "For a real-valued function on a finite-dimensional real normed space, the formal statement assumes smoothness of all orders at $a$ and positivity of $D^2f(a)[h,h]$ for nonzero $h$. It gives some $C>0$ with $D^2f(a)[h,h]\\ge C\\lVert h\\rVert^2$ for every $h$. The proof uses smoothness to obtain Hessian symmetry.",
+   "because": [
+    "lean-smoothness"
+   ]
+  },
+  "coercive_of_posdef": {
+   "text": "On a finite-dimensional real normed space, positivity of $D^2f(a)[h,h]$ for every nonzero $h$ gives some $C>0$ with $D^2f(a)[h,h]\\ge C\\lVert h\\rVert^2$ for all $h$. The formal statement requires neither analyticity, a zero gradient nor a separate smoothness assumption. Its conclusion is a bound on the Hessian, not yet a minimum of $f$.",
+   "because": [
+    "test-lower-bound",
+    "lean-smoothness"
+   ]
+  },
+  "le_of_littleO": {
+   "text": "Fix $x$ and write $h=x-a$. The formal statement assumes $D^2f(a)[h,h]\\ge C\\lVert h\\rVert^2$, $Df(a)[h]=0$, and $|f(x)-f(a)-Df(a)[h]-\\tfrac12D^2f(a)[h,h]|\\le\\tfrac C2\\lVert h\\rVert^2$. It concludes $f(a)\\le f(x)$. This is a pointwise implication; it neither chooses a neighbourhood nor assumes a little-o estimate itself. No finite-dimensional assumption is imposed.",
+   "because": [
+    "test-inequality"
+   ]
+  },
+  "isLocalMin_of_posDef_of_littleo": {
+   "text": "The formal statement assumes a finite-dimensional real inner product space, a quadratic Taylor remainder $o(\\lVert x-a\\rVert^2)$, zero gradient, smoothness of all orders at $a$, and a positive definite Hessian there. It concludes a local minimum. The proof obtains the lower bound twice and uses smoothness in the second call; the page argues that this second call can be omitted.",
+   "because": [
+    "lean-smoothness",
+    "without-smoothness"
+   ]
+  },
+  "littleO_of_powerseries": {
+   "text": "If $f$ agrees with a convergent power series on a ball of positive radius around $a$, the formal statement gives a remainder $o(\\lVert x-a\\rVert^2)$ after subtracting the terms of degrees zero, one and two. It works on a real normed space without requiring finite dimensionality or a zero gradient; the linear term vanishes only at a critical point.",
+   "because": [
+    "test-taylor-error"
+   ]
+  },
+  "isLocalMin.of_subsingleton": {
+   "text": "If a topological space has at most one point, every real-valued function has a local minimum at each point of that space. No differentiability or vector-space hypothesis is needed. The zero-dimensional vector space in the page is an instance of this statement, allowing the analytic test to handle that case separately.",
+   "because": [
+    "test-lower-bound",
+    "test-zero-dimensional"
+   ]
+  },
+  "second_derivative_test": {
+   "text": "Let $f$ be real-valued on a finite-dimensional real inner product space. The formal statement assumes a convergent power series on a ball of positive radius around $a$, zero gradient there, and a positive definite Hessian. It concludes a local minimum. Its proof obtains smoothness from the power series before applying the remainder argument.",
+   "because": [
+    "power-series-caller",
+    "test-statement"
+   ]
+  }
+ }
 }

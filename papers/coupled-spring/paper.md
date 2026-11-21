@@ -16,7 +16,7 @@ so the proof doubles as a worked example of the test. The sections below
 follow it in order: what the test requires (§1) and how its proof turns a
 positive Hessian into a minimum (§2). Then come a perturbed potential for
 which the completed square no longer settles the question (§3) and a
-hypothesis of the test's remainder lemma that its proof never uses (§4).
+hypothesis of the test's remainder lemma that its proof does not need (§4).
 The last two sections derive $U$ from three springs and describe the
 motion it governs.
 
@@ -109,10 +109,11 @@ for $-1<t<0$ and zero at $t=-1$, and they decrease without bound as $t$
 decreases further. For example $W(-2,0)=-4<W(0)$, which Lean also checks,
 so $W$ has no global minimum. On the negative half of this axis the
 inequality $W\ge W(0)$ holds out to $t=-1$, twice as far as the region the
-test guarantees. Whether the origin is a minimum of $W$ follows from $K$
-alone, and the cubic changes only the size of the neighbourhood.
+test guarantees. Given the zero gradient and analyticity, whether the
+origin is a local minimum of $W$ is settled by $K$ alone, and the cubic
+changes only the size of the neighbourhood.
 
-## 4. A hypothesis the proof never uses
+## 4. A hypothesis the proof does not need
 
 PhyslibAlpha's remainder lemma, `isLocalMin_of_posDef_of_littleo`, takes
 the little-o estimate, the zero gradient and positive definiteness, and

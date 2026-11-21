@@ -16,6 +16,98 @@
   "2",
   "3"
  ],
+ "families": [
+  {
+   "id": "first-order-representation",
+   "name": "First-order representation"
+  },
+  {
+   "id": "contextual-representation",
+   "name": "Contextual representation"
+  },
+  {
+   "id": "conversion",
+   "name": "Conversion between representations"
+  },
+  {
+   "id": "isomorphism",
+   "name": "Isomorphism and its assumptions"
+  }
+ ],
+ "topics": [
+  {
+   "id": "types-contexts",
+   "family": "first-order-representation",
+   "name": "Types and contexts",
+   "description": "Guest types and snoc contexts specify the types and available variables of the simply typed lambda calculus."
+  },
+  {
+   "id": "de-bruijn-indices",
+   "family": "first-order-representation",
+   "name": "Typed de Bruijn indices",
+   "description": "Top and Pop locate a variable of a given type within its context."
+  },
+  {
+   "id": "first-order-terms",
+   "family": "first-order-representation",
+   "name": "First-order terms",
+   "description": "Variables, abstraction, application and the unit term form the first-order embedding."
+  },
+  {
+   "id": "singleton-variables",
+   "family": "contextual-representation",
+   "name": "Singleton variable markers",
+   "description": "A singleton marker saves the context and type of the most recently introduced variable."
+  },
+  {
+   "id": "context-extension",
+   "family": "contextual-representation",
+   "name": "Context extension",
+   "description": "The identity and extension instances recover a de Bruijn index from the binding and use contexts."
+  },
+  {
+   "id": "contextual-terms",
+   "family": "contextual-representation",
+   "name": "Contextual terms",
+   "description": "Contextual terms use host functions for abstraction and reification for variable occurrences."
+  },
+  {
+   "id": "unembedding",
+   "family": "conversion",
+   "name": "Unembedding contextual terms",
+   "description": "Unembedding translates contextual syntax to first-order syntax while preserving context and guest type."
+  },
+  {
+   "id": "contextualisation",
+   "family": "conversion",
+   "name": "Contextualising first-order terms",
+   "description": "Contextualisation translates first-order syntax back to contextual syntax."
+  },
+  {
+   "id": "variable-conversion",
+   "family": "conversion",
+   "name": "Converting individual variables",
+   "description": "An existential variable package separates conversion of indices from conversion of whole terms."
+  },
+  {
+   "id": "term-round-trips",
+   "family": "isomorphism",
+   "name": "Term round trips",
+   "description": "The two term equations express recovery of the original representation after both conversions."
+  },
+  {
+   "id": "index-round-trips",
+   "family": "isomorphism",
+   "name": "Index round trips",
+   "description": "The variable equations relate de Bruijn indices to their existential packages and support the term equations."
+  },
+  {
+   "id": "closed-world-assumption",
+   "family": "isomorphism",
+   "name": "Closed world assumption",
+   "description": "The reverse conversion relies on the assumption that reification uses only the identity and context-extension instances."
+  }
+ ],
  "passages": [
   {
    "id": "ty",
@@ -24,7 +116,15 @@
    "lean": [
     "Ty"
    ],
-   "quote": "Ty represents the types of the guest language"
+   "quote": "Ty represents the types of the guest language",
+   "topic": "types-contexts",
+   "comparisons": [
+    {
+     "lean": "Ty",
+     "fidelity": "same",
+     "note": "The formal definition gives exactly the guest types named here: Unit and function types, with no additional base types."
+    }
+   ]
   },
   {
    "id": "ctx",
@@ -33,7 +133,15 @@
    "lean": [
     "Ctx"
    ],
-   "quote": "Ctx represents the guest language’s typing context, which is a “snoc” list of types."
+   "quote": "Ctx represents the guest language’s typing context, which is a “snoc” list of types.",
+   "topic": "types-contexts",
+   "comparisons": [
+    {
+     "lean": "Ctx",
+     "fidelity": "same",
+     "note": "The formal definition gives the empty context and extension by one type at the right, matching the paper’s snoc lists."
+    }
+   ]
   },
   {
    "id": "index",
@@ -42,7 +150,15 @@
    "lean": [
     "Index"
    ],
-   "quote": "The Index ts t type represents de Bruijn indices"
+   "quote": "The Index ts t type represents de Bruijn indices",
+   "topic": "de-bruijn-indices",
+   "comparisons": [
+    {
+     "lean": "Index",
+     "fidelity": "same",
+     "note": "The formal definition represents typed de Bruijn indices: Top selects the newest variable, and Pop crosses one later context entry while preserving the selected variable’s type."
+    }
+   ]
   },
   {
    "id": "stlc",
@@ -51,7 +167,15 @@
    "lean": [
     "STLC"
    ],
-   "quote": "STLC is a first-order embedding of the standard STLC with a unit type."
+   "quote": "STLC is a first-order embedding of the standard STLC with a unit type.",
+   "topic": "first-order-terms",
+   "comparisons": [
+    {
+     "lean": "STLC",
+     "fidelity": "same",
+     "note": "The formal definition is the simply typed lambda calculus with variables, abstraction, application and the unit term; every term has the context and type prescribed by the paper."
+    }
+   ]
   },
   {
    "id": "proxytop",
@@ -60,7 +184,15 @@
    "lean": [
     "ProxyTop"
    ],
-   "quote": "We exclude exotic terms by exchanging Index for a truncated version ProxyTop."
+   "quote": "We exclude exotic terms by exchanging Index for a truncated version ProxyTop.",
+   "topic": "singleton-variables",
+   "comparisons": [
+    {
+     "lean": "ProxyTop",
+     "fidelity": "different",
+     "note": "The passage claims exclusion of exotic terms; the formal definition supplies a singleton marker for the newest variable. This removes the illustrated choice between Top and Pop, but the declaration itself states no general theorem about all contextual terms."
+    }
+   ]
   },
   {
    "id": "proxytop-only-top",
@@ -73,6 +205,14 @@
    "lines": [
     34,
     34
+   ],
+   "topic": "singleton-variables",
+   "comparisons": [
+    {
+     "lean": "ProxyTop",
+     "fidelity": "same",
+     "note": "The formal definition has one constructor, available only when the context ends in the selected variable’s type; it offers no operation for selecting an earlier variable."
+    }
    ]
   },
   {
@@ -82,7 +222,15 @@
    "lean": [
     "ReifyIndex"
    ],
-   "quote": "We define a type class ReifyIndex ts ts' that features a (modified) reify function:"
+   "quote": "We define a type class ReifyIndex ts ts' that features a (modified) reify function:",
+   "topic": "context-extension",
+   "comparisons": [
+    {
+     "lean": "ReifyIndex",
+     "fidelity": "same",
+     "note": "The formal definition supplies reify from a saved top-variable marker in the binding context to a typed index in the use context, as described in the paper."
+    }
+   ]
   },
   {
    "id": "instance-refl",
@@ -95,6 +243,14 @@
    "lines": [
     42,
     44
+   ],
+   "topic": "context-extension",
+   "comparisons": [
+    {
+     "lean": "instReifyIndexRefl",
+     "fidelity": "same",
+     "note": "For equal binding and use contexts, the formal definition sends the saved top-variable marker to Top, exactly as the passage describes."
+    }
    ]
   },
   {
@@ -108,6 +264,14 @@
    "lines": [
     46,
     47
+   ],
+   "topic": "context-extension",
+   "comparisons": [
+    {
+     "lean": "instReifyIndexSnoc",
+     "fidelity": "same",
+     "note": "Given reification into a context, the formal definition reifies into that context extended by one type by adding one Pop to the result."
+    }
    ]
   },
   {
@@ -117,10 +281,18 @@
    "lean": [
     "instReifyIndexSnoc"
    ],
-   "quote": "every ‘snoc’ corresponds to a Pop, until the contexts are equal.",
+   "quote": "every ‘snoc’ corresponds to a Pop",
    "lines": [
     47,
     47
+   ],
+   "topic": "context-extension",
+   "comparisons": [
+    {
+     "lean": "instReifyIndexSnoc",
+     "fidelity": "same",
+     "note": "The formal instance turns a conversion into one context into a conversion into that context extended by one type, adding one Pop to its result. Each extension of the context therefore contributes one Pop."
+    }
    ]
   },
   {
@@ -130,7 +302,15 @@
    "lean": [
     "instReifyIndexSnoc"
    ],
-   "quote": "we intentionally defer this ‘snoc’ check until after the instance has already been selected"
+   "quote": "we intentionally defer this ‘snoc’ check until after the instance has already been selected",
+   "topic": "context-extension",
+   "comparisons": [
+    {
+     "lean": "instReifyIndexSnoc",
+     "fidelity": "different",
+     "note": "The paper postpones the context-shape equality until after Haskell selects the recursive instance. The formal definition instead places the extended context directly in the instance head, so it does not implement that selection strategy."
+    }
+   ]
   },
   {
    "id": "contextual-embedding",
@@ -139,7 +319,15 @@
    "lean": [
     "STLCCtx"
    ],
-   "quote": "The Contextual Embedding decorates the intrinsically typed first-order embedding by binding a strongly typed singleton object (ProxyTop) that snapshots the context at each variable’s binding site"
+   "quote": "The Contextual Embedding decorates the intrinsically typed first-order embedding by binding a strongly typed singleton object (ProxyTop) that snapshots the context at each variable’s binding site",
+   "topic": "contextual-terms",
+   "comparisons": [
+    {
+     "lean": "STLCCtx",
+     "fidelity": "same",
+     "note": "The formal definition gives contextual terms whose abstractions receive a singleton marker for the binding context and whose variables carry reification into their use context, matching the described construction."
+    }
+   ]
   },
   {
    "id": "unembed",
@@ -148,7 +336,15 @@
    "lean": [
     "unembed"
    ],
-   "quote": "One of the greatest advantages of this embedding technique is that it supports type-safe unembedding."
+   "quote": "One of the greatest advantages of this embedding technique is that it supports type-safe unembedding.",
+   "topic": "unembedding",
+   "comparisons": [
+    {
+     "lean": "unembed",
+     "fidelity": "same",
+     "note": "The formal definition translates every contextual term to a first-order term with the same context and guest type. This is the type-safe conversion claimed here; its existence does not require the closed world assumption."
+    }
+   ]
   },
   {
    "id": "cvar-case",
@@ -161,6 +357,14 @@
    "lines": [
     62,
     62
+   ],
+   "topic": "unembedding",
+   "comparisons": [
+    {
+     "lean": "unembed",
+     "fidelity": "same",
+     "note": "For a contextual variable, the formal definition applies its stored reification to its saved marker and constructs a first-order variable from the resulting index."
+    }
    ]
   },
   {
@@ -170,7 +374,15 @@
    "lean": [
     "contextualise"
    ],
-   "quote": "We complement unembed with its inverse, contextualise (right of Fig. 2), which translates the first-order embedding back to the Contextual Embedding."
+   "quote": "which translates the first-order embedding back to the Contextual Embedding.",
+   "topic": "contextualisation",
+   "comparisons": [
+    {
+     "lean": "contextualise",
+     "fidelity": "same",
+     "note": "The formal definition translates each first-order term to a contextual term in the same context and of the same guest type, case by case as in Fig. 2. That the two translations are mutually inverse is stated by the separate round-trip theorems."
+    }
+   ]
   },
   {
    "id": "lam-ignores",
@@ -183,6 +395,14 @@
    "lines": [
     92,
     92
+   ],
+   "topic": "contextualisation",
+   "comparisons": [
+    {
+     "lean": "contextualise",
+     "fidelity": "same",
+     "note": "In the abstraction case, the formal definition builds a contextual abstraction whose function ignores its marker argument and recursively translates the first-order body."
+    }
    ]
   },
   {
@@ -192,7 +412,15 @@
    "lean": [
     "ProxyVar"
    ],
-   "quote": "To achieve this we define an existential type that captures just this data."
+   "quote": "To achieve this we define an existential type that captures just this data.",
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "ProxyVar",
+     "fidelity": "same",
+     "note": "The formal definition packages a hidden binding context, its top-variable marker, and reification into the fixed use context, matching the existential variable package described here."
+    }
+   ]
   },
   {
    "id": "workhorse",
@@ -201,7 +429,15 @@
    "lean": [
     "fromIndex"
    ],
-   "quote": "The workhorse that carries it out is the function fromIndex."
+   "quote": "The workhorse that carries it out is the function fromIndex.",
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "fromIndex",
+     "fidelity": "same",
+     "note": "The formal definition converts a typed de Bruijn index into the existential variable package, creating the newest variable at Top and extending its use context at each Pop."
+    }
+   ]
   },
   {
    "id": "weaken",
@@ -215,6 +451,19 @@
    "lines": [
     85,
     85
+   ],
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "fromIndex",
+     "fidelity": "same",
+     "note": "The formal definition handles each Pop by converting the remaining index and then extending the resulting variable package’s use context by one entry."
+    },
+    {
+     "lean": "weakenPVar",
+     "fidelity": "same",
+     "note": "The formal definition extends a variable package’s use context by one entry and supplies the corresponding recursive reification, preserving its saved binding context and marker. This is the weakening used for each Pop."
+    }
    ]
   },
   {
@@ -229,6 +478,19 @@
    "lines": [
     84,
     84
+   ],
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "fromIndex",
+     "fidelity": "same",
+     "note": "The Top case of the formal definition returns the package for the newest variable, exactly as the quoted conversion step requires."
+    },
+    {
+     "lean": "varTop",
+     "fidelity": "same",
+     "note": "The formal definition packages the top-variable marker with reification from a context to itself, yielding the newest variable in that context."
+    }
    ]
   },
   {
@@ -239,7 +501,20 @@
     "fromVar",
     "toCVar"
    ],
-   "quote": "we compose this conversion with a simple function that injects Var into the full Contextual Embedding (STLCCtx) to implement toCVar."
+   "quote": "we compose this conversion with a simple function that injects Var into the full Contextual Embedding (STLCCtx) to implement toCVar.",
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "fromVar",
+     "fidelity": "same",
+     "note": "The formal definition is the injection mentioned in the passage: it turns an existential variable package into a contextual variable term without changing its context or guest type."
+    },
+    {
+     "lean": "toCVar",
+     "fidelity": "same",
+     "note": "The formal definition composes conversion of an index to a variable package with injection of that package into a contextual term, exactly as the passage says."
+    }
+   ]
   },
   {
    "id": "proven",
@@ -249,7 +524,20 @@
     "isoL",
     "isoR"
    ],
-   "quote": "We have proven that unembed and contextualise form an isomorphism in Lean 4"
+   "quote": "We have proven that unembed and contextualise form an isomorphism in Lean 4",
+   "topic": "term-round-trips",
+   "comparisons": [
+    {
+     "lean": "isoL",
+     "fidelity": "weaker",
+     "note": "The passage claims an isomorphism; this formal statement proves only that unembedding after contextualisation returns every original first-order term. The reverse equation is supplied by the other cited theorem."
+    },
+    {
+     "lean": "isoR",
+     "fidelity": "weaker",
+     "note": "The passage claims an isomorphism; this formal statement proves only that contextualisation after unembedding returns every original contextual term. Its proof uses the closed world assumption disclosed later in this subsection; the other cited theorem supplies the opposite direction."
+    }
+   ]
   },
   {
    "id": "core",
@@ -259,7 +547,20 @@
     "indexIsoL",
     "indexIsoR"
    ],
-   "quote": "The core of the proof lies in the isomorphism between Index and ProxyTop with ReifyIndex."
+   "quote": "The core of the proof lies in the isomorphism between Index and ProxyTop with ReifyIndex.",
+   "topic": "index-round-trips",
+   "comparisons": [
+    {
+     "lean": "indexIsoL",
+     "fidelity": "weaker",
+     "note": "The passage names an isomorphism of variable representations; this formal statement gives one direction: converting any index to a package and reifying it returns that index."
+    },
+    {
+     "lean": "indexIsoR",
+     "fidelity": "weaker",
+     "note": "The passage names an isomorphism of variable representations; this formal statement gives the reverse direction: reifying a package and converting the index back returns the original package. Its proof uses the closed world assumption."
+    }
+   ]
   },
   {
    "id": "isoL-statement",
@@ -272,6 +573,14 @@
    "lines": [
     199,
     200
+   ],
+   "topic": "term-round-trips",
+   "comparisons": [
+    {
+     "lean": "isoL",
+     "fidelity": "same",
+     "note": "The formal statement is the displayed equation $\\operatorname{unembed}(\\operatorname{contextualise}(e))=e$ for every first-order term, in any context and at any guest type; its proof does not use the closed world assumption."
+    }
    ]
   },
   {
@@ -285,6 +594,14 @@
    "lines": [
     210,
     211
+   ],
+   "topic": "term-round-trips",
+   "comparisons": [
+    {
+     "lean": "isoR",
+     "fidelity": "same",
+     "note": "The formal statement is the displayed equation $\\operatorname{contextualise}(\\operatorname{unembed}(e))=e$ for every contextual term. Its proof uses the closed world assumption discussed immediately below, so equality of the displayed statements does not mean an assumption-free isomorphism."
+    }
    ]
   },
   {
@@ -298,6 +615,14 @@
    "lines": [
     120,
     121
+   ],
+   "topic": "index-round-trips",
+   "comparisons": [
+    {
+     "lean": "indexIsoL",
+     "fidelity": "same",
+     "note": "The formal statement gives the left-inverse equation discussed under this heading: reifying the variable package produced from any index returns the original index. It does not require the closed world assumption."
+    }
    ]
   },
   {
@@ -311,6 +636,14 @@
    "lines": [
     122,
     125
+   ],
+   "topic": "index-round-trips",
+   "comparisons": [
+    {
+     "lean": "indexIsoL",
+     "fidelity": "different",
+     "note": "The passage describes proof by induction; the formal statement says that reifying the package produced from an index returns that index. The supplied proof does use induction on the index, but that proof method is not a separate theorem statement."
+    }
    ]
   },
   {
@@ -320,10 +653,18 @@
    "lean": [
     "indexIsoR"
    ],
-   "quote": "The opposite direction is more difficult because we no longer have a concrete index on which to induct.",
+   "quote": "indexIsoR: (fromIndex . reify). The opposite direction is more difficult because we no longer have a concrete index on which to induct.",
    "lines": [
     162,
     164
+   ],
+   "topic": "index-round-trips",
+   "comparisons": [
+    {
+     "lean": "indexIsoR",
+     "fidelity": "same",
+     "note": "The passage names the reverse round trip, fromIndex after reify. The formal statement says that reifying a marker and converting the resulting index back returns the original package with its instance. Its proof uses the closed world assumption, which the paper introduces next for exactly this difficulty."
+    }
    ]
   },
   {
@@ -337,6 +678,14 @@
    "lines": [
     142,
     154
+   ],
+   "topic": "closed-world-assumption",
+   "comparisons": [
+    {
+     "lean": "closedWorld",
+     "fidelity": "same",
+     "note": "The formal assumption says every reification instance is either the identity-context instance or a one-entry extension of another instance. This is the paper’s closed world condition, assumed here rather than derived from instance resolution."
+    }
    ]
   },
   {
@@ -346,7 +695,15 @@
    "lean": [
     "closedWorld"
    ],
-   "quote": "We believe this is a reasonable assertion to make in practice because we can hide the type class from users by not exporting it."
+   "quote": "We believe this is a reasonable assertion to make in practice because we can hide the type class from users by not exporting it.",
+   "topic": "closed-world-assumption",
+   "comparisons": [
+    {
+     "lean": "closedWorld",
+     "fidelity": "different",
+     "note": "The passage justifies the assumption by hiding a type class from users; the formal declaration simply assumes the two-case condition for every reification instance. It does not prove that a module boundary enforces that condition."
+    }
+   ]
   },
   {
    "id": "case-analysis",
@@ -355,10 +712,18 @@
    "lean": [
     "indexIsoR"
    ],
-   "quote": "we can now complete the proof in this direction by case analysis on the ReifyIndex instances.",
+   "quote": "Armed with our ‘closed world’ axiom, we can now complete the proof in this direction by case analysis on the ReifyIndex instances.",
    "lines": [
     165,
     183
+   ],
+   "topic": "closed-world-assumption",
+   "comparisons": [
+    {
+     "lean": "indexIsoR",
+     "fidelity": "different",
+     "note": "The passage describes the proof: case analysis on the reification instances, made possible by the closed world assumption. The formal statement is the resulting reverse round-trip equation; its proof does split on the two cases that assumption allows and recurses through the extension case."
+    }
    ]
   },
   {
@@ -372,6 +737,14 @@
    "lines": [
     205,
     205
+   ],
+   "topic": "term-round-trips",
+   "comparisons": [
+    {
+     "lean": "isoL",
+     "fidelity": "different",
+     "note": "The passage names the variable case’s proof dependency; the formal statement gives the first-order term round-trip equation. Its variable case does use the index round-trip result, as the passage says."
+    }
    ]
   },
   {
@@ -385,6 +758,14 @@
    "lines": [
     215,
     216
+   ],
+   "topic": "term-round-trips",
+   "comparisons": [
+    {
+     "lean": "isoR",
+     "fidelity": "different",
+     "note": "The passage names the contextual-variable case’s proof dependency; the formal statement gives the contextual term round-trip equation. Its proof uses the reverse variable round trip and therefore the closed world assumption."
+    }
    ]
   },
   {
@@ -398,6 +779,14 @@
    "lines": [
     217,
     221
+   ],
+   "topic": "term-round-trips",
+   "comparisons": [
+    {
+     "lean": "isoR",
+     "fidelity": "different",
+     "note": "The passage describes the abstraction case’s use of function extensionality; the formal statement gives the contextual term round-trip equation. The supplied proof uses extensionality and the singleton marker to establish equality of the abstraction bodies."
+    }
    ]
   },
   {
@@ -413,7 +802,15 @@
    ],
    "quote": "data Ty = Unit | Ty :-> Ty",
    "page": 4,
-   "nth": 1
+   "nth": 1,
+   "topic": "types-contexts",
+   "comparisons": [
+    {
+     "lean": "Ty",
+     "fidelity": "same",
+     "note": "The formal definition has exactly the two alternatives shown in the code: the unit type and a function type formed from two guest types."
+    }
+   ]
   },
   {
    "id": "code-ctx",
@@ -428,7 +825,15 @@
    ],
    "quote": "data Ctx = Empty | Ctx :/: Ty",
    "page": 4,
-   "nth": 1
+   "nth": 1,
+   "topic": "types-contexts",
+   "comparisons": [
+    {
+     "lean": "Ctx",
+     "fidelity": "same",
+     "note": "The formal definition has exactly the empty context and right extension by one guest type, matching the two alternatives shown here."
+    }
+   ]
   },
   {
    "id": "code-top",
@@ -443,7 +848,15 @@
    ],
    "quote": "Top :: Index (ts :/: t) t",
    "page": 4,
-   "nth": 1
+   "nth": 1,
+   "topic": "de-bruijn-indices",
+   "comparisons": [
+    {
+     "lean": "Index",
+     "fidelity": "same",
+     "note": "The formal Top constructor selects a variable of type $t$ from a context ending in $t$, matching this constructor signature."
+    }
+   ]
   },
   {
    "id": "code-pop",
@@ -458,7 +871,15 @@
    ],
    "quote": "Pop :: Index ts t -> Index (ts :/: t') t",
    "page": 4,
-   "nth": 1
+   "nth": 1,
+   "topic": "de-bruijn-indices",
+   "comparisons": [
+    {
+     "lean": "Index",
+     "fidelity": "same",
+     "note": "The formal Pop constructor preserves a variable’s type while extending its context by an arbitrary later type, matching this constructor signature."
+    }
+   ]
   },
   {
    "id": "code-var",
@@ -471,7 +892,15 @@
     25,
     25
    ],
-   "quote": "Var :: Index ts t -> STLC ts t"
+   "quote": "Var :: Index ts t -> STLC ts t",
+   "topic": "first-order-terms",
+   "comparisons": [
+    {
+     "lean": "STLC",
+     "fidelity": "same",
+     "note": "The formal variable constructor turns a typed de Bruijn index into a first-order term with the same context and guest type."
+    }
+   ]
   },
   {
    "id": "code-lam",
@@ -484,7 +913,15 @@
     27,
     27
    ],
-   "quote": "Lam :: STLC (ts :/: t1) t2 -> STLC ts (t1 :-> t2)"
+   "quote": "Lam :: STLC (ts :/: t1) t2 -> STLC ts (t1 :-> t2)",
+   "topic": "first-order-terms",
+   "comparisons": [
+    {
+     "lean": "STLC",
+     "fidelity": "same",
+     "note": "The formal abstraction constructor turns a body of type $t_2$ in a context extended by $t_1$ into a function of type $t_1\\to t_2$ in the original context."
+    }
+   ]
   },
   {
    "id": "code-app",
@@ -497,7 +934,15 @@
     28,
     28
    ],
-   "quote": "App :: STLC ts (t1 :-> t2) -> STLC ts t1 -> STLC ts t2"
+   "quote": "App :: STLC ts (t1 :-> t2) -> STLC ts t1 -> STLC ts t2",
+   "topic": "first-order-terms",
+   "comparisons": [
+    {
+     "lean": "STLC",
+     "fidelity": "same",
+     "note": "The formal application constructor combines a function of type $t_1\\to t_2$ with an argument of type $t_1$ in the same context, producing a term of type $t_2$."
+    }
+   ]
   },
   {
    "id": "code-star",
@@ -510,7 +955,15 @@
     26,
     26
    ],
-   "quote": "Star :: STLC ts Unit"
+   "quote": "Star :: STLC ts Unit",
+   "topic": "first-order-terms",
+   "comparisons": [
+    {
+     "lean": "STLC",
+     "fidelity": "same",
+     "note": "The formal unit constructor gives a term of type Unit in any context, matching the paper’s Star constructor."
+    }
+   ]
   },
   {
    "id": "code-proxytop",
@@ -523,7 +976,15 @@
     33,
     34
    ],
-   "quote": "data ProxyTop :: Ctx -> Ty -> Type where ProxyTop :: ProxyTop (ts :/: t) t"
+   "quote": "data ProxyTop :: Ctx -> Ty -> Type where ProxyTop :: ProxyTop (ts :/: t) t",
+   "topic": "singleton-variables",
+   "comparisons": [
+    {
+     "lean": "ProxyTop",
+     "fidelity": "same",
+     "note": "The formal definition has one marker for the last entry of a nonempty context, and that entry determines the marker’s guest type, matching the displayed definition."
+    }
+   ]
   },
   {
    "id": "code-reify-class",
@@ -536,7 +997,15 @@
     38,
     39
    ],
-   "quote": "class ReifyIndex ts ts' where reify :: ProxyTop ts t -> Index ts' t"
+   "quote": "class ReifyIndex ts ts' where reify :: ProxyTop ts t -> Index ts' t",
+   "topic": "context-extension",
+   "comparisons": [
+    {
+     "lean": "ReifyIndex",
+     "fidelity": "same",
+     "note": "The formal definition gives reify for any guest type, taking a top-variable marker in the binding context to an index of that same type in the use context."
+    }
+   ]
   },
   {
    "id": "code-refl",
@@ -549,7 +1018,15 @@
     42,
     44
    ],
-   "quote": "ReifyIndex ts ts where reify ProxyTop = Top"
+   "quote": "ReifyIndex ts ts where reify ProxyTop = Top",
+   "topic": "context-extension",
+   "comparisons": [
+    {
+     "lean": "instReifyIndexRefl",
+     "fidelity": "same",
+     "note": "The formal identity-context reification sends the unique top-variable marker to Top, exactly as in the displayed equation."
+    }
+   ]
   },
   {
    "id": "code-snoc",
@@ -562,7 +1039,15 @@
     46,
     47
    ],
-   "quote": "instance (ReifyIndex ts ts', ts'' ~ (ts' :/: a)) => ReifyIndex ts ts'' where reify i = Pop (reify i)"
+   "quote": "reify i = Pop (reify i)",
+   "topic": "context-extension",
+   "comparisons": [
+    {
+     "lean": "instReifyIndexSnoc",
+     "fidelity": "same",
+     "note": "The formal instance has the same equation: reifying into the extended context applies Pop to the reification into the smaller context. The Haskell instance also states the context shape as a separate equality constraint, which the formal instance places in its head instead."
+    }
+   ]
   },
   {
    "id": "code-cvar",
@@ -575,7 +1060,15 @@
     50,
     50
    ],
-   "quote": "CVar :: ReifyIndex ts ts' => ProxyTop ts a -> STLCCtx ts' a"
+   "quote": "CVar :: ReifyIndex ts ts' => ProxyTop ts a -> STLCCtx ts' a",
+   "topic": "contextual-terms",
+   "comparisons": [
+    {
+     "lean": "STLCCtx",
+     "fidelity": "same",
+     "note": "The formal contextual-variable constructor combines a saved marker with reification from its binding context into its use context, preserving the guest type."
+    }
+   ]
   },
   {
    "id": "code-clam",
@@ -588,7 +1081,15 @@
     52,
     52
    ],
-   "quote": "CLam :: (ProxyTop (ts :/: a) a -> STLCCtx (ts :/: a) b) -> STLCCtx ts (a :-> b)"
+   "quote": "CLam :: (ProxyTop (ts :/: a) a -> STLCCtx (ts :/: a) b) -> STLCCtx ts (a :-> b)",
+   "topic": "contextual-terms",
+   "comparisons": [
+    {
+     "lean": "STLCCtx",
+     "fidelity": "same",
+     "note": "The formal contextual-abstraction constructor receives a function from the newest variable’s marker to a body in the extended context, yielding a function term in the original context."
+    }
+   ]
   },
   {
    "id": "code-capp",
@@ -601,7 +1102,15 @@
     53,
     53
    ],
-   "quote": "CApp :: STLCCtx ts (a :-> b) -> STLCCtx ts a -> STLCCtx ts b"
+   "quote": "CApp :: STLCCtx ts (a :-> b) -> STLCCtx ts a -> STLCCtx ts b",
+   "topic": "contextual-terms",
+   "comparisons": [
+    {
+     "lean": "STLCCtx",
+     "fidelity": "same",
+     "note": "The formal contextual-application constructor applies a contextual function to an argument in the same context and returns the function’s result type."
+    }
+   ]
   },
   {
    "id": "code-cstar",
@@ -614,7 +1123,15 @@
     51,
     51
    ],
-   "quote": "CStar :: STLCCtx ts Unit"
+   "quote": "CStar :: STLCCtx ts Unit",
+   "topic": "contextual-terms",
+   "comparisons": [
+    {
+     "lean": "STLCCtx",
+     "fidelity": "same",
+     "note": "The formal contextual unit constructor produces a term of type Unit in any context, matching CStar."
+    }
+   ]
   },
   {
    "id": "fig2-cvar",
@@ -627,7 +1144,15 @@
     62,
     62
    ],
-   "quote": "unembed (CVar i) = Var (reify i)"
+   "quote": "unembed (CVar i) = Var (reify i)",
+   "topic": "unembedding",
+   "comparisons": [
+    {
+     "lean": "unembed",
+     "fidelity": "same",
+     "note": "The formal conversion of a contextual variable reifies its saved marker and uses that index as the first-order variable, exactly as in this equation."
+    }
+   ]
   },
   {
    "id": "fig2-clam",
@@ -640,7 +1165,15 @@
     63,
     63
    ],
-   "quote": "unembed (CLam e) = Lam (unembed (e ProxyTop))"
+   "quote": "unembed (CLam e) = Lam (unembed (e ProxyTop))",
+   "topic": "unembedding",
+   "comparisons": [
+    {
+     "lean": "unembed",
+     "fidelity": "same",
+     "note": "The formal conversion of an abstraction supplies the unique top-variable marker to its body, recursively unembeds the result, and forms a first-order abstraction."
+    }
+   ]
   },
   {
    "id": "fig2-capp",
@@ -653,7 +1186,15 @@
     64,
     64
    ],
-   "quote": "unembed (CApp e1 e2) = App (unembed e1) (unembed e2)"
+   "quote": "unembed (CApp e1 e2) = App (unembed e1) (unembed e2)",
+   "topic": "unembedding",
+   "comparisons": [
+    {
+     "lean": "unembed",
+     "fidelity": "same",
+     "note": "The formal conversion of an application recursively unembeds its function and argument, then forms the corresponding first-order application."
+    }
+   ]
   },
   {
    "id": "fig2-cstar",
@@ -666,7 +1207,15 @@
     61,
     61
    ],
-   "quote": "unembed CStar = Star"
+   "quote": "unembed CStar = Star",
+   "topic": "unembedding",
+   "comparisons": [
+    {
+     "lean": "unembed",
+     "fidelity": "same",
+     "note": "The formal conversion sends the contextual unit term to the first-order unit term, exactly as in this equation."
+    }
+   ]
   },
   {
    "id": "fig2-var",
@@ -679,7 +1228,15 @@
     91,
     91
    ],
-   "quote": "contextualise (Var i) = toCVar i"
+   "quote": "contextualise (Var i) = toCVar i",
+   "topic": "contextualisation",
+   "comparisons": [
+    {
+     "lean": "contextualise",
+     "fidelity": "same",
+     "note": "The formal conversion sends a first-order variable to the contextual variable obtained by converting its de Bruijn index."
+    }
+   ]
   },
   {
    "id": "fig2-lam",
@@ -692,7 +1249,15 @@
     92,
     92
    ],
-   "quote": "contextualise (Lam e) = CLam (\\_ -> contextualise e)"
+   "quote": "contextualise (Lam e) = CLam (\\_ -> contextualise e)",
+   "topic": "contextualisation",
+   "comparisons": [
+    {
+     "lean": "contextualise",
+     "fidelity": "same",
+     "note": "The formal conversion makes an abstraction whose marker argument is ignored and whose body is the recursively contextualised first-order body, exactly as in this equation."
+    }
+   ]
   },
   {
    "id": "fig2-app",
@@ -705,7 +1270,15 @@
     93,
     93
    ],
-   "quote": "contextualise (App e1 e2) = CApp (contextualise e1) (contextualise e2)"
+   "quote": "contextualise (App e1 e2) = CApp (contextualise e1) (contextualise e2)",
+   "topic": "contextualisation",
+   "comparisons": [
+    {
+     "lean": "contextualise",
+     "fidelity": "same",
+     "note": "The formal conversion recursively contextualises the function and argument of an application and then forms their contextual application."
+    }
+   ]
   },
   {
    "id": "fig2-star",
@@ -718,7 +1291,15 @@
     94,
     94
    ],
-   "quote": "contextualise Star = CStar"
+   "quote": "contextualise Star = CStar",
+   "topic": "contextualisation",
+   "comparisons": [
+    {
+     "lean": "contextualise",
+     "fidelity": "same",
+     "note": "The formal conversion sends the first-order unit term to the contextual unit term, exactly as in this equation."
+    }
+   ]
   },
   {
    "id": "code-proxyvar",
@@ -731,7 +1312,15 @@
     70,
     71
    ],
-   "quote": "data Var ts' t where MkVar :: ReifyIndex ts ts' => ProxyTop ts t -> Var ts' t"
+   "quote": "data Var ts' t where MkVar :: ReifyIndex ts ts' => ProxyTop ts t -> Var ts' t",
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "ProxyVar",
+     "fidelity": "same",
+     "note": "The formal definition packages a hidden binding context, a marker at that context, and reification into the given use context, exactly as the displayed existential variable definition does."
+    }
+   ]
   },
   {
    "id": "code-fromindex-top",
@@ -744,7 +1333,15 @@
     84,
     84
    ],
-   "quote": "fromIndex Top = varTop"
+   "quote": "fromIndex Top = varTop",
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "fromIndex",
+     "fidelity": "same",
+     "note": "The formal Top branch returns the predefined package for the newest variable, matching this equation."
+    }
+   ]
   },
   {
    "id": "code-vartop",
@@ -757,7 +1354,15 @@
     78,
     78
    ],
-   "quote": "varTop = MkVar (ProxyTop :: ProxyTop (ts :/: t) t)"
+   "quote": "varTop = MkVar (ProxyTop :: ProxyTop (ts :/: t) t)",
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "varTop",
+     "fidelity": "same",
+     "note": "The formal definition packages the newest-variable marker at the extended context with identity-context reification, matching varTop in the paper."
+    }
+   ]
   },
   {
    "id": "code-fromindex-pop",
@@ -770,7 +1375,15 @@
     85,
     85
    ],
-   "quote": "fromIndex (Pop i) = weakenCVar (fromIndex i)"
+   "quote": "fromIndex (Pop i) = weakenCVar (fromIndex i)",
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "fromIndex",
+     "fidelity": "same",
+     "note": "The formal Pop branch first converts the smaller index and then extends the package’s use context by one entry, matching this equation."
+    }
+   ]
   },
   {
    "id": "code-weaken",
@@ -783,7 +1396,15 @@
     76,
     76
    ],
-   "quote": "weakenCVar (MkVar p) = MkVar p"
+   "quote": "weakenCVar (MkVar p) = MkVar p",
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "weakenPVar",
+     "fidelity": "same",
+     "note": "The formal definition keeps the saved marker and binding context while extending the use context and its reification by one entry; the unchanged-looking package in the paper has exactly this effect."
+    }
+   ]
   },
   {
    "id": "code-fromvar",
@@ -796,7 +1417,15 @@
     81,
     81
    ],
-   "quote": "fromVar (MkVar i) = CVar i"
+   "quote": "fromVar (MkVar i) = CVar i",
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "fromVar",
+     "fidelity": "same",
+     "note": "The formal definition turns the existential variable package into a contextual variable using the same saved marker and reification, matching this equation."
+    }
+   ]
   },
   {
    "id": "code-tocvar",
@@ -809,7 +1438,15 @@
     88,
     88
    ],
-   "quote": "toCVar = fromVar . fromIndex"
+   "quote": "toCVar = fromVar . fromIndex",
+   "topic": "variable-conversion",
+   "comparisons": [
+    {
+     "lean": "toCVar",
+     "fidelity": "same",
+     "note": "The formal definition first converts an index to an existential variable package and then injects that package into the contextual term representation, matching the displayed composition."
+    }
+   ]
   },
   {
    "id": "indexIsoL-intuition",
@@ -822,100 +1459,251 @@
     124,
     125
    ],
-   "quote": "Intuitively, for every Pop in the index, fromIndex weakens the ProxyTop by one, which reify then turns back into a Pop."
-  }
- ],
-  "plain": {
-    "Ty": "Guest types",
-    "Ctx": "Typing contexts",
-    "Index": "de Bruijn indices",
-    "STLC": "First-order terms",
-    "ProxyTop": "Truncated index",
-    "ReifyIndex": "Reify type class",
-    "instReifyIndexRefl": "Reflexive case",
-    "instReifyIndexSnoc": "Step case",
-    "STLCCtx": "Contextual terms",
-    "unembed": "Contextual term to first-order term",
-    "ProxyVar": "Existential wrapper",
-    "weakenPVar": "Weaken the wrapper",
-    "varTop": "Top in the wrapper",
-    "fromVar": "Wrapper to contextual term",
-    "fromIndex": "Index to wrapper",
-    "toCVar": "Index to contextual variable",
-    "contextualise": "First-order term to contextual term",
-    "indexIsoL": "Index round trip",
-    "closedWorld": "Closed-world axiom",
-    "indexIsoR": "Wrapper round trip",
-    "isoL": "First-order round trip",
-    "isoR": "Contextual round trip"
-  },
- "notes": {
-  "unembed": {
-   "text": "The paper's Lam and App are the Lean's Lambda and Apply.",
-   "because": [
-    "fig2-clam"
+   "quote": "Intuitively, for every Pop in the index, fromIndex weakens the ProxyTop by one, which reify then turns back into a Pop.",
+   "topic": "index-round-trips",
+   "comparisons": [
+    {
+     "lean": "indexIsoL",
+     "fidelity": "different",
+     "note": "The passage explains how weakening and reification cancel at each Pop; the formal statement gives the resulting equality for the entire index. The supplied inductive proof follows this explanation, rather than stating a separate step-count theorem."
+    }
    ]
   },
-  "contextualise": {
-   "text": "The paper's Lam and App are the Lean's Lambda and Apply.",
+  {
+   "id": "provability-closed-world",
+   "section": "3.7",
+   "role": "mentions",
+   "lean": [
+    "isoL",
+    "isoR"
+   ],
+   "quote": "This relies on our isomorphism proofs, and therefore our ‘closed world’ axiom, and comes at the cost of switching back and forth between the representations.",
+   "topic": "closed-world-assumption",
+   "comparisons": [
+    {
+     "lean": "isoL",
+     "fidelity": "different",
+     "note": "The passage says that transferring proofs between the two representations relies on the round-trip results and so on the closed world assumption. This direction, unembedding after contextualisation returns the first-order term, is proved without that assumption; only the reverse direction uses it."
+    },
+    {
+     "lean": "isoR",
+     "fidelity": "different",
+     "note": "The formal statement says that contextualising after unembedding returns the original contextual term, and its proof does use the closed world assumption, as the passage says. The passage concerns how proofs transfer between representations, which no formal statement here expresses."
+    }
+   ]
+  }
+ ],
+ "plain": {
+  "Ty": "Unit and function types",
+  "Ctx": "Contexts as snoc lists",
+  "Index": "Typed de Bruijn indices",
+  "STLC": "Simply typed first-order terms",
+  "ProxyTop": "Most recent variable",
+  "ReifyIndex": "Reification between contexts",
+  "instReifyIndexRefl": "Reification without context growth",
+  "instReifyIndexSnoc": "Reification after one context extension",
+  "STLCCtx": "Terms with contextual variables",
+  "unembed": "Convert to first-order terms",
+  "ProxyVar": "A variable with its reification",
+  "weakenPVar": "Extend a variable’s use context",
+  "varTop": "Package the most recent variable",
+  "fromVar": "Packaged variable to contextual term",
+  "fromIndex": "Index to packaged variable",
+  "toCVar": "Index to contextual variable",
+  "contextualise": "Convert to contextual terms",
+  "indexIsoL": "Recover an original index",
+  "closedWorld": "Assume only two instance forms",
+  "indexIsoR": "Recover a packaged variable",
+  "isoL": "Recover a first-order term",
+  "isoR": "Recover a contextual term"
+ },
+ "notes": {
+  "Ty": {
+   "text": "The guest language has a unit type and function types. Every type is built from these two alternatives, so an expression such as $a\\to b$ uses two already constructed guest types. This definition describes the small calculus in Section 2; it does not include the sum types, modal types or linear types discussed elsewhere in the paper.",
    "because": [
-    "fig2-lam"
+    "ty",
+    "code-ty"
+   ]
+  },
+  "Ctx": {
+   "text": "A context is either empty or an existing context extended by one guest type at the right. The final entry therefore describes the most recently introduced variable. The same contexts parameterise both term representations and their conversions, so the round-trip equations concern terms in an unchanged context, including contexts with free variables.",
+   "because": [
+    "ctx",
+    "code-ctx"
+   ]
+  },
+  "Index": {
+   "text": "An index selects a variable of a specified guest type from a context. Top selects the last entry, while Pop passes over one later entry and keeps the selected variable’s type unchanged. Consequently an index cannot point outside its context or select an entry of the wrong type. These are typed positions, not arbitrary natural numbers.",
+   "because": [
+    "index",
+    "code-top",
+    "code-pop"
+   ]
+  },
+  "STLC": {
+   "text": "The first-order syntax contains variables, the unit term, abstractions and applications. An abstraction has a body in a context extended by the argument type; application requires its function and argument to have compatible types in the same context. These are exactly the constructors of Figure 1. The definition supplies syntax and typing, rather than an evaluator or a theorem about execution.",
+   "because": [
+    "stlc",
+    "code-var",
+    "code-lam",
+    "code-app",
+    "code-star"
+   ]
+  },
+  "ProxyTop": {
+   "text": "The marker can refer only to the last entry of its saved context, and its guest type must equal that entry’s type. There is one possible marker at those fixed parameters. This prevents the illustrated choice between Top and Pop when inspecting the argument of a contextual abstraction. It does not by itself establish the round-trip theorem for complete contextual terms.",
+   "because": [
+    "proxytop",
+    "proxytop-only-top",
+    "code-proxytop"
+   ]
+  },
+  "ReifyIndex": {
+   "text": "Reification converts a saved top-variable marker into a typed index at the use context. The definition requires preservation of the variable’s guest type, but does not itself require the conversion to have been built from the two displayed instances. That additional restriction appears as the closed world assumption used for recovery of the original contextual representation.",
+   "because": [
+    "reify-class",
+    "code-reify-class",
+    "closed-world"
+   ]
+  },
+  "instReifyIndexRefl": {
+   "text": "When the binding context and use context coincide, reification sends the saved marker to Top. No later variable needs to be crossed. This is the base case used when constructing the variable package for a Top index, and it is one of the two allowed cases in the closed world assumption.",
+   "because": [
+    "instance-refl",
+    "code-refl"
+   ]
+  },
+  "instReifyIndexSnoc": {
+   "text": "Suppose reification is available from a binding context into a use context. Extending the use context by one guest type produces another reification by applying Pop to the previous result. The formal definition places this extended context directly in the instance head. It therefore shares the paper’s reification equation but does not reproduce the Haskell technique of deferring the context-shape equality until after instance selection.",
+   "because": [
+    "instance-step",
+    "snoc-pop",
+    "defer-snoc",
+    "code-snoc"
+   ]
+  },
+  "STLCCtx": {
+   "text": "The contextual syntax has the same guest types and contexts as the first-order syntax. An abstraction receives a singleton marker for its newest variable, and a variable occurrence carries reification from that marker’s saved context into the occurrence’s context. Application and the unit term follow the usual typing rules. Recovering an identical contextual term after both conversions additionally uses the closed world assumption.",
+   "because": [
+    "contextual-embedding",
+    "code-cvar",
+    "code-clam",
+    "code-capp",
+    "code-cstar"
+   ]
+  },
+  "unembed": {
+   "text": "Unembedding maps a contextual term to a first-order term in the same context and of the same guest type. Variables are converted with their stored reification; an abstraction’s function is applied to the unique marker for its new variable. Applications and the unit term are translated recursively. This conversion is defined without the closed world assumption, which is needed only for one of the round-trip proofs.",
+   "because": [
+    "unembed",
+    "cvar-case",
+    "fig2-cvar",
+    "fig2-clam",
+    "fig2-capp",
+    "fig2-cstar"
+   ]
+  },
+  "ProxyVar": {
+   "text": "The paper’s existential variable package hides the binding context while retaining the variable’s guest type and its use context. Inside it are a top-variable marker and reification from the hidden context into the use context. This package lets conversion of an index be handled separately from conversion of a whole term. The reverse variable round trip recovers the package itself, not merely its reified index.",
+   "because": [
+    "existential",
+    "code-proxyvar"
+   ]
+  },
+  "weakenPVar": {
+   "text": "Weakening extends the use context by one type while keeping the saved binding context and marker unchanged. It also replaces the stored reification with the extension instance, so reifying the weakened package adds one Pop. The apparently unchanged package on both sides of the paper’s equation therefore has a different use context and a correspondingly extended reification.",
+   "because": [
+    "weaken",
+    "code-weaken"
    ]
   },
   "varTop": {
-   "text": "The paper's MkVar and ProxyTop constructors are the Lean's PVar and PTop.",
+   "text": "The newest-variable package uses the current nonempty context as both binding context and use context. Its marker identifies the last entry, and its reification is the identity-context instance, which returns Top. This is the base case for converting an index into a package. The guest type is arbitrary, provided it is the type of that final context entry.",
    "because": [
+    "top-case",
     "code-vartop"
    ]
   },
   "fromVar": {
-   "text": "The paper's MkVar is the Lean's PVar.",
+   "text": "This conversion injects the paper’s existential variable package into the full contextual term syntax. It reuses the package’s marker, hidden binding context and reification, so the resulting variable has exactly the same guest type and use context. No index traversal occurs here; the separate conversion from an index has already chosen the package’s contents.",
    "because": [
+    "inject",
     "code-fromvar"
    ]
   },
-  "instReifyIndexRefl": {
-   "text": "The paper's ProxyTop constructor is the Lean's PTop.",
+  "fromIndex": {
+   "text": "Conversion of an index proceeds by its Top and Pop cases. Top creates the package for the newest variable. Pop first converts the smaller index and then extends the resulting package’s use context by one type. Thus the result carries both a suitable saved binding context and reification back into the original index’s context, without requiring the closed world assumption.",
    "because": [
-    "code-refl"
+    "workhorse",
+    "weaken",
+    "top-case",
+    "code-fromindex-top",
+    "code-fromindex-pop"
    ]
   },
-  "STLC": {
-   "text": "Two constructors are named Lam and App in the paper's Haskell, and Lambda and Apply in the Lean.",
+  "toCVar": {
+   "text": "This definition composes the two variable conversions: first form the existential package associated with an index, then include that package as a contextual variable term. Both steps preserve the index’s guest type and use context. The definition is the variable branch of contextualisation; the separate index round-trip theorem explains why subsequent unembedding recovers the original index.",
    "because": [
-    "stlc"
+    "inject",
+    "code-tocvar",
+    "fig2-var"
    ]
   },
-  "ProxyTop": {
-   "text": "In the paper's Haskell the constructor has the same name as its type, ProxyTop. In the Lean the constructor is PTop.",
+  "contextualise": {
+   "text": "Contextualisation translates a first-order term to a contextual term with the same context and guest type. In an abstraction, the newly supplied marker is ignored because variable occurrences already carry their de Bruijn indices. Each such index is converted separately to a contextual variable. This function is defined without the closed world assumption; the claim that both conversions are inverse functions uses the separate round-trip theorems.",
    "because": [
-    "proxytop"
+    "contextualise",
+    "lam-ignores",
+    "fig2-var",
+    "fig2-lam",
+    "fig2-app",
+    "fig2-star"
    ]
   },
-  "ProxyVar": {
-   "text": "This type is named Var in the paper's Haskell, and its constructor MkVar is PVar in the Lean.",
+  "indexIsoL": {
+   "text": "For every typed de Bruijn index $i$, converting $i$ to its existential package and then applying the package’s reification recovers $i$. The statement quantifies over arbitrary contexts and guest types. Its proof follows the Top and Pop cases of the index, and does not use the closed world assumption. This is the variable fact needed for the first-order term round trip.",
    "because": [
-    "existential"
-   ]
-  },
-  "weakenPVar": {
-   "text": "This function is named weakenCVar in the paper's Haskell, and its MkVar is PVar in the Lean.",
-   "because": [
-    "weaken"
-   ]
-  },
-  "instReifyIndexSnoc": {
-   "text": "In the Haskell instance the snoc is a type equality, which instance selection does not see. In the Lean instance the snoc is written directly in the instance head.",
-   "because": [
-    "defer-snoc"
+    "core",
+    "indexIsoL",
+    "indexIsoL-proof",
+    "indexIsoL-intuition"
    ]
   },
   "closedWorld": {
-   "text": "One axiom with two cases, one for each instance of ReifyIndex.",
+   "text": "The assumption quantifies over every reification instance between two contexts. It says that the instance is either the identity-context case or one context-extension step built from another instance. It does not merely describe instances that a particular search has returned. The source assumes this condition; it contains no theorem deriving it from module encapsulation. The reverse variable and contextual term round trips depend on it.",
    "because": [
-    "closed-world"
+    "closed-world",
+    "closed-world-why",
+    "case-analysis"
+   ]
+  },
+  "indexIsoR": {
+   "text": "Begin with a saved variable marker and its reification into a use context. Reifying the marker and converting the resulting index back yields the original existential variable package. This recovers the package, including its hidden-context information, rather than only an equal index. The proof uses the closed world assumption to reduce every reification to the identity or extension case, then continues through the smaller use context.",
+   "because": [
+    "core",
+    "indexIsoR",
+    "case-analysis"
+   ]
+  },
+  "isoL": {
+   "text": "For every first-order term $e$, in any context and at any guest type, $\\operatorname{unembed}(\\operatorname{contextualise}(e))=e$. No closed world assumption is used in this direction: contextualisation itself constructs the reification instances needed to recover each original index. The proof proceeds through the term’s constructors, using the first index round trip in the variable case. This is one half of the claimed isomorphism.",
+   "because": [
+    "proven",
+    "isoL-statement",
+    "isoL-var",
+    "provability-closed-world"
+   ]
+  },
+  "isoR": {
+   "text": "For every contextual term $e$, $\\operatorname{contextualise}(\\operatorname{unembed}(e))=e$, assuming the closed world condition on reification instances. The variable case uses recovery of the original existential package; the abstraction case uses function extensionality and the singleton marker. Together with the first-order round trip, this supplies the isomorphism under the assumption explicitly discussed in Section 3.3. It does not establish that module encapsulation enforces that assumption.",
+   "because": [
+    "proven",
+    "isoR-statement",
+    "isoR-cvar",
+    "isoR-clam",
+    "provability-closed-world"
    ]
   }
  },
-  "fidelity_held": "The comparisons for this paper are written and held until the authors have seen them."
+ "fidelity_held": "The comparisons for this paper are written and held until the authors have seen them."
 }
