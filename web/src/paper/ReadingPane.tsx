@@ -96,6 +96,10 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
   const zone = useRef<Zone>("before");
   const lineAbove = useRef<string | null>(null);
   const section = useRef<string | null | undefined>(undefined);
+  const whereCache = useRef<{
+    top: number; height: number; scrollHeight: number;
+    passages: Passage[]; line: string | null; where: Where;
+  } | null>(null);
   const followTimer = useRef(0);
   const settleTimer = useRef(0);
   const dwell = useRef(0);
@@ -110,6 +114,7 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
     const el = scroller.current;
     const page = sheet.current;
     if (!el || !page || !el.clientHeight) return;
+    whereCache.current = null;
     const origin = el.getBoundingClientRect().top - el.scrollTop;
     const sheetTop = page.getBoundingClientRect().top;
     const next: Bar[] = [];
@@ -143,18 +148,23 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
   const whereNow = useCallback((): Where => {
     const el = scroller.current;
     if (!el) return { passage: null, zone: "before", above: null, section: null, page: 1, into: 0 };
-    const at = el.scrollTop + el.clientHeight * READING_LINE;
+    const { scrollTop: top, clientHeight: height, scrollHeight } = el;
+    const passages = latest.current.passages;
+    const held = line.current;
+    const cached = whereCache.current;
+    if (cached && cached.top === top && cached.height === height && cached.scrollHeight === scrollHeight && cached.passages === passages && cached.line === held) return { ...cached.where };
+    const at = top + height * READING_LINE;
     // At the very end the last headings can never reach the reading line.
-    const low = el.scrollTop + el.clientHeight * (el.scrollTop + el.clientHeight >= el.scrollHeight - 4 ? 1 : READING_LINE);
+    const low = top + height * (top + height >= scrollHeight - 4 ? 1 : READING_LINE);
     let current: string | null = null;
     for (const h of headings.current) if (h.top <= low) current = h.id;
     let best: string | null = null;
-    let bestGap = el.clientHeight * 0.5;
+    let bestGap = height * 0.5;
     let first = Infinity;
     let last = -Infinity;
     let above: string | null = null;
     let aboveTop = -Infinity;
-    for (const passage of latest.current.passages) {
+    for (const passage of passages) {
       const span = spans.current.get(passage.id);
       if (!span) continue;
       first = Math.min(first, span.top);
@@ -177,10 +187,12 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
     for (let i = 0; i < tops.length; i++) {
       if (tops[i].top > at) break;
       page = tops[i].page;
-      const next = tops[i + 1]?.top ?? el.scrollHeight;
+      const next = tops[i + 1]?.top ?? scrollHeight;
       into = (at - tops[i].top) / Math.max(1, next - tops[i].top);
     }
-    return { passage: best, zone: kind, above, section: current, page, into };
+    const where = { passage: best, zone: kind, above, section: current, page, into };
+    whereCache.current = { top, height, scrollHeight, passages, line: held, where };
+    return { ...where };
   }, []);
 
   const followSoon = useCallback((id: string | null, kind: Zone, above: string | null) => {
