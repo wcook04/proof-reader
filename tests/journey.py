@@ -74,6 +74,11 @@ def caption(page: Page) -> str:
     return page.locator(".proof__says p").inner_text()
 
 
+def progress(page: Page) -> str:
+    """The stepper's words, present in the bar or, on a phone, in the site menu."""
+    return page.locator(".stepper span").first.text_content() or ""
+
+
 def address(page: Page) -> str:
     return page.evaluate("location.hash")
 
@@ -2146,6 +2151,39 @@ def graph_mode(page: Page, url: str, shots: Path | None, size: tuple[int, int]) 
                   f"{slug}: the drawing leaves a scrollable Lean dock")
         lean = page.locator(".proof__lean")
         wait_until(page, lambda: lean.is_visible() and len(lean.inner_text().strip()) > 40, f"{slug}: the dock is never empty while following")
+        if w >= 600 and page.locator(".graph[data-whole]").count():
+            # A paper that opens before its first linked statement shows the whole map, and keeps
+            # it, under the same camera, while the reader scrolls the unlinked front matter.
+            check(page.locator(".fg").count() == 0 and progress(page).startswith("Before the first"),
+                  f"{slug}: before the first linked statement the graph is the whole map")
+            page.locator(".graph .tree .tree__world").wait_for()
+            page.wait_for_timeout(400)
+            camera_now = lambda: page.locator(".graph .tree .tree__world").evaluate("(el) => el.style.transform")
+            opened_at = camera_now()
+            room = page.evaluate("""() => {
+              const pane = document.querySelector('[data-paper-pane]:not([hidden])');
+              const mark = pane.querySelector('.q[data-p]');
+              return mark ? mark.getBoundingClientRect().top - pane.getBoundingClientRect().bottom : 0;
+            }""")
+            if room > 240:
+                page.locator("[data-paper-pane]:not([hidden])").evaluate("(el) => { el.scrollTop += 200; }")
+                page.wait_for_timeout(700)
+                check(page.locator(".graph[data-whole]").count() == 1 and page.locator(".fg").count() == 0 and camera_now() == opened_at,
+                      f"{slug}: scrolling the front matter keeps the whole map and its camera")
+        if page.locator(".graph[data-whole]").count() or progress(page).startswith("Before the first"):
+            # Next lands on the first linked statement; from there the graph follows the reading.
+            page.keyboard.press("j")
+            wait_until(page, lambda: progress(page).startswith("Statement 1 "), f"{slug}: Next reaches the first linked statement")
+            if w >= 600:
+                wait_until(page, lambda: page.locator(".fg__card.is-subject").count() > 0, f"{slug}: and the graph is drawn around it")
+            wait_until(page, lambda: lean.is_visible() and len(lean.inner_text().strip()) > 40, f"{slug}: the dock still has its Lean")
+            # The step scrolls smoothly: let the paper come to rest before aiming at it.
+            settled = lambda: page.evaluate("""() => new Promise((done) => {
+              const pane = document.querySelector('[data-paper-pane]:not([hidden])');
+              const was = pane.scrollTop;
+              setTimeout(() => done(Math.abs(pane.scrollTop - was) < 1), 600);
+            })""")
+            wait_until(page, settled, f"{slug}: the paper comes to rest on it")
         if w >= 600:
             pane_rules(page, f"{slug} at {w}x{h}, following")
         if slug == GRAPH_PAGES[0]:
