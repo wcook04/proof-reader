@@ -1124,7 +1124,10 @@ def note_entry(note: dict | None, html_text: str | None) -> dict | None:
 def fidelity_of(entry: dict | None, html_text: str | None = None) -> dict | None:
     if not entry:
         return None
-    return {"verdict": entry["verdict"], "text": entry["text"], "because": entry["because"], "checks": entry.get("checks", [])}
+    fidelity = {"verdict": entry["verdict"], "text": entry["text"], "because": entry["because"], "checks": entry.get("checks", [])}
+    if html_text:
+        fidelity["html"] = html_text
+    return fidelity
 
 
 def check(slug: str) -> None:
