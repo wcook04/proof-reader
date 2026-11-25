@@ -66,7 +66,7 @@ button:disabled { cursor: default; }
 .bar--spread + .bar__pdf-controls { padding-left: 224px; }
 .bar__pdf-controls > .back { max-width: min(35vw, 24ch); }
 .bar__copy-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 0 8px; }
-.bar--spread { display: grid; grid-template-columns: 212px minmax(0, clamp(480px, calc(44vw - 26px), 1000px)) minmax(0, 1fr); gap: 0; padding: 0; }
+.bar--spread { display: grid; grid-template-columns: 212px minmax(0, max(420px, min(calc((100% - 238px) / 2), calc(100% - 838px - 2.5vw)))) minmax(0, 1fr); gap: 0; padding: 0; }
 .bar--spread .bar__left { padding-left: 16px; }
 .bar--spread .bar__column { padding: 0 20px 0 12px; }
 .bar--spread .bar__right { padding: 0 16px 0 42px; justify-content: flex-end; }
@@ -140,9 +140,9 @@ button:disabled { cursor: default; }
 .spread.has-right { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
 .spread--reading {
   --proof-min: 600px;
-  --paper-measure: clamp(480px, calc(44vw - 26px), 1000px);
-  /* Leave one keyboard step to widen the paper from its default. */
-  --paper-w: min(var(--paper-measure), max(420px, calc(100% - var(--rail-width) - 26px - var(--proof-min) - 2.5vw)));
+  /* By default the paper and the proof share the room beside the contents equally. Where the
+     proof's minimum binds, leave one keyboard step to widen the paper from its default. */
+  --paper-w: max(420px, min(calc((100% - var(--rail-width) - 26px) / 2), calc(100% - var(--rail-width) - 26px - var(--proof-min) - 2.5vw)));
 }
 .spread--reading.has-right { grid-template-columns: var(--rail-width) minmax(0, var(--paper-w)) minmax(0, 1fr); column-gap: 0; }
 /* The divider stands in the gutter between the paper and the proof (after the Quartic Reader). */
@@ -510,7 +510,7 @@ a.source__ref:hover { color: var(--lit); text-decoration: underline solid; }
 }
 @media (min-width: 2100px) {
   .spread { --rail-width: 260px; }
-  .spread--reading { --paper-measure: 1000px; }
+  .bar--spread { grid-template-columns: 260px minmax(0, max(420px, min(calc((100% - 286px) / 2), calc(100% - 886px - 2.5vw)))) minmax(0, 1fr); }
   .lean-code { font-size: 0.875rem; }
   .rail { font-size: var(--fs-ui); }
 }
