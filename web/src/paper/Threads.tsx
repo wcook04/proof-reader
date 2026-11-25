@@ -1,12 +1,11 @@
-// The thread: a short line across the gutter from the sentence being read to the
-// right page, level with the Lean it describes or, with the Lean closed, the card
-// lit for it. It stops at the page's edge and only ever crosses the empty gutter, so
-// it can never run over a card or text. It is drawn from what is on screen each
-// frame, so it stays tied while pages move.
+// The thread crosses the gutter from the sentence being read to its Lean row
+// or graph card. It updates when either pane moves or the endpoints change,
+// then eases into place and stops drawing.
 
 import { useEffect, useRef, type RefObject } from "react";
 
 const EASE = 0.26;
+const SNAP = 0.1;
 
 interface Point {
   x: number;
@@ -23,78 +22,123 @@ function curve(a: Point, b: Point): string {
   return `M${a.x.toFixed(1)} ${a.y.toFixed(1)} C${(a.x + pull).toFixed(1)} ${a.y.toFixed(1)} ${(b.x - pull).toFixed(1)} ${b.y.toFixed(1)} ${b.x.toFixed(1)} ${b.y.toFixed(1)}`;
 }
 
+function glide(was: Point | null, to: Point, reduced: boolean): Point {
+  if (!was || reduced || Math.hypot(to.x - was.x, to.y - was.y) <= SNAP) return to;
+  return { x: was.x + (to.x - was.x) * EASE, y: was.y + (to.y - was.y) * EASE };
+}
+
 export function Threads({ root, target }: { root: RefObject<HTMLElement | null>; target: Target }) {
   const svg = useRef<SVGSVGElement>(null);
   const latest = useRef(target);
   latest.current = target;
+  const wake = useRef<(() => void) | null>(null);
 
   useEffect(() => {
+    const el = root.current;
+    const lines = svg.current;
+    if (!el || !lines) return;
+    const container = el;
+    const path = lines.querySelector("path")!;
+    const [firstDot, lastDot] = lines.querySelectorAll("circle");
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const held = new Map<string, Point>();
-    const glide = (key: string, to: Point): Point => {
-      const was = held.get(key);
-      const next = !was || reduced.matches ? to : { x: was.x + (to.x - was.x) * EASE, y: was.y + (to.y - was.y) * EASE };
-      held.set(key, next);
-      return next;
-    };
+    let start: Point | null = null;
+    let end: Point | null = null;
     let frame = 0;
-    const draw = () => {
-      frame = requestAnimationFrame(draw);
-      const el = root.current;
-      const lines = svg.current;
-      if (!el || !lines) return;
-      const box = el.getBoundingClientRect();
-      const paths = lines.querySelectorAll("path");
-      const dots = lines.querySelectorAll("circle");
+
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(draw);
+    };
+    const sizes = new ResizeObserver(schedule);
+    const structure = new MutationObserver(schedule);
+    const positions = new MutationObserver(schedule);
+    let watched: (Element | null | undefined)[] = [];
+
+    function dot(circle: SVGCircleElement, point: Point) {
+      circle.setAttribute("cx", point.x.toFixed(1));
+      circle.setAttribute("cy", point.y.toFixed(1));
+    }
+
+    function draw() {
+      frame = 0;
       const { passage, line } = latest.current;
-      const paper = el.querySelector<HTMLElement>("[data-paper-pane]");
+      const paper = container.querySelector<HTMLElement>("[data-paper-pane]");
       const tie = passage && paper ? paper.querySelector<HTMLElement>(`.tie[data-passage="${CSS.escape(passage)}"]`) : null;
-      let used = 0;
-      let dotted = 0;
-      const dot = (p: Point) => {
-        const c = dots[dotted++];
-        if (!c) return;
-        c.setAttribute("cx", p.x.toFixed(1));
-        c.setAttribute("cy", p.y.toFixed(1));
-        c.style.opacity = "1";
-      };
-      const stroke = (a: Point, b: Point) => {
-        const p = paths[used++];
-        if (!p) return;
-        p.setAttribute("d", curve(a, b));
-        p.style.opacity = "1";
-      };
+      const proof = container.querySelector<HTMLElement>(".proof");
+      const leanBody = proof?.querySelector<HTMLElement>(".proof__lean:not([hidden]) .leaf__body");
+      const row = line && leanBody ? leanBody.querySelector<HTMLElement>(`.source__line[data-line="${line}"]:not(.cmp__code *)`) : null;
+      const canvas = proof?.querySelector<HTMLElement>(".proof__graph:not([hidden]) .fg__scroll");
+      const world = canvas?.querySelector<HTMLElement>(".fg__world");
+      const within = row && leanBody ? leanBody : canvas;
+      const mark = row ?? world?.querySelector<HTMLElement>(".fg__card.is-subject");
+      const next = [paper, paper?.querySelector(".sheet"), tie, proof, within, world, mark];
+      if (next.some((node, i) => node !== watched[i])) {
+        watched = next;
+        sizes.disconnect();
+        sizes.observe(container);
+        for (const node of next) if (node) sizes.observe(node);
+        positions.disconnect();
+        // The tie can be repositioned when the paper lays out. Camera gestures
+        // transform the graph world without changing the observed box sizes.
+        for (const node of [tie, world]) if (node) positions.observe(node, { attributes: true, attributeFilter: ["style"] });
+      }
+
       const t = tie?.getBoundingClientRect();
       const pane = paper?.getBoundingClientRect();
-      // Only a statement placed and on the page has a thread.
-      if (t && pane && t.height > 0 && t.bottom > pane.top && t.top < pane.bottom) {
-        const start = glide("start", {
-          x: pane.right - box.left,
-          y: Math.max(pane.top + 6, Math.min(pane.bottom - 6, t.top + t.height / 2)) - box.top,
-        });
-        const page = el.querySelector<HTMLElement>(".proof");
-        const leanBody = el.querySelector<HTMLElement>(".proof__lean:not([hidden]) .leaf__body");
-        const row = line && leanBody ? leanBody.querySelector<HTMLElement>(`.source__line[data-line="${line}"]:not(.cmp__code *)`) : null;
-        const canvas = el.querySelector<HTMLElement>(".proof__graph:not([hidden]) .fg__scroll");
-        const card = canvas?.querySelector<HTMLElement>(".fg__card.is-subject") ?? null;
-        const within = row && leanBody ? leanBody : canvas;
-        const mark = row ?? card;
-        if (page && mark && within) {
-          const r = mark.getBoundingClientRect();
-          const s = within.getBoundingClientRect();
-          const end = glide("end", { x: page.getBoundingClientRect().left - box.left, y: Math.max(s.top + 8, Math.min(s.bottom - 8, r.top + Math.min(11, r.height / 2))) - box.top });
-          dot(start);
-          stroke(start, end);
-          dot(end);
-        }
+      if (!t || !pane || t.height <= 0 || t.bottom <= pane.top || t.top >= pane.bottom || !proof || !mark || !within) {
+        if (start) for (const shape of [path, firstDot, lastDot]) shape.style.opacity = "";
+        start = end = null;
+        return;
       }
-      if (!used) held.clear();
-      for (let i = used; i < paths.length; i++) paths[i].style.opacity = "0";
-      for (let i = dotted; i < dots.length; i++) dots[i].style.opacity = "0";
+
+      const box = container.getBoundingClientRect();
+      const r = mark.getBoundingClientRect();
+      const s = within.getBoundingClientRect();
+      const startAt = {
+        x: pane.right - box.left,
+        y: Math.max(pane.top + 6, Math.min(pane.bottom - 6, t.top + t.height / 2)) - box.top,
+      };
+      const endAt = {
+        x: proof.getBoundingClientRect().left - box.left,
+        y: Math.max(s.top + 8, Math.min(s.bottom - 8, r.top + Math.min(11, r.height / 2))) - box.top,
+      };
+      const from = glide(start, startAt, reduced.matches);
+      const to = glide(end, endAt, reduced.matches);
+      if (from.x !== start?.x || from.y !== start?.y || to.x !== end?.x || to.y !== end?.y) {
+        path.setAttribute("d", curve(from, to));
+        dot(firstDot, from);
+        dot(lastDot, to);
+      }
+      if (!start) for (const shape of [path, firstDot, lastDot]) shape.style.opacity = "1";
+      start = from;
+      end = to;
+      if (from !== startAt || to !== endAt) schedule();
+    }
+
+    wake.current = schedule;
+    // A new pane or subject may be mounted after the target changes.
+    structure.observe(el, { subtree: true, childList: true, attributes: true, attributeFilter: ["hidden", "data-paper-pane", "data-card"] });
+    el.addEventListener("scroll", schedule, { capture: true, passive: true });
+    el.addEventListener("load", schedule, true);
+    window.addEventListener("resize", schedule);
+    document.fonts.addEventListener("loadingdone", schedule);
+    reduced.addEventListener("change", schedule);
+    schedule();
+    return () => {
+      wake.current = null;
+      cancelAnimationFrame(frame);
+      sizes.disconnect();
+      structure.disconnect();
+      positions.disconnect();
+      el.removeEventListener("scroll", schedule, true);
+      el.removeEventListener("load", schedule, true);
+      window.removeEventListener("resize", schedule);
+      document.fonts.removeEventListener("loadingdone", schedule);
+      reduced.removeEventListener("change", schedule);
     };
-    frame = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(frame);
   }, [root]);
+
+  const { passage, line } = target;
+  useEffect(() => wake.current?.(), [passage, line]);
 
   return (
     <svg ref={svg} className="threads" aria-hidden="true">

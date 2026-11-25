@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperti
 import { selecting } from "../paper/clickIntent";
 import type { OutlineEntry } from "../app/edition";
 import { Lockup, OwnerLink, ReaderHome, ReaderMark, ReaderMenu } from "../app/Family";
-import { readRoute, routeHref } from "../app/router";
+import { PHYSLIB_MAP, readRoute, routeHref } from "../app/router";
 import { setScheme, useScheme } from "../app/theme";
 import { LeanCode, useFileLines } from "../lean/code";
 import { Contents } from "../paper/Contents";
@@ -12,7 +12,6 @@ import { NoteCredit } from "../proof/Note";
 import { DependencyMap, type MapNode } from "./DependencyMap";
 import "./physlib-map.css";
 
-export const PHYSLIB_MAP = "physlib-gauge-theory";
 const base = `${import.meta.env.BASE_URL}api-maps/${PHYSLIB_MAP}/`;
 const indexRoute = (record?: string) => routeHref({ paper: PHYSLIB_MAP, record });
 const tracker = "https://physlib.io/api-tracker";

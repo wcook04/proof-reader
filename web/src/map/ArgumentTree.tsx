@@ -750,44 +750,44 @@ export const ArgumentTree = forwardRef<MapViewHandle, TreeProps>(function Argume
       const b = builtRef.current;
       const m = motion.current;
       const raw = m && m.dur > 0 ? Math.min(1, Math.max(0, (now - m.start) / m.dur)) : 1;
-      const e = easeMove(raw);
-      // A staged move, so two maps never show through each other: leaving cards fade
-      // where they are within EXIT_MS; staying cards and the camera move together;
-      // arriving cards fade in at their final places over the last part of the move.
-      const fadeOut = m && m.dur > 0 ? Math.min(1, Math.max(0, (now - m.start) / EXIT_MS)) : 1;
-      const fadeIn = m && m.dur > 0 ? easeMove(Math.min(1, Math.max(0, (raw - ARRIVE_AT) / (1 - ARRIVE_AT)))) : 1;
-      // Cards.
-      const boxes = new Map<string, Rect>();
-      const all = new Map<string, Rect>();
-      const states = m ? m.to : new Map([...b.layout.boxes].map(([id, rect]) => [id, { rect, op: 1, sc: 1 }]));
-      for (const [id, to] of states) {
-        const from = m?.from.get(id) ?? to;
-        const leaving = !!m && to.op === 0;
-        const arriving = !!m && m.entering.has(id);
-        const s: CardState = {
-          rect: leaving ? from.rect : { x: lerp(from.rect.x, to.rect.x, e), y: lerp(from.rect.y, to.rect.y, e), w: to.rect.w, h: to.rect.h },
-          op: leaving ? from.op * (1 - fadeOut) : arriving ? lerp(from.op, to.op, fadeIn) : lerp(from.op, to.op, e),
-          sc: 1,
-        };
-        shown.current.set(id, s);
-        all.set(id, s.rect);
-        if (b.layout.boxes.has(id)) boxes.set(id, s.rect);
-        const el = cardEls.current.get(id);
-        if (el) {
-          el.style.transform = `translate(${s.rect.x}px, ${s.rect.y}px)`;
-          el.style.opacity = s.op < 1 ? String(s.op) : "";
-          el.style.zIndex = m && raw < 1 && (arriving || leaving) ? "0" : "";
-        }
-      }
-      const dummyX = (key: string) => {
-        const to = b.layout.dummies.get(key)!.x;
-        const from = m?.dummyFrom.get(key) ?? to;
-        const x = lerp(from, to, e);
-        shownDummy.current.set(key, x);
-        return x;
-      };
-      // The cards have stopped and only the camera still moves: the lines stay as they are.
+      // When the cards and paths settle, a longer camera move can continue on its own.
       if (!m?.routed) {
+        const e = easeMove(raw);
+        // A staged move, so two maps never show through each other: leaving cards fade
+        // where they are within EXIT_MS; staying cards and the camera move together;
+        // arriving cards fade in at their final places over the last part of the move.
+        const fadeOut = m && m.dur > 0 ? Math.min(1, Math.max(0, (now - m.start) / EXIT_MS)) : 1;
+        const fadeIn = m && m.dur > 0 ? easeMove(Math.min(1, Math.max(0, (raw - ARRIVE_AT) / (1 - ARRIVE_AT)))) : 1;
+        // Cards.
+        const boxes = new Map<string, Rect>();
+        const all = new Map<string, Rect>();
+        const states = m ? m.to : new Map([...b.layout.boxes].map(([id, rect]) => [id, { rect, op: 1, sc: 1 }]));
+        for (const [id, to] of states) {
+          const from = m?.from.get(id) ?? to;
+          const leaving = !!m && to.op === 0;
+          const arriving = !!m && m.entering.has(id);
+          const s: CardState = {
+            rect: leaving ? from.rect : { x: lerp(from.rect.x, to.rect.x, e), y: lerp(from.rect.y, to.rect.y, e), w: to.rect.w, h: to.rect.h },
+            op: leaving ? from.op * (1 - fadeOut) : arriving ? lerp(from.op, to.op, fadeIn) : lerp(from.op, to.op, e),
+            sc: 1,
+          };
+          shown.current.set(id, s);
+          all.set(id, s.rect);
+          if (b.layout.boxes.has(id)) boxes.set(id, s.rect);
+          const el = cardEls.current.get(id);
+          if (el) {
+            el.style.transform = `translate(${s.rect.x}px, ${s.rect.y}px)`;
+            el.style.opacity = s.op < 1 ? String(s.op) : "";
+            el.style.zIndex = m && raw < 1 && (arriving || leaving) ? "0" : "";
+          }
+        }
+        const dummyX = (key: string) => {
+          const to = b.layout.dummies.get(key)!.x;
+          const from = m?.dummyFrom.get(key) ?? to;
+          const x = lerp(from, to, e);
+          shownDummy.current.set(key, x);
+          return x;
+        };
         const routed = route(b.plan, { boxes, dummyX, ignoreRows: m && raw < 1 ? m.entering : undefined });
         lastRouted.current = routed;
         writePaths(routed, all, fadeIn, fadeOut);

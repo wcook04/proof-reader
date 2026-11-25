@@ -1,12 +1,13 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { flushSync } from "react-dom";
-import { PHYSLIB_MAP, PhyslibMap } from "../api/PhyslibMap";
 import { PaperPage } from "../paper/PaperPage";
 import { StatementSheet } from "../paper/StatementSheet";
 import { Lockup } from "./Family";
 import { Shelf } from "./Shelf";
 import { loadEdition, type Edition } from "./edition";
-import { readRoute, routeHref, type Route } from "./router";
+import { PHYSLIB_MAP, readRoute, routeHref, type Route } from "./router";
+
+const PhyslibMap = lazy(() => import("../api/PhyslibMap").then((module) => ({ default: module.PhyslibMap })));
 
 /** The last address App saw, to tell a move to or from the statement sheet. */
 let readRouteCache: Route = readRoute();
@@ -33,7 +34,11 @@ export function App() {
       window.removeEventListener("popstate", onChange);
     };
   }, []);
-  if (route.paper === PHYSLIB_MAP) return <PhyslibMap />;
+  if (route.paper === PHYSLIB_MAP) return (
+    <Suspense fallback={<p className="status">Opening the Physlib API map…</p>}>
+      <PhyslibMap />
+    </Suspense>
+  );
   return route.paper ? <Loaded key={route.paper} slug={route.paper} sheet={route.record === "@sheet"} /> : <Shelf />;
 }
 

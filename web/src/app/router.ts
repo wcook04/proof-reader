@@ -2,6 +2,8 @@
 // host. #/paper opens a paper, #/paper/name a Lean declaration, and #/paper/@place
 // a sentence, a heading, a figure, a PDF page or the list of declarations.
 
+export const PHYSLIB_MAP = "physlib-gauge-theory";
+
 export type Trace = "rests" | "uses";
 
 export interface Route {

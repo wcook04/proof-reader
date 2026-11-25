@@ -4,13 +4,12 @@
 // papers are in it. Nothing here knows about any one paper.
 
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
-import { PHYSLIB_MAP } from "../api/PhyslibMap";
 import { tokenizeLean } from "../lean/leanTokens";
 import { Lockup, SisterSites } from "./Family";
 import { FilmSlot } from "./FilmSlot";
 import { loadShelf, paperFile, type ShelfExample, type ShelfItem } from "./edition";
 import { LONG_FILM, SHORT_FILM } from "./films";
-import { routeHref } from "./router";
+import { PHYSLIB_MAP, routeHref } from "./router";
 import { setScheme, useScheme } from "./theme";
 import "./shelf.css";
 
