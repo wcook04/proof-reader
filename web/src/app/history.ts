@@ -31,6 +31,11 @@ export interface Entry {
   lean: boolean;
   /** How this entry was opened, so every way back lands where Back lands. */
   opened: { steps: number; fromGraph: boolean } | null;
+  /**
+   * A card inspected from the graph, the paper left where it stood: how many entries back the
+   * reading was before the first such click, and how that place reads.
+   */
+  inspect?: { steps: number; origin: string };
   /** The toggle chose Lean here, so Back is the way out. */
   wentToLean: boolean;
   /** The paper's exact position and the width it was measured at. */

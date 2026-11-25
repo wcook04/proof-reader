@@ -137,7 +137,6 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const [pdfZoomSlot, setPdfZoomSlot] = useState<HTMLDivElement | null>(null);
   const [section, setSection] = useState<string | null>(null);
   const [line, setLine] = useState<{ id: string | null; zone: Zone; above: string | null }>({ id: null, zone: "before", above: null });
-  const [atTop, setAtTop] = useState(true);
   const lastLinked = useRef<string | null>(null);
   const [point, setPoint] = useState<Pointed>(null);
   const [cardPoint, setCardPoint] = useState<string | null>(null);
@@ -283,7 +282,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
 
   /** Open something: one history entry, with an address and a way back. */
   const open = useCallback(
-    (o: { record?: string; pin?: Pin | null; tab?: Tab; copy?: Copy; target?: Target | null; from?: "paper" | "right"; sheet?: boolean; stay?: boolean; lean?: boolean; wentToLean?: boolean; after?: () => void }) => {
+    (o: { record?: string; pin?: Pin | null; tab?: Tab; copy?: Copy; target?: Target | null; from?: "paper" | "right"; sheet?: boolean; stay?: boolean; lean?: boolean; wentToLean?: boolean; inspect?: boolean; after?: () => void }) => {
       saveNow();
       o.after?.();
       const cur = entryRef.current;
@@ -301,6 +300,8 @@ export function PaperPage({ edition }: { edition: Edition }) {
         // Opening something changes the subject, never the view.
         lean: o.lean ?? (plain || cur.lean),
         wentToLean: !!o.wentToLean,
+        // Graph hops count back to the reading before the first of them.
+        inspect: o.inspect ? { steps: (cur.inspect?.steps ?? 0) + 1, origin: cur.inspect?.origin ?? label } : undefined,
         opened: (o.pin === undefined ? cur.pin : o.pin) || (o.tab ?? "step") !== "step"
           ? cur.opened ? { steps: cur.opened.steps + 1, fromGraph: cur.opened.fromGraph } : cur.pin || cur.tab !== "step" ? null : { steps: 1, fromGraph: !cur.lean }
           : null,
@@ -474,10 +475,10 @@ export function PaperPage({ edition }: { edition: Edition }) {
     // statement, the Lean and the graph follow the reading line again.
     const cur = entryRef.current;
     if (byReader && cur.pin && cur.tab === "step" && id && id !== lineId.current && id !== cur.pin.passage) {
-      const unpinned = { ...cur, pin: null, opened: null };
+      const unpinned = { ...cur, pin: null, opened: null, inspect: undefined };
       entryRef.current = unpinned;
       setEntry(unpinned);
-      }
+    }
     lineId.current = id;
     if (id && (pane()?.top() ?? 0) > 6) lastLinked.current = id;
     setLine({ id, zone, above });
@@ -501,21 +502,29 @@ export function PaperPage({ edition }: { edition: Edition }) {
     open({ record: name, pin: { passage: null, decl: name, at: pane()?.top() ?? 0 }, from });
   }, [declarations, open, pane]);
 
-  /** A card: the paper goes to the statement, the Lean opens, the graph stays. */
+  /** A card: it is inspected in the graph and the Lean, and the paper stays where it is. */
   const openCard = useCallback((id: string) => {
-    const claim = edition.claims.find((c) => c.id === id);
-    if (claim) {
-      open({ record: id, pin: { passage: claim.passage, decl: null, at: null }, target: { passage: claim.passage }, stay: true });
-      return;
-    }
-    const passage = bestPassage(edition, id);
-    open({ record: id, pin: { passage, decl: id, at: passage ? null : pane()?.top() ?? 0 }, target: passage ? { passage } : null, stay: true });
-  }, [edition, open, pane]);
+    const decl = edition.claims.find((c) => c.id === id)?.lean[0] ?? id;
+    if (!declarations.has(decl) || (entryRef.current.pin?.decl === decl && entryRef.current.tab === "step")) return;
+    open({ record: decl, pin: { passage: null, decl, at: pane()?.top() ?? 0 }, from: "right", inspect: true, stay: true });
+  }, [declarations, edition, open, pane]);
 
   /** A sentence named on the Lean page: go there and hold it. */
   const goToPassage = useCallback((id: string) => {
     open({ record: `@${id}`, pin: { passage: id, decl: null, at: null }, target: { passage: id } });
   }, [open]);
+
+  /** From an inspected card to its statement in the paper, which the right page then follows. */
+  const followFrom = useCallback((id: string) => {
+    stepAt.current = edition.passages.findIndex((p) => p.id === id);
+    open({ record: `@${id}`, pin: null, target: { passage: id }, inspect: true });
+  }, [edition, open]);
+
+  /** Back over every graph hop, to the reading place and view before the first. */
+  const returnToOrigin = useCallback(() => {
+    const steps = entryRef.current.inspect?.steps;
+    if (steps) window.history.go(-steps);
+  }, []);
 
   const jumpTo = useCallback((id: string) => {
     const cur = entryRef.current;
@@ -660,33 +669,45 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const here = useMemo(() => outline.find((e) => e.id === section), [outline, section]);
   const hereLabel = here ? (here.number ? sectionLabel(here.number) : here.title) : null;
 
-  type Shown = { mode: "preview" | "pin" | "line" | "start" | "between" | "after"; passage: Passage | null; decl: string | null };
+  // The front matter: the reading line has reached no linked statement and none lies above it.
+  // Until then an opening map stays the whole map, under the camera it opened with.
+  const intro = !line.id && !line.above && line.zone === "before";
+  type Shown = { mode: "preview" | "next" | "pin" | "line" | "start" | "between" | "after"; passage: Passage | null; decl: string | null };
   // What is in hand, before any preview: the subject of the graph and of the Lean.
   const held = useMemo((): Shown => {
     if (pin?.decl) return { mode: "pin", passage: null, decl: pin.decl };
     if (pin?.passage) return { mode: "pin", passage: passages.get(pin.passage) ?? null, decl: null };
     if (landing?.decl || landing?.passage) return { mode: "line", passage: passages.get(landing.passage ?? "") ?? null, decl: landing.decl ?? null };
-    if (atTop) return { mode: "start", passage: claimPassage, decl: null };
+    if (intro) return { mode: "start", passage: claimPassage, decl: null };
     if (line.id) return { mode: "line", passage: passages.get(line.id) ?? null, decl: null };
     const previous = lastLinked.current ?? line.above;
     if (previous) return { mode: plain ? "line" : "between", passage: passages.get(previous) ?? null, decl: null };
     return { mode: "start", passage: claimPassage, decl: null };
-  }, [atTop, claimPassage, landing, line, passages, pin, plain]);
+  }, [claimPassage, intro, landing, line, passages, pin, plain]);
+  // In the untied opening of a page that shows no whole map: the statement the next step
+  // (→, j or Next) would land on, without moving to it.
+  const nextUp = (() => {
+    const mapShown = !plain && !entry.lean && (wide ? layout.graph : entry.sheet);
+    if (held.mode !== "start" || !intro || mapShown) return null;
+    const at = stepAt.current < 0 ? -1 : stepAt.current;
+    return edition.passages[at + 1] ?? null;
+  })();
   // A card under the pointer previews its Lean, in the dock or in the Lean view. In the Lean
   // view a sentence under the pointer previews its Lean too.
   const shown = useMemo((): Shown => {
     if (pointedCard) return { mode: "preview", passage: null, decl: pointedCard };
     if (pointedClaim) return { mode: "preview", passage: passages.get(pointedClaim.passage) ?? null, decl: null };
     if (entry.lean && pointedPassage) return { mode: "preview", passage: pointedPassage, decl: null };
+    if (nextUp) return { mode: "next", passage: nextUp, decl: null };
     return held;
-  }, [entry.lean, held, passages, pointedCard, pointedClaim, pointedPassage]);
+  }, [entry.lean, held, nextUp, passages, pointedCard, pointedClaim, pointedPassage]);
 
   const stepView = useMemo((): Step => {
     if (shown.mode === "after") return { key: "after", title: null, passage: null, decls: [], exact: null, untied: { section: hereLabel, last: lastTie } };
     if (shown.decl) return { key: `d:${shown.decl}`, title: null, passage: null, decls: [shown.decl], exact: null, untied: null };
     const passage = shown.passage;
     if (!passage) return { key: "none", title: null, passage: null, decls: [], exact: null, untied: { section: hereLabel, last: lastTie } };
-    const title = shown.mode === "start" ? `The ${noun(edition)}’s main claim, ${sectionLabel(passage.section)}` : `${sectionLabel(passage.section)}, ${passageLocation(passage)}`;
+    const title = shown.mode === "start" ? `The ${noun(edition)}’s main claim, ${sectionLabel(passage.section)}` : `${shown.mode === "next" ? "Next statement, " : ""}${sectionLabel(passage.section)}, ${passageLocation(passage)}`;
     return { key: `p:${passage.id}`, title, passage, decls: passage.lean, exact: passage.lines ?? null, untied: null };
   }, [hereLabel, lastTie, shown]);
 
@@ -710,8 +731,9 @@ export function PaperPage({ edition }: { edition: Edition }) {
     const ids = pointedName ? [pointedName] : cardPoint ? [cardPoint] : pin?.decl ? [pin.decl] : [];
     for (const id of ids) for (const p of declarations.get(id)?.passages ?? []) out.add(p);
     if (pointedClaim) out.add(pointedClaim.passage);
+    if (nextUp && !pointedId && !cardPoint) out.add(nextUp.id);
     return out;
-  }, [cardPoint, declarations, pin, pointedClaim, pointedName]);
+  }, [cardPoint, declarations, nextUp, pin, pointedClaim, pointedId, pointedName]);
 
   // The bar reads the statement in hand; what has been reached is read from the page.
   const activeId = pin?.passage ?? landing?.passage ?? line.id;
@@ -737,6 +759,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
   const name = plainOf(stepView.decls[0]) || stepView.passage?.title;
   const says = (() => {
     if (shown.mode === "preview") return <><b>Previewing</b> {plainOf(shown.decl ?? undefined) || stepView.title}. Move away to return.</>;
+    if (shown.mode === "next") return <><b>{edition.paper.standard ? "Before the first linked passage." : "Before the first statement."}</b> Next: {name}, {sectionLabel(shown.passage!.section)}.</>;
     if (shown.mode === "pin") return <><b>Pinned</b> {plainOf(pin?.decl ?? undefined) || stepView.passage?.title || stepView.title}<button type="button" className="proof__unpin" onClick={closeLean}>Unpin</button></>;
     if (shown.mode === "after") {
       const sections = edition.coverage.sections;
@@ -753,7 +776,14 @@ export function PaperPage({ edition }: { edition: Edition }) {
     return <><b>Following the {noun(edition)}:</b> {name && shown.passage ? `${name}, ${sectionLabel(shown.passage.section)}` : name || stepView.title}</>;
   })();
 
-  const backButton = entry.back && <button type="button" className="back" onClick={back} title="Your browser’s Back ( [ or Alt + Left )">Back to {entry.back}</button>;
+  // A card inspected from the graph: its statement in the paper, and the way back to the reading.
+  const inspectedPassage = entry.inspect && pin?.decl ? bestPassage(edition, pin.decl) : null;
+  // Before landing the card offers its passage; once there, or with none, the way back.
+  const backButton = inspectedPassage ? (
+    <button type="button" className="back" onClick={() => followFrom(inspectedPassage)} title={`Go to ${placeOf(passages.get(inspectedPassage)!)} and follow the ${noun(edition)} from there`}>Go to passage</button>
+  ) : entry.inspect ? (
+    <button type="button" className="back" onClick={returnToOrigin} title={`Back to ${entry.inspect.origin}, as it was before the first click in the graph`}>Return to original</button>
+  ) : entry.back && <button type="button" className="back" onClick={back} title="Your browser’s Back ( [ or Alt + Left )">Back to {entry.back}</button>;
 
   const pointedDecl = pointedName ? declarations.get(pointedName) : null;
   const hasLean = (ids: string[]) => ids.map((id) => declarations.get(id)).filter((d) => !!d);
@@ -864,11 +894,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
           }}>Go to the start of the paper</a>
         </p>
       )}
-      <main className={`spread${edition.reading ? " spread--reading" : ""}${showRight ? " has-right" : ""}`} ref={spread}
-        onScrollCapture={(event) => {
-          const element = event.target;
-          if (element instanceof HTMLElement && element.hasAttribute("data-paper-pane")) setAtTop(element.scrollTop <= 6);
-        }}>
+      <main className={`spread${edition.reading ? " spread--reading" : ""}${showRight ? " has-right" : ""}`} ref={spread}>
         {edition.reading && (
           <Contents
             noun={noun(edition)}
@@ -962,7 +988,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
                 edition={edition}
                 graph={graph}
                 subjects={graphSubject}
-                autoOverview={atTop && !pin && !landing?.passage && !landing?.decl}
+                autoOverview={intro && !pin && !landing?.passage && !landing?.decl}
                 pointed={pointedIds}
                 held={pointedCard}
                 position={position}
