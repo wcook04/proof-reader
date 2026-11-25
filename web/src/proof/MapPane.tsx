@@ -7,6 +7,7 @@ import { memo, useCallback, useEffect, useImperativeHandle, useMemo, useRef, use
 import type { Edition } from "../app/edition";
 import { ArgumentTree, type Insets, type MapViewHandle } from "../map/ArgumentTree";
 import type { MapScene } from "../map/canvas/scene";
+import { reach } from "../map/treeModel";
 import type { ArgGraph } from "../model/graph";
 import { FocusGraph, type FGCard } from "./FocusGraph";
 import { focusData } from "./focusCards";
@@ -73,7 +74,6 @@ interface Props {
 export const MapPane = memo(function MapPane({ ref, edition, graph, subjects, autoOverview, pointed, held, position, label, onSubject, onHover, availableHeight, onFitHeight }: Props) {
   const data = useMemo(() => focusData(edition), [edition]);
   const [wholeRequested, setWhole] = useState(false);
-  const whole = autoOverview || wholeRequested;
   const tree = useRef<MapViewHandle>(null);
   const [narrow, setNarrow] = useState(false);
   const [unfolded, setUnfolded] = useState(false);
@@ -95,6 +95,12 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, subjects, au
   }, [data, position, subjectSet]);
   const shown = useMemo(() => subjects.filter((id) => data.card(id)), [subjects, data]);
   const edges = useMemo(() => data.edges(shown), [data, shown]);
+  const claim = edition.claims[0];
+  const goal = claim?.id ?? "";
+  const hasOverview = useMemo(() => !!goal && reach(graph, goal).size > 1, [graph, goal]);
+  const fallback = shown.length > 0 && edges.length === 0 && hasOverview;
+  const automaticOverview = autoOverview || fallback;
+  const whole = automaticOverview || wholeRequested;
   const route = useMemo(() => data.route(shown), [data, shown]);
   // A label over the drawing already says this is a view of its own (Lean the paper does not
   // state, or the statement before an untied paragraph); a second line saying there is no
@@ -122,8 +128,6 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, subjects, au
   }), [whole]);
 
   const litIds = useMemo(() => (shown.length ? new Set(shown) : null), [shown]);
-  const goal = edition.claims[0]?.id ?? "";
-  const claim = edition.claims[0];
   const heightOf = useCallback((id: string) => Math.max(TILE_H, tileHeight(graph.nodes.get(id)?.label ?? "", TILE_W, graph.nodes.get(id)?.rawName ?? "")), [graph]);
   // A card on the whole map opens as the subject, back in the drawing around it.
   const chooseOnMap = useCallback((id: string | null) => {
@@ -162,7 +166,7 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, subjects, au
             tileHeight={TILE_H}
             tileHeightOf={heightOf}
             oneCardEach
-            litIds={litIds}
+            litIds={fallback ? null : litIds}
             previewIds={pointed}
             rootExcerpt={<span>{claim?.title}</span>}
             onSelect={chooseOnMap}
@@ -194,7 +198,7 @@ export const MapPane = memo(function MapPane({ ref, edition, graph, subjects, au
       )}
       {!folded && (
         <div className="graph__switch">
-          {!autoOverview && <button type="button" onClick={() => setWhole((w) => !w)}>{whole ? "Around this step" : "Whole proof map"}</button>}
+          {!automaticOverview && <button type="button" onClick={() => setWhole((w) => !w)}>{whole ? "Around this step" : "Whole proof map"}</button>}
           {narrow && <button type="button" onClick={() => { setWhole(false); setUnfolded(false); }}>Fold the graph</button>}
         </div>
       )}
