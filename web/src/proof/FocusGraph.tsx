@@ -110,6 +110,25 @@ export interface FocusGraphProps {
 interface Box { x: number; y: number; w: number; h: number }
 interface Seg { d: string; cls: string; kind: string; edge?: string; why?: string; href?: string }
 interface Drawn { w: number; h: number; segs: Seg[]; paths: Record<string, string>; boxes: { id: string; box: Box; band: string }[] }
+
+/** Skip an SVG commit when the layout and its edge targets have not moved. */
+function sameDrawing(a: Drawn | null, b: Drawn | null): boolean {
+  if (a === b) return true;
+  if (!a || !b || a.w !== b.w || a.h !== b.h || a.segs.length !== b.segs.length) return false;
+  if (a.boxes.length !== b.boxes.length || a.boxes.some(({ id, band, box }, i) => {
+    const next = b.boxes[i];
+    return id !== next.id || band !== next.band || Math.abs(box.x - next.box.x) > 0.05 ||
+      Math.abs(box.y - next.box.y) > 0.05 || Math.abs(box.w - next.box.w) > 0.05 || Math.abs(box.h - next.box.h) > 0.05;
+  })) return false;
+  if (!a.segs.every((seg, i) => {
+    const next = b.segs[i];
+    return seg.d === next.d && seg.cls === next.cls && seg.edge === next.edge &&
+      seg.kind === next.kind;
+  })) return false;
+  const keys = Object.keys(a.paths);
+  return keys.length === Object.keys(b.paths).length && keys.every((key) => a.paths[key] === b.paths[key]);
+}
+
 type Side = "users" | "uses";
 /**
  * A neighbour: the relation its line shows (the first of RELATION_ORDER it has), every relation it
@@ -231,7 +250,7 @@ export function FocusGraph(props: FocusGraphProps) {
   /** True from opening, a new subject or Fit until the reader moves the view or opens a group: the drawing is kept fitted. */
   const auto = useRef(true);
   const drawnRef = useRef<Drawn | null>(null);
-  drawnRef.current = drawn;
+  useLayoutEffect(() => { drawnRef.current = drawn; }, [drawn]);
   const applyCam = () => {
     const w = world.current;
     if (!w) return;
@@ -503,7 +522,7 @@ export function FocusGraph(props: FocusGraphProps) {
   }, []);
 
   // The lines, measured from the nodes as the browser laid them out.
-  const measure = useCallback(() => {
+  const readDrawing = useCallback((): Drawn | null | undefined => {
     const w = world.current;
     if (!w) return;
     // HTML cards and SVG wires share the world's layout space. Position them before
@@ -524,7 +543,7 @@ export function FocusGraph(props: FocusGraphProps) {
       return { x, y, w: el.offsetWidth, h: el.offsetHeight };
     };
     const frame = w.querySelector<HTMLElement>(".fg__subjects");
-    if (!frame) { setDrawn(null); return; }
+    if (!frame) return null;
     const F = box(frame);
     const stackedNow = w.classList.contains("fg__world--narrow");
     const segs: Seg[] = [];
@@ -609,24 +628,33 @@ export function FocusGraph(props: FocusGraphProps) {
       segs.push({ d, cls: `fg__wire fg__edge fg__edge--${e.kind ?? "use"} fg__inner`, kind: e.kind ?? "use", edge: `${e.from}>${e.to}`, why: e.kind === "paper" ? e.why : undefined, href: e.kind === "paper" ? e.href : undefined });
     });
     // The world's own size: offsetWidth is not scaled by the camera.
-    setDrawn({ w: w.offsetWidth, h: w.offsetHeight, segs, paths, boxes });
+    return { w: w.offsetWidth, h: w.offsetHeight, segs, paths, boxes };
   }, [model, many]);
 
   useLayoutEffect(() => {
-    measure();
+    const next = readDrawing();
+    if (next !== undefined && !sameDrawing(drawnRef.current, next)) setDrawn(next);
     const w = world.current;
     if (!w) return;
-    // Fonts and typeset titles can arrive after the first layout.
-    const ro = new ResizeObserver(() => measure());
-    ro.observe(w);
-    for (const c of w.querySelectorAll(".fg__card, .fg__grouphead, .fg__side, .fg__subjects, .fg__sidehead, .fg__edge-note")) ro.observe(c);
+
+    // Size changes made by the browser arrive after React's layout effect. Commit
+    // changed paths in this observer turn, before the browser paints the moved cards.
+    const syncDrawing = () => {
+      const next = readDrawing();
+      if (next === undefined || sameDrawing(drawnRef.current, next)) return;
+      flushSync(() => setDrawn(next));
+    };
+    const ro = new ResizeObserver(syncDrawing);
+    if (scroller.current) ro.observe(scroller.current, { box: "border-box" });
+    ro.observe(w, { box: "border-box" });
+    for (const c of w.querySelectorAll(".fg__card, .fg__grouphead, .fg__side, .fg__subjects, .fg__sidehead, .fg__edge-note")) ro.observe(c, { box: "border-box" });
     const fonts = w.ownerDocument.fonts;
-    fonts?.addEventListener("loadingdone", measure);
+    fonts?.addEventListener("loadingdone", syncDrawing);
     return () => {
       ro.disconnect();
-      fonts?.removeEventListener("loadingdone", measure);
+      fonts?.removeEventListener("loadingdone", syncDrawing);
     };
-  }, [measure, key, leftItems, rightItems, sideW, subjectW]);
+  }, [readDrawing, key, leftItems, rightItems, sideW, subjectW]);
 
   // The pane and its new SVG can commit in different frames. Fit the latest
   // drawing and pane together, after both the HTML and SVG have laid out.
