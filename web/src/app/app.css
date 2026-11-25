@@ -483,7 +483,14 @@ button:disabled { cursor: default; }
 a.source__ref { font-family: inherit; text-indent: 0; color: inherit; text-decoration: underline dotted; text-decoration-color: var(--tie-rest); text-underline-offset: 2px; }
 a.source__ref.lk--type { color: var(--code-type); }
 a.source__ref:hover { color: var(--lit); text-decoration: underline solid; }
-.source__self { font-weight: 700; }
+/* A source name's signature beside it; placed by SourcePreview in lean/code.tsx. */
+.source-preview {
+  position: fixed; top: 0; left: 0; z-index: 30; visibility: hidden; pointer-events: none;
+  box-sizing: border-box; max-width: min(36rem, calc(100vw - 12px)); padding: 6px 10px;
+  font-size: var(--fs-xs); line-height: 1.4; color: var(--ink); overflow-wrap: anywhere;
+  background: var(--raised); border: 1px solid var(--rule-control); border-radius: var(--radius-s);
+  box-shadow: 0 6px 22px rgb(0 0 0 / 0.18);
+}.source__self { font-weight: 700; }
 .lean-code .lk--keyword { color: var(--lean-keyword); font-weight: 700; }
 .lk--binder { color: var(--ink-2); font-style: italic; }
 .lean-code .lk--arrow { color: var(--lean-keyword); }

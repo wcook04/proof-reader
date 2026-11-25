@@ -1,7 +1,8 @@
 // The authors' Lean, drawn line by line with every name a link. A name walks to its
 // declaration in place; under the pointer it says its signature on the right page.
 
-import { useMemo, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode, type RefObject } from "react";
+import { createPortal } from "react-dom";
 import { routeHref } from "../app/router";
 import { tokenizeLean } from "./leanTokens";
 
@@ -71,6 +72,7 @@ export function DeclLink({ paper, name, className, act, children, preview = true
     <a
       className={className}
       href={routeHref({ paper, record: name })}
+      data-lean-declaration={name}
       onClick={(event) => {
         if (event.metaKey || event.ctrlKey || event.shiftKey) return;
         event.preventDefault();
@@ -84,6 +86,108 @@ export function DeclLink({ paper, name, className, act, children, preview = true
     >
       {children ?? <><span>{act.plain(name)}</span> <code>{name}</code></>}
     </a>
+  );
+}
+
+/** Moving from one name to the next passes over nothing, so the preview does not blink. */
+const LINGER = 140;
+
+/**
+ * A name in the source says its signature beside itself, from the declarations already
+ * loaded. It listens on the host, so pointing re-renders this preview and not the code.
+ */
+export function SourcePreview({ host, act, type }: { host: RefObject<HTMLElement | null>; act: LeanActions; type(name: string): string | undefined }) {
+  const [shown, setShown] = useState<{ anchor: HTMLAnchorElement; name: string } | null>(null);
+  const tip = useRef<HTMLDivElement>(null);
+  const id = useId();
+
+  useEffect(() => {
+    const el = host.current;
+    if (!el) return;
+    let timer = 0;
+    const refOf = (target: EventTarget | null) => (target instanceof Element ? target.closest<HTMLAnchorElement>("a.source__ref[data-lean-declaration]") : null);
+    const show = (anchor: HTMLAnchorElement) => {
+      window.clearTimeout(timer);
+      const name = anchor.dataset.leanDeclaration!;
+      setShown((was) => (was?.anchor === anchor ? was : { anchor, name }));
+    };
+    const hide = (now = false) => {
+      window.clearTimeout(timer);
+      if (now) setShown(null);
+      else timer = window.setTimeout(() => setShown(null), LINGER);
+    };
+    const over = (event: PointerEvent) => {
+      const anchor = refOf(event.target);
+      if (anchor && event.pointerType !== "touch") show(anchor);
+    };
+    const out = (event: PointerEvent) => {
+      if (refOf(event.target) && refOf(event.target) !== refOf(event.relatedTarget)) hide();
+    };
+    const focusIn = (event: FocusEvent) => {
+      const anchor = refOf(event.target);
+      if (anchor?.matches(":focus-visible")) show(anchor);
+    };
+    const focusOut = (event: FocusEvent) => {
+      if (refOf(event.target)) hide(true);
+    };
+    const click = (event: MouseEvent) => {
+      if (refOf(event.target)) hide(true);
+    };
+    el.addEventListener("pointerover", over);
+    el.addEventListener("pointerout", out);
+    el.addEventListener("focusin", focusIn);
+    el.addEventListener("focusout", focusOut);
+    el.addEventListener("click", click, true);
+    return () => {
+      window.clearTimeout(timer);
+      el.removeEventListener("pointerover", over);
+      el.removeEventListener("pointerout", out);
+      el.removeEventListener("focusin", focusIn);
+      el.removeEventListener("focusout", focusOut);
+      el.removeEventListener("click", click, true);
+    };
+  }, [host]);
+
+  useLayoutEffect(() => {
+    const box = tip.current;
+    const anchor = shown?.anchor;
+    if (!box || !anchor) return;
+    if (!anchor.isConnected) return setShown(null);
+    const prior = anchor.getAttribute("aria-describedby");
+    anchor.setAttribute("aria-describedby", [prior, id].filter(Boolean).join(" "));
+    const token = anchor.getBoundingClientRect();
+    const gap = 6;
+    const left = Math.min(window.innerWidth - box.offsetWidth - gap, Math.max(gap, token.left));
+    const below = token.bottom + gap;
+    const top = below + box.offsetHeight <= window.innerHeight - gap ? below : Math.max(gap, token.top - box.offsetHeight - gap);
+    box.style.transform = `translate(${Math.round(left)}px, ${Math.round(top)}px)`;
+    box.style.visibility = "visible";
+    const close = () => setShown(null);
+    const key = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      close();
+      event.preventDefault();
+      event.stopPropagation();
+    };
+    window.addEventListener("scroll", close, { passive: true, capture: true });
+    window.addEventListener("resize", close, { passive: true });
+    window.addEventListener("keydown", key, true);
+    return () => {
+      window.removeEventListener("scroll", close, true);
+      window.removeEventListener("resize", close);
+      window.removeEventListener("keydown", key, true);
+      if (prior === null) anchor.removeAttribute("aria-describedby");
+      else anchor.setAttribute("aria-describedby", prior);
+    };
+  }, [shown, id]);
+
+  if (!shown) return null;
+  const signature = type(shown.name);
+  return createPortal(
+    <div ref={tip} className="source-preview" id={id} role="tooltip">
+      <b>{act.plain(shown.name)}.</b> <code className="proof__sig">{signature ? `${shown.name} : ${signature}` : shown.name}</code>
+    </div>,
+    document.body,
   );
 }
 

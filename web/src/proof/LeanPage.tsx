@@ -5,7 +5,7 @@ import { memo, useCallback, useEffect, useImperativeHandle, useLayoutEffect, use
 import { declEvidence, hasComparisons, noun, passageLocation, type Edition, type Passage } from "../app/edition";
 import type { Tab } from "../app/history";
 import { routeHref } from "../app/router";
-import { DeclLink, LeanCode, useFileLines, type LeanActions } from "../lean/code";
+import { DeclLink, LeanCode, SourcePreview, useFileLines, type LeanActions } from "../lean/code";
 import { sectionLabel, shapeOf } from "../model/fromEdition";
 import { READING_LINE } from "../paper/reading-line";
 import { DeclBlock, KIND_WORDS, list } from "./DeclBlock";
@@ -55,6 +55,10 @@ const SHORT_PROOF = 8;
 export const LeanPage = memo(function LeanPage({ ref, edition, step, open, startTop, tab, onTab, onPassage, act, onOpenLean }: Props) {
   const body = useRef<HTMLDivElement>(null);
   const names = useMemo(() => new Set(edition.declarations.map((d) => d.id)), [edition]);
+  const typeOf = useMemo(() => {
+    const types = new Map(edition.declarations.map((d) => [d.id, d.type]));
+    return (name: string) => types.get(name);
+  }, [edition]);
   // The reader's own folds outlast the step that showed them.
   const [chosen, setChosen] = useState<ReadonlyMap<string, boolean>>(new Map());
   const tops = useRef(new Map<string, number>());
@@ -228,6 +232,7 @@ export const LeanPage = memo(function LeanPage({ ref, edition, step, open, start
           </>
         )}
       </div>
+      <SourcePreview host={body} act={act} type={typeOf} />
     </section>
   );
 });
