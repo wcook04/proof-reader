@@ -115,8 +115,8 @@ export function Threads({ root, target }: { root: RefObject<HTMLElement | null>;
     }
 
     wake.current = schedule;
-    // A new pane or subject may be mounted after the target changes.
-    structure.observe(el, { subtree: true, childList: true, attributes: true, attributeFilter: ["hidden", "data-paper-pane", "data-card"] });
+    // Panes and subjects can mount late. Disclosures can move a row without resizing it.
+    structure.observe(el, { subtree: true, childList: true, attributes: true, attributeFilter: ["hidden", "open", "data-paper-pane", "data-card"] });
     el.addEventListener("scroll", schedule, { capture: true, passive: true });
     el.addEventListener("load", schedule, true);
     window.addEventListener("resize", schedule);

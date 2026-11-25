@@ -1365,6 +1365,38 @@ def shared_links(page: Page, url: str) -> None:
     wait_until(page, lambda: lean_head(page) != unlinked, "the return control resumes following the paper")
 
 
+def thread_follows_note(page: Page, url: str) -> None:
+    """The note's disclosure can move a Lean row inside a pane of fixed height."""
+    page.goto(f"{url}#/{SLUG}/@isoL-statement", wait_until="load")
+    note = page.locator(".decl__note .note-credit summary").first
+    endpoint = page.locator(".threads circle:last-child")
+    geometry = """() => {
+      const row = document.querySelector('.proof__lean .source__line.is-exact');
+      const pane = row?.closest('.leaf__body');
+      if (!pane || !row) return null;
+      const r = row.getBoundingClientRect();
+      const p = pane.getBoundingClientRect();
+      const y = Math.max(p.top + 8, Math.min(p.bottom - 8, r.top + Math.min(11, r.height / 2)));
+      return y - document.querySelector('.spread').getBoundingClientRect().top;
+    }"""
+
+    def attached() -> float | None:
+        y = page.evaluate(geometry)
+        cy = endpoint.get_attribute("cy")
+        return y if y is not None and cy is not None and abs(y - float(cy)) < 0.5 else None
+
+    wait_until(page, attached, "the thread reaches the highlighted Lean line")
+    # Let the initial camera and pane geometry settle before testing the disclosure.
+    page.wait_for_timeout(750)
+    before = wait_until(page, attached, "the thread remains attached when idle")
+    note.click()
+    wait_until(page, lambda: (y := attached()) is not None and abs(y - before) > 8,
+               "opening note credit moves the thread with its Lean line")
+    note.click()
+    wait_until(page, lambda: (y := attached()) is not None and abs(y - before) < 0.5,
+               "closing note credit moves the thread back")
+
+
 def monitors(page: Page, url: str, shots: Path | None, size: tuple[int, int]) -> None:
     w, h = size
     print(f"At {w}x{h}")
@@ -2341,6 +2373,9 @@ def main() -> int:
             if args.only in (None, "shared-links"):
                 context = graph_first(browser.new_context(viewport={"width": 1440, "height": 900}))
                 shared_links(context.new_page(), url)
+                context.close()
+                context = browser.new_context(viewport={"width": 2560, "height": 1440})
+                thread_follows_note(context.new_page(), url)
                 context.close()
             if args.only in (None, "journey"):
                 context = browser.new_context(viewport={"width": 1440, "height": 790})
