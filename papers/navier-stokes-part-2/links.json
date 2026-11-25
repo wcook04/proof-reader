@@ -10188,7 +10188,7 @@
    ]
   },
   "Breakdown.Cert.XX": {
-   "text": "The complete iteration space controls the two spatial derivative norms. Each bordered solve supplies the additional time equation required for membership in D_S.",
+   "text": "The complete iteration space controls the two spatial derivative norms. Each bordered solve supplies the additional time equation required for membership in $D_S$.",
    "because": [
     "spatial-graph-closed"
    ]
@@ -10237,7 +10237,7 @@
   },
   "Breakdown.Cert.Internal.BorderedInvertible.exists_inverse_of_compact_bordered": {
    "verdict": "different",
-   "text": "The formal result inverts a bordered identity-plus-compact operator on a complete normed space, assuming invariance and injectivity. The account applies this operator theorem to T_S, convection, actuators and pins after proving those hypotheses.",
+   "text": "The formal result inverts a bordered identity-plus-compact operator on a complete normed space, assuming invariance and injectivity. The account applies this operator theorem to $T_S$, convection, actuators and pins after proving those hypotheses.",
    "because": [
     "finite-rank-border",
     "fredholm-surjectivity"
@@ -10301,7 +10301,7 @@
   },
   "Breakdown.Cert.XX": {
    "verdict": "different",
-   "text": "The complete ambient space contains period-one L² fields with a square-integrable Laplacian. The paper’s D_S additionally requires the combined time-and-dilation equation; that extra condition is imposed by the inverse, not by the ambient iteration space.",
+   "text": "The complete ambient space contains period-one $L^2$ fields with a square-integrable Laplacian. The paper’s $D_S$ additionally requires the combined time-and-dilation equation; that extra condition is imposed by the inverse, not by the ambient iteration space.",
    "because": [
     "complete-space-statement",
     "spatial-graph-closed"
@@ -10317,7 +10317,7 @@
   },
   "Breakdown.Cert.exists_gradInvSpec": {
    "verdict": "different",
-   "text": "The construction gives the homogeneous gradient through a bounded heat-dilation integral. A separate extension into the spatial derivative space and a test-equation argument yield the physical inverse of T_S.",
+   "text": "The construction gives the homogeneous gradient through a bounded heat-dilation integral. A separate extension into the spatial derivative space and a test-equation argument yield the physical inverse of $T_S$.",
    "because": [
     "heat-dilation-inverse"
    ]
@@ -10535,7 +10535,7 @@
   },
   "Breakdown.Cert.freeInvHolds_of": {
    "verdict": "weaker",
-   "text": "The theorem constructs the free inverse in the spatial derivative representation and gives ‖Δv‖H²+¼‖∇v‖H²≤‖f‖H². The complete physical bijection on D_S uses separate equation and uniqueness arguments.",
+   "text": "The theorem constructs the free inverse in the spatial derivative representation and gives $\\lVert\\Delta v\\rVert_H^2+\\frac{1}{4}\\lVert\\nabla v\\rVert_H^2\\le\\lVert f\\rVert_H^2$. The complete physical bijection on $D_S$ uses separate equation and uniqueness arguments.",
    "because": [
     "period-energy-bound",
     "free-inverse-statement",
@@ -10559,7 +10559,7 @@
   },
   "Breakdown.Cert.localCompactnessHolds_of": {
    "verdict": "different",
-   "text": "From bounded forcing and periods in a compact positive interval, the theorem extracts locally Cauchy subsequences of both velocity and gradient. Proposition II.5 also identifies the limit as T_S⁻¹f and concludes convergence of the whole sequence.",
+   "text": "From bounded forcing and periods in a compact positive interval, the theorem extracts locally Cauchy subsequences of both velocity and gradient. Proposition II.5 also identifies the limit as $T_S^{-1}f$ and concludes convergence of the whole sequence.",
    "because": [
     "period-compactness-statement",
     "local-compactness-step"
@@ -10588,7 +10588,7 @@
   },
   "Breakdown.Cert.productBoundHolds_of": {
    "verdict": "same",
-   "text": "The bilinear bound uses the same c_w, weighted first-factor norm and essential gradient supremum of the second factor. For a continuous X-valued representative, the essential and ordinary suprema agree.",
+   "text": "The bilinear bound uses the same $c_w$, weighted first-factor norm and essential gradient supremum of the second factor. For a continuous $X$-valued representative, the essential and ordinary suprema agree.",
    "because": [
     "product-statement",
     "bilinear-product"
@@ -10626,7 +10626,7 @@
   },
   "Breakdown.Cert.sizeZ": {
    "verdict": "same",
-   "text": "After multiplier normalisation the joint norm is √(‖v‖w²+|β|²). Restoring the original multiplier gives the term ω²|β|².",
+   "text": "After multiplier normalisation the joint norm is $\\sqrt{\\lVert v\\rVert_w^2+|\\beta|^2}$. Restoring the original multiplier gives the term $\\omega^2|\\beta|^2$.",
    "because": [
     "name-cert-sizez"
    ]
@@ -10640,7 +10640,7 @@
   },
   "Breakdown.Cert.sliceSupBoundHolds_of": {
    "verdict": "stronger",
-   "text": "The theorem proves the product-form slice estimate ‖u‖∞²≤(2π)⁻¹‖∇u‖₂‖Δu‖₂. The weighted bound with c_w follows from 2√w*ab≤a²+w*b².",
+   "text": "The theorem proves the product-form slice estimate $\\lVert u\\rVert_\\infty^2\\le (2\\pi)^{-1}\\lVert\\nabla u\\rVert_2\\lVert\\Delta u\\rVert_2$. The weighted bound with $c_w$ follows from $2\\sqrt{w^*}ab\\le a^2+w^*b^2$.",
    "because": [
     "product-statement",
     "fourier-constant"
@@ -10721,7 +10721,7 @@
   },
   "Breakdown.ExtendedCertificateData.transferLoss": {
    "verdict": "same",
-   "text": "The transfer loss is the scalar ϑ=(c₁+c₀)c_r used to absorb the reference convection error.",
+   "text": "The transfer loss is the scalar $\\vartheta=(c_1+c_0)c_r$ used to absorb the reference convection error.",
    "because": [
     "name-extendedcertificatedata-transferloss"
    ]
@@ -10828,7 +10828,7 @@
   },
   "Breakdown.IsPerturbation": {
    "verdict": "different",
-   "text": "The domain specifies weak gradient and Hessian representatives and the square-integrable combined time-and-dilation derivative. The paper writes D_S through distributional derivatives of the velocity; a physical representation argument relates the two.",
+   "text": "The domain specifies weak gradient and Hessian representatives and the square-integrable combined time-and-dilation derivative. The paper writes $D_S$ through distributional derivatives of the velocity; a physical representation argument relates the two.",
    "because": [
     "domain-combination",
     "weak-hessian-retained"
@@ -10933,7 +10933,7 @@
   },
   "Breakdown.supBoundFactor": {
    "verdict": "same",
-   "text": "The constant is c_w=1/√(4π√w*), agreeing algebraically with the weighted product estimate.",
+   "text": "The constant is $c_w=1/\\sqrt{4\\pi\\sqrt{w^*}}$, agreeing algebraically with the weighted product estimate.",
    "because": [
     "fourier-constant"
    ]

@@ -17196,7 +17196,7 @@
    ]
   },
   "Breakdown.CertReduction.AdjointSizeBound": {
-   "text": "The two alternatives bound the spatial L³ or L² norm of the adjoint. The L² alternative pairs with the perturbation’s uniform-norm estimate and its constant S(w*)=[2π(2√w*)]⁻¹ᐟ².",
+   "text": "The two alternatives bound the spatial $L^3$ or $L^2$ norm of the adjoint. The $L^2$ alternative pairs with the perturbation’s uniform-norm estimate and its constant $S(w^*)=[2\\pi(2\\sqrt{w^*})]^{-1/2}$.",
    "because": [
     "b-field-12-adjoint-quadratic"
    ]
@@ -17273,7 +17273,7 @@
    ]
   },
   "Breakdown.CertReduction.adjointQuadCoeff": {
-   "text": "The L³ adjoint bound has coefficient 2/(√3 w*). The L² adjoint bound uses the perturbation’s uniform estimate and has coefficient S(w*)/√w*, where S(w*)=[2π(2√w*)]⁻¹ᐟ².",
+   "text": "The $L^3$ adjoint bound has coefficient $2/(\\sqrt{3}\\,w^*)$. The $L^2$ adjoint bound uses the perturbation’s uniform estimate and has coefficient $S(w^*)/\\sqrt{w^*}$, where $S(w^*)=[2\\pi(2\\sqrt{w^*})]^{-1/2}$.",
    "because": [
     "b10-norm"
    ]
@@ -17430,7 +17430,7 @@
   },
   "Breakdown.CertReduction.formShiftBridge_of": {
    "verdict": "same",
-   "text": "For the two chosen profile discrepancies, the theorem gives B.9’s change-of-form cost, including the factors 1/(2√w*) on the appropriate products. Adding the reference lower bound gives the stated final form bound.",
+   "text": "For the two chosen profile discrepancies, the theorem gives B.9’s change-of-form cost, including the factors $1/(2\\sqrt{w^*})$ on the appropriate products. Adding the reference lower bound gives the stated final form bound.",
    "because": [
     "b9-statement",
     "b9-halves"

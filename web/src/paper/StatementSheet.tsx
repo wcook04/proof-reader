@@ -114,7 +114,7 @@ function Entry({ edition, entry, files, names, act, head = false }: { edition: E
           {d.note && <DeclNote note={d.note} />}
           {!passages.length && !d.note && <p className="sheet__none">No explanation yet.</p>}
           {head && d.fidelity && (
-            <p className="sheet__fid"><span className="decl__label">The {word} and the Lean</span> <span className="fid__by">Compared by AI</span> {verdictWords(d.fidelity.verdict, word)}. {d.fidelity.text}</p>
+            <p className="sheet__fid"><span className="decl__label">The {word} and the Lean</span> <span className="fid__by">Compared by AI</span> {verdictWords(d.fidelity.verdict, word)}. {d.fidelity.html ? <span dangerouslySetInnerHTML={{ __html: d.fidelity.html }} /> : d.fidelity.text}</p>
           )}
         </div>
       </div>

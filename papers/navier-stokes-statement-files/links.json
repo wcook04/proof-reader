@@ -34751,25 +34751,25 @@
    ]
   },
   "Breakdown.Symmetry": {
-   "text": "A symmetry consists of an orthogonal spatial transformation and a shift θ₀ in normalized time. In similarity time the shift becomes θ₀S, as in (7.39).",
+   "text": "A symmetry consists of an orthogonal spatial transformation and a shift $\\theta_0$ in normalized time. In similarity time the shift becomes $\\theta_0S$, as in (7.39).",
    "because": [
     "decl-020-encoding-01"
    ]
   },
   "Breakdown.matSq": {
-   "text": "The squared norm is ∑j|G(eⱼ)|². With G(eⱼ)ₖ=∂ⱼvₖ, this is exactly the Frobenius square |∇v|² used in the paper.",
+   "text": "The squared norm is $\\sum_j|G(e_j)|^2$. With $G(e_j)_k=\\partial_jv_k$, this is exactly the Frobenius square $|\\nabla v|^2$ used in the paper.",
    "because": [
     "decl-021-encoding-01"
    ]
   },
   "Breakdown.matInner": {
-   "text": "The pairing is ∑jG(eⱼ)·K(eⱼ). Matching the derivative direction j and vector component k gives the paper's Frobenius matrix pairing.",
+   "text": "The pairing is $\\sum_jG(e_j)\\cdot K(e_j)$. Matching the derivative direction $j$ and vector component $k$ gives the paper's Frobenius matrix pairing.",
    "because": [
     "decl-022-encoding-01"
    ]
   },
   "Breakdown.secondDerivTrace": {
-   "text": "The expression is ∑jH(eⱼ,eⱼ). Its identification with Δv uses the separate requirement that H is the weak Hessian of v.",
+   "text": "The expression is $\\sum_jH(e_j,e_j)$. Its identification with $\\Delta v$ uses the separate requirement that $H$ is the weak Hessian of $v$.",
    "because": [
     "decl-023-encoding-01"
    ]
@@ -34821,7 +34821,7 @@
    ]
   },
   "Breakdown.IsPerturbation": {
-   "text": "The supplied field g represents S⁻¹∂θv+v/2+(y·∇)v/2 and belongs to H. Positivity of S comes from the certificate, while Δv is supplied separately through the Hessian trace.",
+   "text": "The supplied field $g$ represents $S^{-1}\\partial_\\theta v+v/2+(y\\cdot\\nabla)v/2$ and belongs to $H$. Positivity of $S$ comes from the certificate, while $\\Delta v$ is supplied separately through the Hessian trace.",
    "because": [
     "decl-031-encoding-01",
     "decl-031-encoding-02"
@@ -34876,7 +34876,7 @@
    ]
   },
   "Breakdown.supBoundFactor": {
-   "text": "For w∗>0 the constant is cw=(4π√w∗)⁻¹ᐟ². Positivity of w∗ is supplied by the certificate.",
+   "text": "For $w^*>0$ the constant is $c_w=(4\\pi\\sqrt{w^*})^{-1/2}$. Positivity of $w^*$ is supplied by the certificate.",
    "because": [
     "decl-039-encoding-01"
    ]
@@ -34944,7 +34944,7 @@
    ]
   },
   "Breakdown.coercive_scalar_core": {
-   "text": "The assumptions include c>0, nonnegative energy and squared coefficient size, and nonnegative retained frequency coefficient. The resulting coefficients are a/√c, K and √(t/c).",
+   "text": "The assumptions include $c>0$, nonnegative energy and squared coefficient size, and nonnegative retained frequency coefficient. The resulting coefficients are $a/\\sqrt{c}$, $K$ and $\\sqrt{t/c}$.",
    "because": [
     "decl-051-encoding-01",
     "decl-051-encoding-02"
@@ -35011,7 +35011,7 @@
    ]
   },
   "Breakdown.cylRadius": {
-   "text": "The cylindrical radius is √(y₁²+y₂²) and vanishes on the rotation axis. The angular-gain inequalities hold almost everywhere, allowing that null axis to be excluded.",
+   "text": "The cylindrical radius is $\\sqrt{y_1^2+y_2^2}$ and vanishes on the rotation axis. The angular-gain inequalities hold almost everywhere, allowing that null axis to be excluded.",
    "because": [
     "decl-062-encoding-01",
     "decl-062-encoding-02"
@@ -35301,7 +35301,7 @@
    ]
   },
   "Breakdown.ModeWeights.stretchCharge": {
-   "text": "The factor √2+1/2 belongs to the earlier mean-and-wave stretching estimate. Its balancing length is required to be positive in the theorem using the bound.",
+   "text": "The factor $\\sqrt{2}+1/2$ belongs to the earlier mean-and-wave stretching estimate. Its balancing length is required to be positive in the theorem using the bound.",
    "because": [
     "decl-109-encoding-01",
     "decl-109-encoding-02"
@@ -35727,7 +35727,7 @@
    ]
   },
   "Breakdown.Coercive.transportPart": {
-   "text": "The combined field is g=S⁻¹∂θv+v/2+(y·∇)v/2=Tₛv+Δv. For weak perturbations its meaning is imposed through integration by parts.",
+   "text": "The combined field is $g=S^{-1}\\partial_\\theta v+v/2+(y\\cdot\\nabla)v/2=T_sv+\\Delta v$. For weak perturbations its meaning is imposed through integration by parts.",
    "because": [
     "decl-180-encoding-01",
     "decl-180-encoding-02"
@@ -35991,7 +35991,7 @@
   },
   "Breakdown.coercive_scalar_core": {
    "verdict": "stronger",
-   "text": "Lemma B.2 uses the printed coefficients c=3/50 and t=1000. The formal scalar argument allows arbitrary coefficients satisfying the displayed signs and gives the corresponding factors a/√c and √(t/c).",
+   "text": "Lemma B.2 uses the printed coefficients $c=3/50$ and $t=1000$. The formal scalar argument allows arbitrary coefficients satisfying the displayed signs and gives the corresponding factors $a/\\sqrt{c}$ and $\\sqrt{t/c}$.",
    "because": [
     "decl-051",
     "decl-051-comparison"
@@ -36247,7 +36247,7 @@
   },
   "Breakdown.CoerciveWeak.extendedCoerciveClause_of_rowMultiplierInequality": {
    "verdict": "different",
-   "text": "Lemma B.2 gives the a priori estimate for the printed coefficients 3/50 and 1000. The formal implication is uniform in the parameter and allows general c,t, with the explicit comparisons a/√c≤c₁ and √(t/c)≤c₂.",
+   "text": "Lemma B.2 gives the a priori estimate for the printed coefficients $3/50$ and $1000$. The formal implication is uniform in the parameter and allows general $c,t$, with the explicit comparisons $a/\\sqrt{c}\\le c_1$ and $\\sqrt{t/c}\\le c_2$.",
    "because": [
     "decl-219",
     "decl-219-comparison"

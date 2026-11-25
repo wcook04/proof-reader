@@ -11989,7 +11989,7 @@
    ]
   },
   "Breakdown.Periodic.heatDivFreeComparison": {
-   "text": "The formal projected-heat comparison is uniform on a time window [ε,ε⁻¹]. Short times are estimated separately when assembling the inverse; the paper’s Oseen argument gives explicit bounds across the full positive-time range.",
+   "text": "The formal projected-heat comparison is uniform on a time window $[\\varepsilon,\\varepsilon^{-1}]$. Short times are estimated separately when assembling the inverse; the paper’s Oseen argument gives explicit bounds across the full positive-time range.",
    "because": [
     "torus-kernel-proof-boundary",
     "torus-explicit-powers"
@@ -12166,13 +12166,13 @@
    ]
   },
   "Breakdown.Periodic.InverseAlgebra.Internal.norm_inverse_one_sub_le": {
-   "text": "If ‖Q‖ ≤ q < 1, the inverse of I − Q has norm at most (1 − q)⁻¹. The bound is valid on any Banach space used for the periodic inverse construction.",
+   "text": "If $\\lVert Q\\rVert \\le q < 1$, the inverse of $I - Q$ has norm at most $(1 - q)^{-1}$. The bound is valid on any Banach space used for the periodic inverse construction.",
    "because": [
     "r5-part1-second-0475"
    ]
   },
   "Breakdown.VarConstIntegralInternal.kern_intervalIntegrable": {
-   "text": "The assumed singular estimate is restricted to heat time at most one. On longer intervals the proof uses a bound of the form C_K(r⁻³ᐟ⁴ + 1), which still gives integrability.",
+   "text": "The assumed singular estimate is restricted to heat time at most one. On longer intervals the proof uses a bound of the form $C_K(r^{-3/4} + 1)$, which still gives integrability.",
    "because": [
     "r5-part1-second-0537"
    ]
@@ -12326,7 +12326,7 @@
   },
   "Breakdown.Freq.bilin_holds": {
    "verdict": "weaker",
-   "text": "This result proves bilinear existence and the τ⁻³ᐟ⁴ bound for two inputs in X. The additional estimate for arbitrary L³ᐟ² forcing in Lemma 2.3 is not included in this conclusion.",
+   "text": "This result proves bilinear existence and the $\\tau^{-3/4}$ bound for two inputs in $X$. The additional estimate for arbitrary $L^{3/2}$ forcing in Lemma 2.3 is not included in this conclusion.",
    "because": [
     "a-bilinear-definition"
    ]
@@ -12457,7 +12457,7 @@
   },
   "Breakdown.Periodic.V": {
    "verdict": "different",
-   "text": "The formal space uses the full H¹ norm on a unit torus and retains the constant Fourier mode. The account’s X_L is mean-zero with the homogeneous gradient norm; the transplant identity explains the additional scaled mass term.",
+   "text": "The formal space uses the full $H^1$ norm on a unit torus and retains the constant Fourier mode. The account’s $X_L$ is mean-zero with the homogeneous gradient norm; the transplant identity explains the additional scaled mass term.",
    "because": [
     "a-periodic-objects",
     "torus-norm-convention"
@@ -12705,7 +12705,7 @@
   },
   "Breakdown.orbitSeq": {
    "verdict": "different",
-   "text": "The definition is the normalised recurrence xₙ₊₁ = θ⁻¹(Mxₙ + cₙ). The account also derives its forcing from a continuous Volterra equation, including endpoint source subtraction.",
+   "text": "The definition is the normalised recurrence $x_{n+1} = \\theta^{-1}(Mx_n + c_n)$. The account also derives its forcing from a continuous Volterra equation, including endpoint source subtraction.",
    "because": [
     "sp-recurrence",
     "sp-recurrence-normalized"
@@ -12713,7 +12713,7 @@
   },
   "Breakdown.exists_section": {
    "verdict": "different",
-   "text": "The formal conclusion gives a bounded section J with P_uJ = P_u and values in any prescribed dense data space. The account expresses the resulting transversal as E = J(V), with P_u:E → V an isomorphism.",
+   "text": "The formal conclusion gives a bounded section $J$ with $P_u J = P_u$ and values in any prescribed dense data space. The account expresses the resulting transversal as $E = J(V)$, with $P_u\\colon E\\to V$ an isomorphism.",
    "because": [
     "sp-section-encoding",
     "sp-compact-section"
@@ -12735,7 +12735,7 @@
   },
   "Breakdown.DiscreteDichotomyInternal.norm_tailSum_le": {
    "verdict": "same",
-   "text": "For normalised forcing bounded by R, the tail is at most Ar₂⁻¹R/(1 − Θ/r₂). This is the geometric tail estimate used in the weighted inverse construction.",
+   "text": "For normalised forcing bounded by $R$, the tail is at most $Ar_2^{-1}R/(1 - \\Theta/r_2)$. This is the geometric tail estimate used in the weighted inverse construction.",
    "because": [
     "sp-tail-convergence",
     "sp-tail-choice"
@@ -12853,7 +12853,7 @@
   },
   "Breakdown.Periodic.cutoffMassBound": {
    "verdict": "different",
-   "text": "The theorem bounds the similarity-coordinate cutoff mass by K/√(T − t). The paper expresses its mass control using a freely chosen large cutoff radius, with a different parameterisation.",
+   "text": "The theorem bounds the similarity-coordinate cutoff mass by $K/\\sqrt{T - t}$. The paper expresses its mass control using a freely chosen large cutoff radius, with a different parameterisation.",
    "because": [
     "sp-cutoff-scale"
    ]
@@ -12909,7 +12909,7 @@
   },
   "Breakdown.Periodic.heatDivFreeComparison": {
    "verdict": "different",
-   "text": "The formal theorem gives arbitrarily small error for a restricted rescaled source evolution on [ε,ε⁻¹]. The paper gives an explicit all-positive-time Oseen estimate with L⁻⁷ᐟ² decay, using a different comparison proof.",
+   "text": "The formal theorem gives arbitrarily small error for a restricted rescaled source evolution on $[\\varepsilon,\\varepsilon^{-1}]$. The paper gives an explicit all-positive-time Oseen estimate with $L^{-7/2}$ decay, using a different comparison proof.",
    "because": [
     "torus-kernel-proof-boundary",
     "torus-explicit-powers",
@@ -12919,7 +12919,7 @@
   },
   "Breakdown.Periodic.freeHeatComparison": {
    "verdict": "different",
-   "text": "The formal theorem compares a fixed compact solenoidal datum with its unit-torus transplant to any prescribed accuracy, including heat time zero. The account’s large-torus formula gives an explicit L⁻⁵ᐟ² rate.",
+   "text": "The formal theorem compares a fixed compact solenoidal datum with its unit-torus transplant to any prescribed accuracy, including heat time zero. The account’s large-torus formula gives an explicit $L^{-5/2}$ rate.",
    "because": [
     "torus-kernel-proof-boundary",
     "torus-explicit-powers"
@@ -12927,7 +12927,7 @@
   },
   "Breakdown.Periodic.approxResidualSmall": {
    "verdict": "different",
-   "text": "The formal residual is bounded by KT¹ᐟ⁴θⁿ on geometric time pieces. The account gives a continuous weighted estimate on a large torus; T = L⁻² relates their small parameters.",
+   "text": "The formal residual is bounded by $KT^{1/4}\\theta^n$ on geometric time pieces. The account gives a continuous weighted estimate on a large torus; $T = L^{-2}$ relates their small parameters.",
    "because": [
     "torus-residual-piece-scale",
     "torus-small-time-large-period"

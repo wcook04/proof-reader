@@ -907,7 +907,12 @@ def edition(slug: str) -> dict:
     # In particular, sibling papers can share a project without exposing `..`
     # in source links or asking a browser to resolve a filesystem path.
     project_root = "lean"
-    note_html = render_notes({n: links["notes"][n]["text"] for n in keep if n in links.get("notes", {})})
+    notes = links.get("notes", {})
+    comparisons = links.get("fidelity", {})
+    annotation_html = render_notes({
+        **{n: notes[n]["text"] for n in keep if n in notes},
+        **{f"comparison {n}": comparisons[n]["text"] for n in keep if n in comparisons},
+    })
     declarations = []
     for name in sorted(keep, key=lambda n: (written[n]["module"], written[n]["line"])):
         row = written[name]
@@ -928,8 +933,8 @@ def edition(slug: str) -> dict:
             "axioms": sorted(a for a in axioms if a not in STANDARD_AXIOMS and a not in ("sorryAx", name)),
             "standard_axioms": sorted(a for a in axioms if a in STANDARD_AXIOMS),
             "passages": linked.get(name, []),
-            "note": note_entry(links.get("notes", {}).get(name), note_html.get(name)),
-            "fidelity": fidelity_of(links.get("fidelity", {}).get(name)),
+            "note": note_entry(notes.get(name), annotation_html.get(name)),
+            "fidelity": fidelity_of(comparisons.get(name), annotation_html.get(f"comparison {name}")),
             # Where these facts come from, per declaration: "lean" (read by Lean from the
             # compiled module), "statement-compiled" (only the statement compiled here) or
             # "source-read" (read from the source by hand).
@@ -1116,7 +1121,7 @@ def note_entry(note: dict | None, html_text: str | None) -> dict | None:
     return entry
 
 
-def fidelity_of(entry: dict | None) -> dict | None:
+def fidelity_of(entry: dict | None, html_text: str | None = None) -> dict | None:
     if not entry:
         return None
     return {"verdict": entry["verdict"], "text": entry["text"], "because": entry["because"], "checks": entry.get("checks", [])}

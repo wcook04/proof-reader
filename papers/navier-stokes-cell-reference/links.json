@@ -61331,13 +61331,13 @@
    ]
   },
   "Breakdown.CertReduction.gapGradCoeff": {
-   "text": "The gradient contribution to the profile gap uses either 2/(√3√w_*) with an L³ bound or the weighted supremum constant c_w with an L² bound.",
+   "text": "The gradient contribution to the profile gap uses either $2/(\\sqrt{3}\\sqrt{w_*})$ with an $L^3$ bound or the weighted supremum constant $c_w$ with an $L^2$ bound.",
    "because": [
     "cell-0430"
    ]
   },
   "Breakdown.CertReduction.shiftGradCoeff": {
-   "text": "The L³ contribution to the quadratic-form shift is 1/(√3√w_*), half its contribution to the profile gap; the alternative L² coefficient is c_w.",
+   "text": "The $L^3$ contribution to the quadratic-form shift is $1/(\\sqrt{3}\\sqrt{w_*})$, half its contribution to the profile gap; the alternative $L^2$ coefficient is $c_w$.",
    "because": [
     "cell-0431"
    ]
@@ -61361,7 +61361,7 @@
    ]
   },
   "Breakdown.CertReduction.adjointQuadCoeff": {
-   "text": "The quadratic adjoint coefficient is 2/(√3w_*) in the L³ case and c_w/√w_* in the L² case, before multiplication by the adjoint norm bound.",
+   "text": "The quadratic adjoint coefficient is $2/(\\sqrt{3}\\,w_*)$ in the $L^3$ case and $c_w/\\sqrt{w_*}$ in the $L^2$ case, before multiplication by the adjoint norm bound.",
    "because": [
     "cell-0435"
    ]
@@ -61643,7 +61643,7 @@
    ]
   },
   "Breakdown.CellCert.CellAnalysis.cylRadius": {
-   "text": "The cylindrical radius is r=√(y₁²+y₂²), using the two horizontal Cartesian components.",
+   "text": "The cylindrical radius is $r=\\sqrt{y_1^2+y_2^2}$, using the two horizontal Cartesian components.",
    "because": [
     "cell-0006"
    ]
@@ -61673,7 +61673,7 @@
    ]
   },
   "Breakdown.CellCert.CellAnalysis.axialUnit": {
-   "text": "The axial unit vector is e_z=(0,0,1), independent of the spatial angle.",
+   "text": "The axial unit vector is $e_z=(0,0,1)$, independent of the spatial angle.",
    "because": [
     "cell-0011"
    ]
@@ -61943,7 +61943,7 @@
    ]
   },
   "Breakdown.CellCert.GivenFields.weightPoly": {
-   "text": "The endpoint weight is σ^e₀(1−σ)^e₁ for nonnegative integers e₀ and e₁. These powers control the origin and far-field behavior.",
+   "text": "The endpoint weight is $\\sigma^{e_0}(1-\\sigma)^{e_1}$ for nonnegative integers $e_0$ and $e_1$. These powers control the origin and far-field behavior.",
    "because": [
     "cell-0157"
    ]
@@ -61967,7 +61967,7 @@
    ]
   },
   "Breakdown.CertCell.Instance.ChartScalar.eval": {
-   "text": "The scalar value is (1−σ)^h times the real part of the selected half-chart spline. Points on the symmetry plane use the upper chart.",
+   "text": "The scalar value is $(1-\\sigma)^h$ times the real part of the selected half-chart spline. Points on the symmetry plane use the upper chart.",
    "because": [
     "cell-0263"
    ]
@@ -61985,7 +61985,7 @@
    ]
   },
   "Breakdown.CertCell.Instance.IsJoinedScalar": {
-   "text": "Each half-chart has the required joins, both halves use the same radial knots, and their height derivatives at η=0 agree with the sign (−1)^o for order o.",
+   "text": "Each half-chart has the required joins, both halves use the same radial knots, and their height derivatives at $\\eta=0$ agree with the sign $(-1)^o$ for order $o$.",
    "because": [
     "cell-0266"
    ]
@@ -62075,19 +62075,19 @@
    ]
   },
   "Breakdown.CertCell.GivenShape.nodalLeft": {
-   "text": "The left-endpoint polynomial is obtained by the affine coordinate (x−a)/(b−a) and factor (b−a)^p. For a≠b and p<n, where n is the interpolation depth, this preserves the physical p-th derivative normalization.",
+   "text": "The left-endpoint polynomial is obtained by the affine coordinate $(x-a)/(b-a)$ and factor $(b-a)^p$. For $a\\ne b$ and $p<n$, where $n$ is the interpolation depth, this preserves the physical $p$-th derivative normalization.",
    "because": [
     "cell-0307"
    ]
   },
   "Breakdown.CertCell.GivenShape.nodalRight": {
-   "text": "The right-endpoint polynomial uses (b−x)/(b−a) and factor (a−b)^p. For a≠b and p<n, where n is the interpolation depth, the reflected coordinate and sign preserve the physical p-th derivative normalization.",
+   "text": "The right-endpoint polynomial uses $(b-x)/(b-a)$ and factor $(a-b)^p$. For $a\\ne b$ and $p<n$, where $n$ is the interpolation depth, the reflected coordinate and sign preserve the physical $p$-th derivative normalization.",
    "because": [
     "cell-0308"
    ]
   },
   "Breakdown.CertCell.GivenShape.bubblePoly": {
-   "text": "The interior polynomial is [(x−a)(b−x)]^n[x−(a+b)/2]^s. Its endpoint derivatives of orders 0 through n−1 vanish at both ends.",
+   "text": "The interior polynomial is $[(x-a)(b-x)]^n[x-(a+b)/2]^s$. Its endpoint derivatives of orders $0$ through $n-1$ vanish at both ends.",
    "because": [
     "cell-0309"
    ]
@@ -62111,7 +62111,7 @@
    ]
   },
   "Breakdown.CertCell.GivenShape.JetAxis.dofSign": {
-   "text": "A reflected p-th endpoint derivative has sign (−1)^p, and a reflected midpoint polynomial of degree s has sign (−1)^s.",
+   "text": "A reflected $p$-th endpoint derivative has sign $(-1)^p$, and a reflected midpoint polynomial of degree $s$ has sign $(-1)^s$.",
    "because": [
     "cell-0313"
    ]
@@ -62207,7 +62207,7 @@
    ]
   },
   "Breakdown.CertCell.GivenShape.shiftedScale": {
-   "text": "The phase-shifted radial operator is V_l=σ(1−σ)∂σ+2il|y|²f′(|y|²).",
+   "text": "The phase-shifted radial operator is $V_l=\\sigma(1-\\sigma)\\partial_\\sigma+2il|y|^2f'(|y|^2)$.",
    "because": [
     "cell-0332"
    ]
@@ -62333,7 +62333,7 @@
    ]
   },
   "Breakdown.CellReduction.Instantiation.stepPhase": {
-   "text": "The moving phase is f_*(s)=∫₀^{√s}χ(r/(r+L))dr/r. Vanishing of χ near zero removes the singularity in this integral for valid cutoff data.",
+   "text": "The moving phase is $f_*(s)=\\int_0^{\\sqrt{s}}\\chi(r/(r+L))\\,dr/r$. Vanishing of $\\chi$ near zero removes the singularity in this integral for valid cutoff data.",
    "because": [
     "cell-0446"
    ]
@@ -62369,7 +62369,7 @@
    ]
   },
   "Breakdown.CellReduction.Instantiation.pressureKeyValue": {
-   "text": "One pressure term is its phase multiplied by σ^{h₀}(1−σ)^h(1−η²)^{h′₀} and the scalar spline amplitude.",
+   "text": "One pressure term is its phase multiplied by $\\sigma^{h_0}(1-\\sigma)^h(1-\\eta^2)^{h'_0}$ and the scalar spline amplitude.",
    "because": [
     "cell-0456"
    ]
@@ -62405,7 +62405,7 @@
    ]
   },
   "Breakdown.CertCell.KnotZero.planeOf": {
-   "text": "A spatial point is sent to (√(y₁²+y₂²),y₃), retaining the sign of its height for the subsequent reflection test.",
+   "text": "A spatial point is sent to $(\\sqrt{y_1^2+y_2^2},y_3)$, retaining the sign of its height for the subsequent reflection test.",
    "because": [
     "cell-0481"
    ]
@@ -62417,19 +62417,19 @@
    ]
   },
   "Breakdown.CertCell.GivenShape.planeNorm": {
-   "text": "The meridian distance is √(r²+z²), the radius used to locate spherical spline seams.",
+   "text": "The meridian distance is $\\sqrt{r^2+z^2}$, the radius used to locate spherical spline seams.",
    "because": [
     "cell-0483"
    ]
   },
   "Breakdown.CertCell.GivenShape.sphereKnots": {
-   "text": "A radial breakpoint σ contributes the sphere √(r²+z²)=Lσ/(1−σ). At σ=1 the written formula takes the assigned value zero, so this endpoint does not denote an infinite sphere.",
+   "text": "A radial breakpoint $\\sigma$ contributes the sphere $\\sqrt{r^2+z^2}=L\\sigma/(1-\\sigma)$. At $\\sigma=1$ the written formula takes the assigned value zero, so this endpoint does not denote an infinite sphere.",
    "because": [
     "cell-0484"
    ]
   },
   "Breakdown.CertCell.GivenShape.coneKnots": {
-   "text": "A height breakpoint η contributes the cone z=η√(r²+z²).",
+   "text": "A height breakpoint $\\eta$ contributes the cone $z=\\eta\\sqrt{r^2+z^2}$.",
    "because": [
     "cell-0485"
    ]
@@ -62471,7 +62471,7 @@
    ]
   },
   "Breakdown.CertCell.GivenShape.symmetricJacobi": {
-   "text": "The binomial formula fixes the normalization of the symmetric Jacobi polynomial Pⱼ^{(α,α)} used in the bubble basis conversion.",
+   "text": "The binomial formula fixes the normalization of the symmetric Jacobi polynomial $P_j^{(\\alpha,\\alpha)}$ used in the bubble basis conversion.",
    "because": [
     "cell-0492"
    ]
@@ -62633,7 +62633,7 @@
    ]
   },
   "Breakdown.CertCell.frameUnit": {
-   "text": "The moving frame is ordered as (eᵣ,eφ,e_z). Vector and matrix components use this order.",
+   "text": "The moving frame is ordered as $(e_r,e_\\phi,e_z)$. Vector and matrix components use this order.",
    "because": [
     "cell-0183"
    ]
@@ -62645,7 +62645,7 @@
    ]
   },
   "Breakdown.CertCell.pointPlane": {
-   "text": "The meridian coordinates of a spatial point are (√(y₁²+y₂²),y₃), retaining the sign of the height.",
+   "text": "The meridian coordinates of a spatial point are $(\\sqrt{y_1^2+y_2^2},y_3)$, retaining the sign of the height.",
    "because": [
     "cell-0185"
    ]
@@ -62687,7 +62687,7 @@
    ]
   },
   "Breakdown.CertCell.CellMatField.frameMap": {
-   "text": "The matrix acts by x↦∑ₐᵦMₐᵦ⟨eᵦ,x⟩eₐ. Thus its column index is the input direction and its row index is the output component.",
+   "text": "The matrix acts by $x\\mapsto\\sum_{ab}M_{ab}\\langle e_b,x\\rangle e_a$. Thus its column index is the input direction and its row index is the output component.",
    "because": [
     "cell-0203"
    ]
@@ -62717,7 +62717,7 @@
    ]
   },
   "Breakdown.CertCell.Instance.GeneratedByClassSymmetries": {
-   "text": "Each declared symmetry has spatial action R_(aπ/κ)F^b and time shift a/2+j, with a a nonnegative integer, b either 0 or 1, and j an integer. Here F is the spatial flip.",
+   "text": "Each declared symmetry has spatial action $R_{(a\\pi/\\kappa)}F^b$ and time shift $a/2+j$, with $a$ a nonnegative integer, $b$ either $0$ or $1$, and $j$ an integer. Here $F$ is the spatial flip.",
    "because": [
     "cell-0289"
    ]
@@ -62747,7 +62747,7 @@
    ]
   },
   "Breakdown.CertCell.GivenShape.keyVector": {
-   "text": "One harmonic is its oscillatory factor times u₀y/|y|+u₁p+u₂a, with the chart amplitudes evaluated at σ and η.",
+   "text": "One harmonic is its oscillatory factor times $u_0y/|y|+u_1p+u_2a$, with the chart amplitudes evaluated at $\\sigma$ and $\\eta$.",
    "because": [
     "cell-0338"
    ]
@@ -62759,7 +62759,7 @@
    ]
   },
   "Breakdown.CertCell.GivenShape.shapeInfoField": {
-   "text": "The represented physical field is Re∑_(ι,l)Eι,l(u₀y/|y|+u₁p+u₂a), with normalized time as its time variable.",
+   "text": "The represented physical field is $\\operatorname{Re}\\sum_{(\\iota,l)}E_{\\iota,l}(u_0y/|y|+u_1p+u_2a)$, with normalized time as its time variable.",
    "because": [
     "cell-0343"
    ]
@@ -62843,7 +62843,7 @@
    ]
   },
   "Breakdown.CertCell.Instance.StepDatum.eval": {
-   "text": "The spatial step weight is the selected half-table value times (1−σ)^h for an integer h. The upper table is used on the symmetry plane.",
+   "text": "The spatial step weight is the selected half-table value times $(1-\\sigma)^h$ for an integer $h$. The upper table is used on the symmetry plane.",
    "because": [
     "cell-0273"
    ]
@@ -63059,7 +63059,7 @@
    ]
   },
   "Breakdown.CertCell.RowValues.testBlockMatrix": {
-   "text": "The cell-harmonic Gram entry is ∫_Q r∑ₐconjugate(Pᵢ,ₐ)Pⱼ,ₐ dr dz. Positive definiteness is required for every tested block.",
+   "text": "The cell-harmonic Gram entry is $\\int_Q r\\sum_a\\overline{P_{i,a}}P_{j,a}\\,dr\\,dz$. Positive definiteness is required for every tested block.",
    "because": [
     "cell-0259"
    ]
@@ -63167,7 +63167,7 @@
    ]
   },
   "Breakdown.AdjointDefect.adjointTransport": {
-   "text": "The transport expression is −S⁻¹∂θψ−ψ−(y·∇)ψ/2+(∇W)ᵀψ−(W·∇)ψ, with each sign fixed before adding the diffusion and potential terms.",
+   "text": "The transport expression is $-S^{-1}\\partial_\\theta\\psi-\\psi-(y\\cdot\\nabla)\\psi/2+(\\nabla W)^T\\psi-(W\\cdot\\nabla)\\psi$, with each sign fixed before adding the diffusion and potential terms.",
    "because": [
     "cell-0410"
    ]
@@ -63191,7 +63191,7 @@
    ]
   },
   "Breakdown.AdjointDefect.potentialDefect": {
-   "text": "The combined potential contribution is √(n_G²+(w_*n_U+n_F+n_R)²/w_*), the first contribution in (B.53).",
+   "text": "The combined potential contribution is $\\sqrt{n_G^2+(w_*n_U+n_F+n_R)^2/w_*}$, the first contribution in (B.53).",
    "because": [
     "cell-0414"
    ]
@@ -63209,7 +63209,7 @@
    ]
   },
   "Breakdown.AdjointDefect.AzimuthalBounded": {
-   "text": "The finite expansion uses distinct triples of component, time frequency and azimuthal order, with measurable amplitudes and spatial almost-everywhere equality at each time. Its weighted estimate uses (|m|+1/2)⁻² and the circular-component factors 1/2, 1/2 and 1.",
+   "text": "The finite expansion uses distinct triples of component, time frequency and azimuthal order, with measurable amplitudes and spatial almost-everywhere equality at each time. Its weighted estimate uses $(|m|+1/2)^{-2}$ and the circular-component factors $1/2$, $1/2$ and $1$.",
    "because": [
     "cell-0420"
    ]
@@ -63257,7 +63257,7 @@
    ]
   },
   "Breakdown.AdjointDefect.AdjointDefectEntry.pinCharge": {
-   "text": "The pin contribution is n_Φ+n_Yc_Ξ/√w_*, separating the potential error from the gradient approximation error.",
+   "text": "The pin contribution is $n_\\Phi+n_Yc_\\Xi/\\sqrt{w_*}$, separating the potential error from the gradient approximation error.",
    "because": [
     "cell-0428"
    ]
@@ -63365,7 +63365,7 @@
    ]
   },
   "Breakdown.PotentialShape.PotComponent.carriesSine": {
-   "text": "Both circular components receive the polar factor √(1−η²); the vertical component receives no extra sine factor.",
+   "text": "Both circular components receive the polar factor $\\sqrt{1-\\eta^2}$; the vertical component receives no extra sine factor.",
    "because": [
     "cell-0750"
    ]
@@ -63377,7 +63377,7 @@
    ]
   },
   "Breakdown.PotentialShape.polarSine": {
-   "text": "The polar sine is √(1−η²), where η is the Cartesian height divided by the radius; its assigned value at the origin follows the chosen coordinate convention.",
+   "text": "The polar sine is $\\sqrt{1-\\eta^2}$, where $\\eta$ is the Cartesian height divided by the radius; its assigned value at the origin follows the chosen coordinate convention.",
    "because": [
     "cell-0752"
    ]
@@ -63395,7 +63395,7 @@
    ]
   },
   "Breakdown.PotentialShape.coordsOfComponents": {
-   "text": "Cartesian components are recovered as (g₊+g₋)/2, (g₊−g₋)/(2i) and g_z.",
+   "text": "Cartesian components are recovered as $(g_++g_-)/2$, $(g_+-g_-)/(2i)$ and $g_z$.",
    "because": [
     "cell-0755"
    ]
@@ -63503,7 +63503,7 @@
    ]
   },
   "Breakdown.CellCert.CellAnalysis.curlComp": {
-   "text": "The curl component is the contraction ∑ⱼₗ εᵢⱼₗ sₗⱼ. Thus the first index of s is the vector component and the second is the differentiation direction.",
+   "text": "The curl component is the contraction $\\sum_{jl}\\varepsilon_{ijl}s_{lj}$. Thus the first index of $s$ is the vector component and the second is the differentiation direction.",
    "because": [
     "cell-0024"
    ]
@@ -63515,13 +63515,13 @@
    ]
   },
   "Breakdown.CellCert.CellAnalysis.CellBases.radialPoly": {
-   "text": "The radial polynomial is ∑ᵢ₌₀ʲ aⱼᵢrⁱ, so its degree is at most j. The separate positive-leading-coefficient condition makes the degree exactly j.",
+   "text": "The radial polynomial is $\\sum_{i=0}^{j}a_{ji}r^i$, so its degree is at most $j$. The separate positive-leading-coefficient condition makes the degree exactly $j$.",
    "because": [
     "cell-0026"
    ]
   },
   "Breakdown.CellCert.CellAnalysis.CellBases.heightPoly": {
-   "text": "The height polynomial is ∑ᵢ₌₀ˡ bₗᵢzⁱ. Orthonormality and the positive leading coefficient are separate requirements on the family.",
+   "text": "The height polynomial is $\\sum_{i=0}^{l}b_{li}z^i$. Orthonormality and the positive leading coefficient are separate requirements on the family.",
    "because": [
     "cell-0027"
    ]
@@ -63545,7 +63545,7 @@
    ]
   },
   "Breakdown.CellCert.CellAnalysis.sumSq": {
-   "text": "The gradient square is ∑ₐᵦ|sₐᵦ|² over all nine complex entries.",
+   "text": "The gradient square is $\\sum_{ab}|s_{ab}|^2$ over all nine complex entries.",
    "because": [
     "cell-0031"
    ]
@@ -63647,7 +63647,7 @@
    ]
   },
   "Breakdown.CellCert.CellFormula.presMode": {
-   "text": "The pressure coefficient is (2π)⁻¹∫₀²πe^(−iκnφ)P(r,φ,z)dφ. It transforms only the spatial angle and leaves r and z fixed.",
+   "text": "The pressure coefficient is $(2\\pi)^{-1}\\int_0^{2\\pi}e^{-i\\kappa n\\phi}P(r,\\phi,z)\\,d\\phi$. It transforms only the spatial angle and leaves $r$ and $z$ fixed.",
    "because": [
     "cell-0048"
    ]
@@ -63773,7 +63773,7 @@
    ]
   },
   "Breakdown.CellCert.CellFormula.CellLayout.radialBeta": {
-   "text": "The radial integration test is r^(i+2) on an axis cell and rⁱ off the axis. The shifted powers enforce the axis-compatible boundary identities.",
+   "text": "The radial integration test is $r^{i+2}$ on an axis cell and $r^i$ off the axis. The shifted powers enforce the axis-compatible boundary identities.",
    "because": [
     "cell-0076"
    ]
@@ -63869,7 +63869,7 @@
    ]
   },
   "Breakdown.CellCert.CellEnergy.testSupForm": {
-   "text": "The test form is R*G⁻¹R for the matrix R of test rows. Positive definiteness of G is required when interpreting this expression as the optimal bound from those tests.",
+   "text": "The test form is $R^*G^{-1}R$ for the matrix $R$ of test rows. Positive definiteness of $G$ is required when interpreting this expression as the optimal bound from those tests.",
    "because": [
     "cell-0092"
    ]
@@ -64049,7 +64049,7 @@
    ]
   },
   "Breakdown.CellCert.CellEnergy.angularTest": {
-   "text": "The axis-compatible angular test is r^(j+1)zˡ, obtained by multiplying the meridian monomial by r.",
+   "text": "The axis-compatible angular test is $r^{j+1}z^l$, obtained by multiplying the meridian monomial by $r$.",
    "because": [
     "cell-0122"
    ]
@@ -64169,7 +64169,7 @@
    ]
   },
   "Breakdown.CellCert.CellAnalysis.supremumLoss": {
-   "text": "The stretching majorant is λ|curl G|²+√(7/2)g₀|G||v|+√(7/2)g′(ℓ|G|²+|v|²/ℓ)/2. The balancing length must be positive in the estimates that use it.",
+   "text": "The stretching majorant is $\\lambda|\\operatorname{curl}G|^2+\\sqrt{7/2}\\,g_0|G||v|+\\sqrt{7/2}\\,g'(\\ell|G|^2+|v|^2/\\ell)/2$. The balancing length must be positive in the estimates that use it.",
    "because": [
     "cell-0167"
    ]
@@ -64181,7 +64181,7 @@
    ]
   },
   "Breakdown.CertCell.Coupling.inverseWeightedSq": {
-   "text": "The inverse-weighted value is Re(a*D⁻¹a). Positive definiteness of D makes this the squared norm associated with D⁻¹.",
+   "text": "The inverse-weighted value is $\\operatorname{Re}(a^*D^{-1}a)$. Positive definiteness of $D$ makes this the squared norm associated with $D^{-1}$.",
    "because": [
     "cell-0170"
    ]
@@ -64271,7 +64271,7 @@
    ]
   },
   "Breakdown.CertCell.TailBand.PointCoef.PassesTest": {
-   "text": "The pointwise test requires f₂≥0, 0≤t≤f₁*, f₀*≥0, and f₀₁²≤4(f₁*−t)f₀*. These are the four grouped conditions of (B.29).",
+   "text": "The pointwise test requires $f_2\\ge 0$, $0\\le t\\le f_1^*$, $f_0^*\\ge 0$, and $f_{01}^2\\le 4(f_1^*-t)f_0^*$. These are the four grouped conditions of (B.29).",
    "because": [
     "cell-0382"
    ]
@@ -64283,7 +64283,7 @@
    ]
   },
   "Breakdown.CertCell.TailBand.PointCoef.withStretch": {
-   "text": "The update subtracts s₁+a′₁ from the curl coefficient, c_*s₃h/2+a₁ from the gradient coefficient, and c_*s₃/(2h)+a₀ from the velocity coefficient. It adds c_*s₂ to the mixed-loss coefficient.",
+   "text": "The update subtracts $s_1+a'_1$ from the curl coefficient, $c_*s_3h/2+a_1$ from the gradient coefficient, and $c_*s_3/(2h)+a_0$ from the velocity coefficient. It adds $c_*s_2$ to the mixed-loss coefficient.",
    "because": [
     "cell-0384"
    ]
@@ -64445,7 +64445,7 @@
    ]
   },
   "Breakdown.CertCell.CellCalculus.turnVector": {
-   "text": "For angular wave number k the frame derivative sends (xᵣ,xφ,x_z) to (ikxᵣ−xφ,ikxφ+xᵣ,ikx_z).",
+   "text": "For angular wave number $k$ the frame derivative sends $(x_r,x_\\phi,x_z)$ to $(ikx_r-x_\\phi,ikx_\\phi+x_r,ikx_z)$.",
    "because": [
     "cell-0536"
    ]
@@ -64673,7 +64673,7 @@
    ]
   },
   "Breakdown.CertCell.Certificate.realColumns": {
-   "text": "Each complex column produces two real columns: the real and imaginary parts of E*F, both multiplied by √t. Zero and repeated columns still count separately in this indexed family.",
+   "text": "Each complex column produces two real columns: the real and imaginary parts of $E^*F$, both multiplied by $\\sqrt{t}$. Zero and repeated columns still count separately in this indexed family.",
    "because": [
     "cell-0237"
    ]
@@ -65711,7 +65711,7 @@
    ]
   },
   "Breakdown.CellCert.Exterior.traceFreeConst": {
-   "text": "The contraction constant is exactly √(7/2). Subsequent estimates may replace it by a larger upper bound.",
+   "text": "The contraction constant is exactly $\\sqrt{7/2}$. Subsequent estimates may replace it by a larger upper bound.",
    "because": [
     "cell-0005"
    ]
@@ -65771,7 +65771,7 @@
    ]
   },
   "Breakdown.CertCell.TailBand.planeRadius": {
-   "text": "The meridian distance is ρ=√(r²+z²)=|y|, including both cylindrical radius and height.",
+   "text": "The meridian distance is $\\rho=\\sqrt{r^2+z^2}=|y|$, including both cylindrical radius and height.",
    "because": [
     "cell-0398"
    ]
@@ -65801,13 +65801,13 @@
    ]
   },
   "Breakdown.CertCell.TailBand.ExteriorCondition": {
-   "text": "The exterior data provide the mode and spatial region, coefficient envelopes, stretching charges, a Hardy constant Λ₀, and the three bounds f₁∞, f₀∞, and f₀₁∞ used in (B.30).",
+   "text": "The exterior data provide the mode and spatial region, coefficient envelopes, stretching charges, a Hardy constant $\\Lambda_0$, and the three bounds $f_1^\\infty$, $f_0^\\infty$, and $f_{01}^\\infty$ used in (B.30).",
    "because": [
     "cell-0403"
    ]
   },
   "Breakdown.CertCell.TailBand.IsExteriorCondition": {
-   "text": "The region is either beyond a positive bounded directional radius, or outside a positive square with zero angular frequency. With one positive Λ₀, the coefficient bounds and f₀∞/Λ₀+f₀₁∞/√Λ₀≤f₁∞ yield the integrated test.",
+   "text": "The region is either beyond a positive bounded directional radius, or outside a positive square with zero angular frequency. With one positive $\\Lambda_0$, the coefficient bounds and $f_0^\\infty/\\Lambda_0+f_{01}^\\infty/\\sqrt{\\Lambda_0}\\le f_1^\\infty$ yield the integrated test.",
    "because": [
     "cell-0404"
    ]

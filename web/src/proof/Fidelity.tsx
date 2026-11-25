@@ -135,7 +135,7 @@ export function FidelityBlock({ edition, d, act, onPassage }: { edition: Edition
     <section className="fid" data-verdict={f.verdict} aria-label={`The ${noun(edition)} and the Lean`}>
       <p className="fid__head"><span className="decl__label">The {noun(edition)} and the Lean</span> <span className="fid__by">Compared by AI</span></p>
       <p className="fid__verdict">{verdictWords(f.verdict, noun(edition))}.</p>
-      <p className="fid__text">{f.text}</p>
+      <p className="fid__text">{f.html ? <span dangerouslySetInnerHTML={{ __html: f.html }} /> : f.text}</p>
       {stops.length > 0 && (
         <p className="fid__because">
           Compared with{" "}

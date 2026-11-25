@@ -118,6 +118,7 @@ export type Verdict = "same" | "stronger" | "weaker" | "different";
 export interface Fidelity {
   verdict: Verdict;
   text: string;
+  html?: string;
   /** Passage ids the comparison reads. */
   because: string[];
   /** Names of checks, written for this page, that Lean ran against the authors' file. */

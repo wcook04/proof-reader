@@ -20561,7 +20561,7 @@
   },
   "Breakdown.CertCell.Assembly.InRowRange": {
    "verdict": "different",
-   "text": "Equation (B.26) writes the reconstructed vector as x=X_Qx_g. The formal domain also allows complex gauge and head contributions and requires the two actuator blocks to be real, so the identification needs the accompanying row and gauge results.",
+   "text": "Equation (B.26) writes the reconstructed vector as $x=X_Qx_g$. The formal domain also allows complex gauge and head contributions and requires the two actuator blocks to be real, so the identification needs the accompanying row and gauge results.",
    "because": [
     "gap-guide-0011"
    ]
@@ -20779,7 +20779,7 @@
   },
   "Breakdown.CertReduction.cubicWeightProductHolds_proof": {
    "verdict": "same",
-   "text": "The cubic product estimate is the squared form of the 2/√3 factor used in (B.49): its coefficient is 4/3. Together with the uniform and gradient alternatives it supplies the stated shift estimates.",
+   "text": "The cubic product estimate is the squared form of the $2/\\sqrt{3}$ factor used in (B.49): its coefficient is $4/3$. Together with the uniform and gradient alternatives it supplies the stated shift estimates.",
    "because": [
     "r5-assembly-detail-013"
    ]
@@ -20807,7 +20807,7 @@
   },
   "Breakdown.CertReduction.gapSupTermHolds_proof": {
    "verdict": "same",
-   "text": "The uniform contribution in (B.49) has coefficient s/√w₀, or its square for the squared period norm. The formal statement retains the positive constant weight and perturbation hypotheses.",
+   "text": "The uniform contribution in (B.49) has coefficient $s/\\sqrt{w_0}$, or its square for the squared period norm. The formal statement retains the positive constant weight and perturbation hypotheses.",
    "because": [
     "r5-assembly-detail-014"
    ]
@@ -20929,7 +20929,7 @@
   },
   "Breakdown.Freq.BilinBound": {
    "verdict": "weaker",
-   "text": "The formal estimate bounds the bilinear term by Cτ^(−3/4)‖u‖‖v‖. Lemma 3.1 also includes a general L^(3/2)-forcing assertion, which is not a conclusion of this row.",
+   "text": "The formal estimate bounds the bilinear term by $C\\tau^{-3/4}\\|u\\|\\|v\\|$. Lemma 3.1 also includes a general $L^{3/2}$-forcing assertion, which is not a conclusion of this row.",
    "because": [
     "r5-route-reading-019"
    ]
@@ -20943,7 +20943,7 @@
   },
   "Breakdown.Freq.DilationAlgebra": {
    "verdict": "same",
-   "text": "The formal dilation laws give the norm factor μ^(1/4), composition of positive scales, and the heat intertwining identity of (3.5).",
+   "text": "The formal dilation laws give the norm factor $\\mu^{1/4}$, composition of positive scales, and the heat intertwining identity of (3.5).",
    "because": [
     "r5-route-reading-012"
    ]
@@ -21013,7 +21013,7 @@
   },
   "Breakdown.Periodic.ApproxResidualSmall": {
    "verdict": "different",
-   "text": "Lemma 6.2 presents the approximation in the paper’s spatial-scale variables. The formal residual estimate is for normalized time pieces and has bound θⁿKT^(1/4), with the unit-torus scaling retained.",
+   "text": "Lemma 6.2 presents the approximation in the paper’s spatial-scale variables. The formal residual estimate is for normalized time pieces and has bound $\\theta^nKT^{1/4}$, with the unit-torus scaling retained.",
    "because": [
     "r5-route-reading-089"
    ]
@@ -21027,7 +21027,7 @@
   },
   "Breakdown.Periodic.ComparisonSmall": {
    "verdict": "different",
-   "text": "Lemma 6.3 gives an explicit candidate and an L^(−1/2) defect bound. The formal comparison gives arbitrarily small operator error once the scale is small enough; the right-inverse transfer is a separate exact implication.",
+   "text": "Lemma 6.3 gives an explicit candidate and an $L^{-1/2}$ defect bound. The formal comparison gives arbitrarily small operator error once the scale is small enough; the right-inverse transfer is a separate exact implication.",
    "because": [
     "r5-route-reading-094",
     "r5-foundation-detail-039"
@@ -21049,7 +21049,7 @@
   },
   "Breakdown.Periodic.HeatDivFreeComparison": {
    "verdict": "different",
-   "text": "Lemma 6.1 gives a uniform quantitative heat comparison. This formal statement gives arbitrarily small error on positive-time windows for compactly supported L² forcing, with an L^(3/2) norm on the right side.",
+   "text": "Lemma 6.1 gives a uniform quantitative heat comparison. This formal statement gives arbitrarily small error on positive-time windows for compactly supported $L^2$ forcing, with an $L^{3/2}$ norm on the right side.",
    "because": [
     "r5-route-reading-098"
    ]
@@ -21098,7 +21098,7 @@
   },
   "Breakdown.Periodic.sourceOp": {
    "verdict": "different",
-   "text": "The formal definition supplies the transplanted unit-torus forcing operator used in the restricted estimate near (3.19). Its L^(3/2) bound and the short-time condition μτ≤1 are established separately.",
+   "text": "The formal definition supplies the transplanted unit-torus forcing operator used in the restricted estimate near (3.19). Its $L^{3/2}$ bound and the short-time condition $\\mu\\tau\\le 1$ are established separately.",
    "because": [
     "recovered-equation-3-19"
    ]
@@ -21173,7 +21173,7 @@
   },
   "Breakdown.VarConstIntegralStatement": {
    "verdict": "stronger",
-   "text": "Lemma 3.3 is stated on the paper’s time interval. The formal result gives integrability and continuity on every compact interval and, for t−a≤1, the explicit bound 4C_K(t−a)^(1/4)MN.",
+   "text": "Lemma 3.3 is stated on the paper’s time interval. The formal result gives integrability and continuity on every compact interval and, for $t-a\\le 1$, the explicit bound $4C_K(t-a)^{1/4}MN$.",
    "because": [
     "r5-route-reading-046"
    ]

@@ -5126,7 +5126,7 @@
    ]
   },
   "Breakdown.AdjointDefect.IsPotentialData": {
-   "text": "The potential assumptions add |U|≲(1+|y|)⁻¹ and require bounded-near-origin Laplacians with decay (1+|y|)⁻⁴ for G and (1+|y|)⁻³ for U. These imply the coarser common derivative bound (B.51), after increasing its unspecified constant.",
+   "text": "The potential assumptions add $|U|\\lesssim(1+|y|)^{-1}$ and require bounded-near-origin Laplacians with decay $(1+|y|)^{-4}$ for $G$ and $(1+|y|)^{-3}$ for $U$. These imply the coarser common derivative bound (B.51), after increasing its unspecified constant.",
    "because": [
     "pdf-item-equation-B-51"
    ]
@@ -5180,7 +5180,7 @@
    ]
   },
   "Breakdown.Cert.bordered": {
-   "text": "The unknown is f = T_Sv; applying the free inverse recovers v before convection and the constraints are evaluated.",
+   "text": "The unknown is $f = T_S v$; applying the free inverse recovers $v$ before convection and the constraints are evaluated.",
    "because": [
     "pdf-item-theorem-7-8",
     "pdf-item-equation-7-53",
@@ -5295,7 +5295,7 @@
    ]
   },
   "Breakdown.CertCell.CellHypothesis": {
-   "text": "The full cell assumptions include κ≥3 and the constants w*=39/50, c=3/50, pinning weight 1000 and row cap 400(1+2⁻¹⁸). They also require the cell, matrix, pressure and error conditions described, and partly omitted, in Appendix B.",
+   "text": "The full cell assumptions include $\\kappa\\ge 3$ and the constants $w^*=39/50$, $c=3/50$, pinning weight $1000$ and row cap $400(1+2^{-18})$. They also require the cell, matrix, pressure and error conditions described, and partly omitted, in Appendix B.",
    "because": [
     "pdf-item-equation-B-1",
     "pdf-item-equation-B-21",
@@ -5348,19 +5348,19 @@
    ]
   },
   "Breakdown.CertCell.RowValues.mix": {
-   "text": "For positive definite Gram data the mixing matrix is G⁻¹ᐟ². The factor √τₖ is applied through the separate row weight when the row seminorm is formed.",
+   "text": "For positive definite Gram data the mixing matrix is $G^{-1/2}$. The factor $\\sqrt{\\tau_k}$ is applied through the separate row weight when the row seminorm is formed.",
    "because": [
     "pdf-item-equation-B-11"
    ]
   },
   "Breakdown.CertCell.RowValues.rowFieldOf": {
-   "text": "The formal row fields have unit norm after multiplication by G⁻¹ᐟ². The paper includes √τₖ in eₖ itself; the same seminorm is recovered by multiplying the squared formal row pairing by τₖ.",
+   "text": "The formal row fields have unit norm after multiplication by $G^{-1/2}$. The paper includes $\\sqrt{\\tau_k}$ in $e_k$ itself; the same seminorm is recovered by multiplying the squared formal row pairing by $\\tau_k$.",
    "because": [
     "pdf-item-equation-B-11"
    ]
   },
   "Breakdown.CertCell.RowValues.rowWeightOf": {
-   "text": "The row weight is the cell test weight divided by c; at c=3/50 it is τₖ. The paper places √τₖ in the field eₖ, whereas the formal row seminorm carries τₖ as a separate weight.",
+   "text": "The row weight is the cell test weight divided by $c$; at $c=3/50$ it is $\\tau_k$. The paper places $\\sqrt{\\tau_k}$ in the field $e_k$, whereas the formal row seminorm carries $\\tau_k$ as a separate weight.",
    "because": [
     "pdf-item-equation-B-11"
    ]
@@ -5498,7 +5498,7 @@
    ]
   },
   "Breakdown.HeatBilinear": {
-   "text": "The heat operators form a strongly continuous contraction semigroup, and the symmetric bilinear kernel commutes with forward heat shifts. Its τ⁻³⁄⁴ bound is required only for 0<τ≤1, whereas (3.12) requires that bound for every τ>0.",
+   "text": "The heat operators form a strongly continuous contraction semigroup, and the symmetric bilinear kernel commutes with forward heat shifts. Its $\\tau^{-3/4}$ bound is required only for $0<\\tau\\le 1$, whereas (3.12) requires that bound for every $\\tau>0$.",
    "because": [
     "pdf-item-equation-3-11",
     "pdf-item-equation-3-12",
@@ -5513,7 +5513,7 @@
    ]
   },
   "Breakdown.IsPerturbation": {
-   "text": "The drift-time field is S⁻¹∂_θv + ½v + ½(y·∇)v. The Laplacian is subtracted separately in the equation.",
+   "text": "The drift-time field is $S^{-1}\\partial_\\theta v + \\frac{1}{2}v + \\frac{1}{2}(y\\cdot\\nabla)v$. The Laplacian is subtracted separately in the equation.",
    "because": [
     "pdf-item-equation-7-4"
    ]
@@ -5525,7 +5525,7 @@
    ]
   },
   "Breakdown.IsSimilarityProfile": {
-   "text": "The velocity and pressure solve the smooth similarity equation, with |∇ʲW| ≤ C(1+|y|)⁻¹⁻ʲ for j=0,1,2 and |∇q| ≤ C(1+|y|)⁻³. Periodicity and nonvanishing are separate assumptions when this local profile condition is used.",
+   "text": "The velocity and pressure solve the smooth similarity equation, with $|\\nabla^j W| \\le C(1+|y|)^{-1-j}$ for $j=0,1,2$ and $|\\nabla q| \\le C(1+|y|)^{-3}$. Periodicity and nonvanishing are separate assumptions when this local profile condition is used.",
    "because": [
     "pdf-item-equation-1-3",
     "pdf-item-equation-4-1"
@@ -5560,14 +5560,14 @@
    ]
   },
   "Breakdown.Periodic.HeatDivFreeComparison": {
-   "text": "Compactly supported L² forcing has arbitrarily small local projected-heat discrepancy, measured by δ times its L³⁄² norm, at sufficiently small scale and on a compact positive-time window. Lemma 6.1 gives an all-time CL⁻⁷⁄² estimate for the divergence of a W¹,¹ tensor, in terms of that tensor’s L¹ norm.",
+   "text": "Compactly supported $L^2$ forcing has arbitrarily small local projected-heat discrepancy, measured by $\\delta$ times its $L^{3/2}$ norm, at sufficiently small scale and on a compact positive-time window. Lemma 6.1 gives an all-time $CL^{-7/2}$ estimate for the divergence of a $W^{1,1}$ tensor, in terms of that tensor’s $L^1$ norm.",
    "because": [
     "pdf-item-theorem-6-1",
     "pdf-item-equation-6-2"
    ]
   },
   "Breakdown.Periodic.KernelSharpBound": {
-   "text": "The bilinear smoothing bound is Cτ⁻³⁄⁴ in the inhomogeneous unit-torus norm, for 0<τ≤1. Lemma 3.7 and (3.20) use mean-zero homogeneous spaces at every spatial period and all positive times.",
+   "text": "The bilinear smoothing bound is $C\\tau^{-3/4}$ in the inhomogeneous unit-torus norm, for $0<\\tau\\le 1$. Lemma 3.7 and (3.20) use mean-zero homogeneous spaces at every spatial period and all positive times.",
    "because": [
     "pdf-item-theorem-3-7",
     "pdf-item-equation-3-20"
@@ -5597,7 +5597,7 @@
    ]
   },
   "Breakdown.PeriodicSimilarityProfileExists": {
-   "text": "A smooth nonzero profile has a positive period and an orthogonal twist, solves the similarity equation, and satisfies uniform bounds |∇ʲW| ≤ C(1+|y|)⁻¹⁻ʲ for j=0,1,2 and |∇q| ≤ C(1+|y|)⁻³. The second-derivative and pressure-gradient bounds are additional written hypotheses beyond (1.3).",
+   "text": "A smooth nonzero profile has a positive period and an orthogonal twist, solves the similarity equation, and satisfies uniform bounds $|\\nabla^j W| \\le C(1+|y|)^{-1-j}$ for $j=0,1,2$ and $|\\nabla q| \\le C(1+|y|)^{-3}$. The second-derivative and pressure-gradient bounds are additional written hypotheses beyond (1.3).",
    "because": [
     "pdf-item-equation-1-2",
     "pdf-item-equation-1-3"
@@ -5646,7 +5646,7 @@
    ]
   },
   "Breakdown.physicalField": {
-   "text": "The physical curve is D_{(1−t)⁻¹}W(s₀−log(1−t)), with final time fixed to one and arbitrary phase s₀. Display (1.4) allows any positive final time T.",
+   "text": "The physical curve is $D_{(1-t)^{-1}}W(s_0-\\log(1-t))$, with final time fixed to one and arbitrary phase $s_0$. Display (1.4) allows any positive final time $T$.",
    "because": [
     "pdf-item-equation-1-4",
     "pdf-item-equation-4-1"
@@ -5689,7 +5689,7 @@
   },
   "Breakdown.AdjointDefect.AdjointDefectEntry.pinCharge": {
    "verdict": "weaker",
-   "text": "The pin charge is nΦ+nYcΞ/√w*, exactly the last part of (B.53). The potential and parameter-shift terms are in the separate defect budget.",
+   "text": "The pin charge is $n\\Phi+nYc\\Xi/\\sqrt{w^*}$, exactly the last part of (B.53). The potential and parameter-shift terms are in the separate defect budget.",
    "because": [
     "pdf-item-equation-B-53"
    ]
@@ -5759,7 +5759,7 @@
   },
   "Breakdown.AdjointDefect.IsPotentialData": {
    "verdict": "stronger",
-   "text": "The potential assumptions add |U|≲(1+|y|)⁻¹ and require bounded-near-origin Laplacians with decay (1+|y|)⁻⁴ for G and (1+|y|)⁻³ for U. These imply the coarser common derivative bound (B.51), after increasing its unspecified constant.",
+   "text": "The potential assumptions add $|U|\\lesssim(1+|y|)^{-1}$ and require bounded-near-origin Laplacians with decay $(1+|y|)^{-4}$ for $G$ and $(1+|y|)^{-3}$ for $U$. These imply the coarser common derivative bound (B.51), after increasing its unspecified constant.",
    "because": [
     "pdf-item-equation-B-51"
    ]
@@ -5801,7 +5801,7 @@
   },
   "Breakdown.AdjointDefect.adjointTransport": {
    "verdict": "weaker",
-   "text": "The expression is −S(0)⁻¹∂θψ−ψ−(y·∇)ψ/2 minus reference advection plus its transposed gradient action. The Laplacian, pins and potential corrections required by (B.52) are supplied separately.",
+   "text": "The expression is $-S(0)^{-1}\\partial_\\theta\\psi-\\psi-(y\\cdot\\nabla)\\psi/2$ minus reference advection plus its transposed gradient action. The Laplacian, pins and potential corrections required by (B.52) are supplied separately.",
    "because": [
     "pdf-item-equation-B-52"
    ]
@@ -5822,7 +5822,7 @@
   },
   "Breakdown.AdjointDefect.pinChargeHolds_proof": {
    "verdict": "weaker",
-   "text": "Replacing the pin tensors by compact solenoidal generators costs at most (nΦ+nYcΞ/√w*)‖v‖w. This is the final contribution to (B.53).",
+   "text": "Replacing the pin tensors by compact solenoidal generators costs at most $(n\\Phi+nYc\\Xi/\\sqrt{w^*})\\lVert v\\rVert_w$. This is the final contribution to (B.53).",
    "because": [
     "pdf-item-theorem-B-12"
    ]
@@ -5836,7 +5836,7 @@
   },
   "Breakdown.AdjointDefect.remainderAzimuthalHolds_proof": {
    "verdict": "weaker",
-   "text": "This proves the dual estimate for the finite harmonic remainder with coefficient (|k|+1/2)⁻² and the component weights 1/2,1/2,1. The plain remainder is combined with it in the full estimate of Lemma B.11.",
+   "text": "This proves the dual estimate for the finite harmonic remainder with coefficient $(|k|+1/2)^{-2}$ and the component weights $1/2,1/2,1$. The plain remainder is combined with it in the full estimate of Lemma B.11.",
    "because": [
     "pdf-item-theorem-B-11"
    ]
@@ -5878,7 +5878,7 @@
   },
   "Breakdown.CellCert.CellAnalysis.supremumLoss": {
    "verdict": "same",
-   "text": "The majorant is s₁|curl G|²+√(7/2)s₂|G||v|+(1/2)√(7/2)s₃(h|G|²+|v|²/h), exactly (B.25).",
+   "text": "The majorant is $s_1|\\operatorname{curl} G|^2+\\sqrt{7/2}s_2|G||v|+(1/2)\\sqrt{7/2}s_3(h|G|^2+|v|^2/h)$, exactly (B.25).",
    "because": [
     "pdf-item-equation-B-25"
    ]
@@ -5892,7 +5892,7 @@
   },
   "Breakdown.CellCert.Exterior.traceFreeConst": {
    "verdict": "weaker",
-   "text": "This fixes the contraction constant to √(7/2), the constant in (B.25). It is the scalar used in that estimate, rather than the full stretching inequality.",
+   "text": "This fixes the contraction constant to $\\sqrt{7/2}$, the constant in (B.25). It is the scalar used in that estimate, rather than the full stretching inequality.",
    "because": [
     "pdf-item-equation-B-25"
    ]
@@ -5990,7 +5990,7 @@
   },
   "Breakdown.CellReduction.Instantiation.centreDefect": {
    "verdict": "same",
-   "text": "The constant residual has the similarity drift, diffusion, central advection, actuator force and ∇(q⁰−|W₀⁰|²/2). These are exactly F⁽⁰⁾ in (B.57).",
+   "text": "The constant residual has the similarity drift, diffusion, central advection, actuator force and $\\nabla(q^0-|W_0^0|^2/2)$. These are exactly $F^{(0)}$ in (B.57).",
    "because": [
     "pdf-item-equation-B-57"
    ]
@@ -6060,28 +6060,28 @@
   },
   "Breakdown.Cert.Internal.ConvectionFirstOrder.first_term": {
    "verdict": "different",
-   "text": "The paper displays a combined pointwise estimate in (7.50). This result bounds one component Wⱼ∂ⱼv in L² by C_a‖∇v‖₂ and proves its square integrability, so its conclusion has a different form and covers one summand.",
+   "text": "The paper displays a combined pointwise estimate in (7.50). This result bounds one component $W_j\\partial_j v$ in $L^2$ by $C_a\\lVert\\nabla v\\rVert_2$ and proves its square integrability, so its conclusion has a different form and covers one summand.",
    "because": [
     "pdf-item-equation-7-50"
    ]
   },
   "Breakdown.Cert.Internal.ConvectionFirstOrder.second_term": {
    "verdict": "different",
-   "text": "The paper displays a combined pointwise estimate in (7.50). This result bounds (v·∇)W in L² using the L³ norm of (1 + |y|)⁻² and the Sobolev embedding of v into L⁶.",
+   "text": "The paper displays a combined pointwise estimate in (7.50). This result bounds $(v\\cdot\\nabla)W$ in $L^2$ using the $L^3$ norm of $(1 + |y|)^{-2}$ and the Sobolev embedding of $v$ into $L^6$.",
    "because": [
     "pdf-item-equation-7-50"
    ]
   },
   "Breakdown.Cert.Internal.DenseEnergyBand.norm_semigroupX_le": {
    "verdict": "weaker",
-   "text": "The operator norm estimate gives the gradient decay e⁻ˢ⁄⁴ in (7.47). It does not include the separate Laplacian estimate with decay e⁻³ˢ⁄⁴.",
+   "text": "The operator norm estimate gives the gradient decay $e^{-s/4}$ in (7.47). It does not include the separate Laplacian estimate with decay $e^{-3s/4}$.",
    "because": [
     "pdf-item-equation-7-47"
    ]
   },
   "Breakdown.Cert.Internal.ExtendedConvectionCompact.slice_tail_first": {
    "verdict": "weaker",
-   "text": "The result bounds the squared exterior L² norm by C(1 + r)⁻¹‖∇v‖₂². In (7.51) the displayed L³ tail gives an L² norm coefficient of order r⁻¹, hence a squared bound of order r⁻²; both estimates suffice for the compactness argument.",
+   "text": "The result bounds the squared exterior $L^2$ norm by $C(1 + r)^{-1}\\lVert\\nabla v\\rVert_2^2$. In (7.51) the displayed $L^3$ tail gives an $L^2$ norm coefficient of order $r^{-1}$, hence a squared bound of order $r^{-2}$; both estimates suffice for the compactness argument.",
    "because": [
     "pdf-item-equation-7-51"
    ]
@@ -6102,7 +6102,7 @@
   },
   "Breakdown.Cert.Internal.FreeEnergyLocal.exists_energyCurve": {
    "verdict": "different",
-   "text": "Lemma 7.4 covers every v ∈ D_S. This result constructs a continuous periodic energy-space representative and integrated identity for the free inverse; it does not alone identify the full printed domain or assert all parts of that lemma.",
+   "text": "Lemma 7.4 covers every $v\\in D_S$. This result constructs a continuous periodic energy-space representative and integrated identity for the free inverse; it does not alone identify the full printed domain or assert all parts of that lemma.",
    "because": [
     "pdf-item-theorem-7-4"
    ]
@@ -6123,14 +6123,14 @@
   },
   "Breakdown.Cert.bordered": {
    "verdict": "different",
-   "text": "The constrained map acts on (f, β), where v = T_S⁻¹f, and returns the projected linear residual together with ℓ(v). Equation (7.53) instead takes (v, β) as its input, so identifying the two maps uses the free inverse.",
+   "text": "The constrained map acts on $(f, \\beta)$, where $v = T_S^{-1}f$, and returns the projected linear residual together with $\\ell(v)$. Equation (7.53) instead takes $(v, \\beta)$ as its input, so identifying the two maps uses the free inverse.",
    "because": [
     "pdf-item-equation-7-53"
    ]
   },
   "Breakdown.Cert.exists_gradInvSpec": {
    "verdict": "different",
-   "text": "This result constructs the time-integral operator giving the gradient part of the free solution. Proposition 7.5 additionally states bijectivity on D_S, symmetry preservation and weak and local strong convergence; those conclusions require separate results.",
+   "text": "This result constructs the time-integral operator giving the gradient part of the free solution. Proposition 7.5 additionally states bijectivity on $D_S$, symmetry preservation and weak and local strong convergence; those conclusions require separate results.",
    "because": [
     "pdf-item-theorem-7-5"
    ]
@@ -6144,7 +6144,7 @@
   },
   "Breakdown.Cert.extendedBorderedInvertibleHolds_of": {
    "verdict": "same",
-   "text": "For a certificate reduced to unit forcing weight and coincident reference and approximate profiles, the constrained linear problem has an inverse and is injective on the invariant subspace. This is the unique solve of Proposition 7.8 in the variable f = T_S v, with the compactness and coercivity results supplied as hypotheses.",
+   "text": "For a certificate reduced to unit forcing weight and coincident reference and approximate profiles, the constrained linear problem has an inverse and is injective on the invariant subspace. This is the unique solve of Proposition 7.8 in the variable $f = T_S v$, with the compactness and coercivity results supplied as hypotheses.",
    "because": [
     "pdf-item-theorem-7-8"
    ]
@@ -6242,7 +6242,7 @@
   },
   "Breakdown.Cert.freeEnergyLocalHolds_of": {
    "verdict": "different",
-   "text": "For the constructed free solution, the result supplies a continuous periodic scalar representative of the gradient energy and an interval-integrated identity. Equation (7.42) is the almost-everywhere differential identity for arbitrary v ∈ D_S; (7.45) is its physical-time counterpart.",
+   "text": "For the constructed free solution, the result supplies a continuous periodic scalar representative of the gradient energy and an interval-integrated identity. Equation (7.42) is the almost-everywhere differential identity for arbitrary $v\\in D_S$; (7.45) is its physical-time counterpart.",
    "because": [
     "pdf-item-theorem-7-4"
    ]
@@ -6284,7 +6284,7 @@
   },
   "Breakdown.Cert.productBoundHolds_of": {
    "verdict": "stronger",
-   "text": "The estimate applies to two possibly different factors: ‖(u·∇)v‖_H ≤ c_w‖u‖_w ess sup_θ‖∇v(θ)‖₂. The quadratic inequality (7.49) is the case u = v, and the formal conclusion also bounds the Leray-projected term.",
+   "text": "The estimate applies to two possibly different factors: $\\lVert(u\\cdot\\nabla)v\\rVert_H \\le c_w\\lVert u\\rVert_w\\operatorname*{ess\\,sup}_{\\theta}\\lVert\\nabla v(\\theta)\\rVert_2$. The quadratic inequality (7.49) is the case $u = v$, and the formal conclusion also bounds the Leray-projected term.",
    "because": [
     "pdf-item-equation-7-49"
    ]
@@ -6312,7 +6312,7 @@
   },
   "Breakdown.Cert.sizeZ": {
    "verdict": "different",
-   "text": "The norm is √(‖v‖²_w + |β|²), so its forcing weight is one. The paper uses √(‖v‖²_w + ω²|β|²); the certificate is rescaled before this norm is used.",
+   "text": "The norm is $\\sqrt{\\lVert v\\rVert_w^2 + |\\beta|^2}$, so its forcing weight is one. The paper uses $\\sqrt{\\lVert v\\rVert_w^2 + \\omega^2|\\beta|^2}$; the certificate is rescaled before this norm is used.",
    "because": [
     "pdf-item-equation-7-14"
    ]
@@ -6473,7 +6473,7 @@
   },
   "Breakdown.CertCell.CellHypothesis": {
    "verdict": "different",
-   "text": "The full cell assumptions include κ≥3 and the constants w*=39/50, c=3/50, pinning weight 1000 and row cap 400(1+2⁻¹⁸). They also require the cell, matrix, pressure and error conditions described, and partly omitted, in Appendix B.",
+   "text": "The full cell assumptions include $\\kappa\\ge 3$ and the constants $w^*=39/50$, $c=3/50$, pinning weight $1000$ and row cap $400(1+2^{-18})$. They also require the cell, matrix, pressure and error conditions described, and partly omitted, in Appendix B.",
    "because": [
     "pdf-item-equation-B-1"
    ]
@@ -6641,14 +6641,14 @@
   },
   "Breakdown.CertCell.Instance.IsRowInstance": {
    "verdict": "different",
-   "text": "The certificate uses orthonormal row fields and separate positive weights, including the bound τmax/c≤c₀². This gives the paper's weighted orthogonal rows after rescaling each field by √τₖ.",
+   "text": "The certificate uses orthonormal row fields and separate positive weights, including the bound $\\tau_{\\max}/c\\le c_0^2$. This gives the paper's weighted orthogonal rows after rescaling each field by $\\sqrt{\\tau_k}$.",
    "because": [
     "pdf-item-equation-B-11"
    ]
   },
   "Breakdown.CertCell.Instance.rowFieldsOrthonormal": {
    "verdict": "different",
-   "text": "The theorem proves that the normalized rows have inner products δₖₗ. The paper's rows have squared norms τₖ, obtained by the additional √τₖ rescaling.",
+   "text": "The theorem proves that the normalized rows have inner products $\\delta_{kl}$. The paper's rows have squared norms $\\tau_k$, obtained by the additional $\\sqrt{\\tau_k}$ rescaling.",
    "because": [
     "pdf-item-equation-B-11"
    ]
@@ -6683,21 +6683,21 @@
   },
   "Breakdown.CertCell.RowValues.mix": {
    "verdict": "same",
-   "text": "For positive definite Gram data the mixing matrix is G⁻¹ᐟ². The factor √τₖ is applied through the separate row weight when the row seminorm is formed.",
+   "text": "For positive definite Gram data the mixing matrix is $G^{-1/2}$. The factor $\\sqrt{\\tau_k}$ is applied through the separate row weight when the row seminorm is formed.",
    "because": [
     "pdf-item-equation-B-11"
    ]
   },
   "Breakdown.CertCell.RowValues.rowFieldOf": {
    "verdict": "different",
-   "text": "The formal row fields have unit norm after multiplication by G⁻¹ᐟ². The paper includes √τₖ in eₖ itself; the same seminorm is recovered by multiplying the squared formal row pairing by τₖ.",
+   "text": "The formal row fields have unit norm after multiplication by $G^{-1/2}$. The paper includes $\\sqrt{\\tau_k}$ in $e_k$ itself; the same seminorm is recovered by multiplying the squared formal row pairing by $\\tau_k$.",
    "because": [
     "pdf-item-equation-B-11"
    ]
   },
   "Breakdown.CertCell.RowValues.rowWeightOf": {
    "verdict": "different",
-   "text": "The row weight is the cell test weight divided by c; at c=3/50 it is τₖ. The paper places √τₖ in the field eₖ, whereas the formal row seminorm carries τₖ as a separate weight.",
+   "text": "The row weight is the cell test weight divided by $c$; at $c=3/50$ it is $\\tau_k$. The paper places $\\sqrt{\\tau_k}$ in the field $e_k$, whereas the formal row seminorm carries $\\tau_k$ as a separate weight.",
    "because": [
     "pdf-item-equation-B-11"
    ]
@@ -6711,7 +6711,7 @@
   },
   "Breakdown.CertCell.TailBand.Internal.ExteriorLinks.quad_lower": {
    "verdict": "different",
-   "text": "The displayed conclusion replaces f₁*, f₀ and f₀₁ by an exterior lower gradient bound and inverse-square velocity and cross bounds. It is the subsequent exterior absorption estimate used in Lemma B.6, rather than the exact intermediate formula (B.36).",
+   "text": "The displayed conclusion replaces $f_1^*$, $f_0$ and $f_{01}$ by an exterior lower gradient bound and inverse-square velocity and cross bounds. It is the subsequent exterior absorption estimate used in Lemma B.6, rather than the exact intermediate formula (B.36).",
    "because": [
     "pdf-item-equation-B-36"
    ]
@@ -6732,7 +6732,7 @@
   },
   "Breakdown.CertCell.TailBand.PointCoef.PassesTest": {
    "verdict": "same",
-   "text": "The condition is f₂≥0, 0≤t≤f₁*, f₀*≥0 and f₀₁²≤4(f₁*−t)f₀*. Splitting the middle inequality into two clauses does not change (B.29).",
+   "text": "The condition is $f_2\\ge 0$, $0\\le t\\le f_1^*$, $f_0^*\\ge 0$ and $f_{01}^2\\le 4(f_1^*-t)f_0^*$. Splitting the middle inequality into two clauses does not change (B.29).",
    "because": [
     "pdf-item-equation-B-29"
    ]
@@ -6956,7 +6956,7 @@
   },
   "Breakdown.CertReduction.adjointQuadCoeff": {
    "verdict": "weaker",
-   "text": "The coefficient is 2/(√3w*) for the L³ choice and c_w/√w* for the L² choice. These are the two constants of Lemma B.10; the adjoint norm and the resulting pairing estimate are separate.",
+   "text": "The coefficient is 2/(√3w*) for the $L^3$ choice and $c_w/\\sqrt{w^*}$ for the $L^2$ choice. These are the two constants of Lemma B.10; the adjoint norm and the resulting pairing estimate are separate.",
    "because": [
     "pdf-item-theorem-B-10"
    ]
@@ -6984,7 +6984,7 @@
   },
   "Breakdown.CertReduction.cubicWeightProductHolds_proof": {
    "verdict": "weaker",
-   "text": "Hölder's inequality and ‖u‖L⁶≤(2/√3)‖∇u‖L² give the L³ coefficient product bound. This supplies the Sobolev step in the last line of (B.49).",
+   "text": "Hölder's inequality and $\\lVert u\\rVert_{L^6}\\le(2/\\sqrt{3})\\lVert\\nabla u\\rVert_{L^2}$ give the $L^3$ coefficient product bound. This supplies the Sobolev step in the last line of (B.49).",
    "because": [
     "pdf-item-equation-B-49"
    ]
@@ -7054,7 +7054,7 @@
   },
   "Breakdown.CoerciveWeak.extendedCoerciveClause_of_pieceData_proved": {
    "verdict": "same",
-   "text": "The two density inequalities and the bounds c_M/√c≤c₁ and √(t/c)≤c₂ imply the a priori certificate estimate. With c=3/50 and t=1000, this is Lemma B.2 for the admitted weak perturbations.",
+   "text": "The two density inequalities and the bounds $c_M/\\sqrt{c}\\le c_1$ and $\\sqrt{t/c}\\le c_2$ imply the a priori certificate estimate. With $c=3/50$ and $t=1000$, this is Lemma B.2 for the admitted weak perturbations.",
    "because": [
     "pdf-item-theorem-B-2"
    ]
@@ -7117,14 +7117,14 @@
   },
   "Breakdown.ExtendedCertificateData.IsHeldSolution": {
    "verdict": "different",
-   "text": "The conditions express (7.12) after Leray projection and the substitution f = T_S v, and also require the radius 2ε and gradient supremum M. The forcing-coefficient norm has weight one at this stage; general ω is handled by rescaling.",
+   "text": "The conditions express (7.12) after Leray projection and the substitution $f = T_S v$, and also require the radius $2\\varepsilon$ and gradient supremum $M$. The forcing-coefficient norm has weight one at this stage; general $\\omega$ is handled by rescaling.",
    "because": [
     "pdf-item-equation-7-12"
    ]
   },
   "Breakdown.ExtendedCertificateData.actuatorAdjointError": {
    "verdict": "different",
-   "text": "The vector is (⟨b_l, ψ_{α,j}⟩_H − V_{lj})_l. Equation (7.31) defines the unshifted pairing vector, so subtraction of the frame column is an extra operation used in (7.35).",
+   "text": "The vector is $(\\langle b_l, \\psi_{\\alpha,j}\\rangle_H - V_{lj})_l$. Equation (7.31) defines the unshifted pairing vector, so subtraction of the frame column is an extra operation used in (7.35).",
    "because": [
     "pdf-item-equation-7-31"
    ]
@@ -7166,7 +7166,7 @@
   },
   "Breakdown.ExtendedCertificateData.transferLoss": {
    "verdict": "same",
-   "text": "The expression is (c₁ + c₀)c_r, exactly the transfer loss ϑ in (7.20).",
+   "text": "The expression is $(c_1 + c_0)c_r$, exactly the transfer loss $\\vartheta$ in (7.20).",
    "because": [
     "pdf-item-equation-7-20"
    ]
@@ -7215,7 +7215,7 @@
   },
   "Breakdown.Freq.BilinBound": {
    "verdict": "weaker",
-   "text": "For all τ>0 and u,v∈X, the symmetric bilinear term is bounded by Cτ⁻³⁄⁴‖u‖X‖v‖X. This is (3.7), while Lemma 3.1 also states a projected-heat estimate for arbitrary L³⁄² forcing.",
+   "text": "For all $\\tau>0$ and $u,v\\in X$, the symmetric bilinear term is bounded by $C\\tau^{-3/4}\\lVert u\\rVert_X\\lVert v\\rVert_X$. This is (3.7), while Lemma 3.1 also states a projected-heat estimate for arbitrary $L^{3/2}$ forcing.",
    "because": [
     "pdf-item-theorem-3-1"
    ]
@@ -7229,14 +7229,14 @@
   },
   "Breakdown.Freq.DilationAlgebra": {
    "verdict": "same",
-   "text": "Positive dilations have norm factor μ¹⁄⁴, compose multiplicatively, and satisfy Dμe^{μtΔ}=e^{tΔ}Dμ, with D₁=I. These are the identities in (3.5) on the energy-space realization.",
+   "text": "Positive dilations have norm factor $\\mu^{1/4}$, compose multiplicatively, and satisfy $D_\\mu e^{\\mu t\\Delta}=e^{t\\Delta}D_\\mu$, with $D_1=I$. These are the identities in (3.5) on the energy-space realization.",
    "because": [
     "pdf-item-equation-3-5"
    ]
   },
   "Breakdown.Freq.GradSixDecay": {
    "verdict": "different",
-   "text": "The explicit Sobolev inequality is proved for smooth solenoidal fields with |u| ≤ C(1+|y|)⁻¹ and |∇u| ≤ C(1+|y|)⁻². Display (3.1) applies to all L⁶ fields with L² gradient; the bounded reconstruction of velocities extends the relevant inequality to X.",
+   "text": "The explicit Sobolev inequality is proved for smooth solenoidal fields with $|u| \\le C(1+|y|)^{-1}$ and $|\\nabla u| \\le C(1+|y|)^{-2}$. Display (3.1) applies to all $L^6$ fields with $L^2$ gradient; the bounded reconstruction of velocities extends the relevant inequality to $X$.",
    "because": [
     "pdf-item-equation-3-1"
    ]
@@ -7306,7 +7306,7 @@
   },
   "Breakdown.Freq.bilinTestFormula_holds": {
    "verdict": "different",
-   "text": "The transport formula −½e^{τΔ}P[(φ·∇)v+(v·∇)φ] is identified when φ is compact, smooth and solenoidal and v∈X. Display (2.3) gives the formula for every pair in X.",
+   "text": "The transport formula $-\\frac{1}{2}e^{\\tau\\Delta}P[(\\phi\\cdot\\nabla)v+(v\\cdot\\nabla)\\phi]$ is identified when $\\phi$ is compact, smooth and solenoidal and $v\\in X$. Display (2.3) gives the formula for every pair in $X$.",
    "because": [
     "pdf-item-equation-2-3"
    ]
@@ -7320,7 +7320,7 @@
   },
   "Breakdown.Freq.bilin_holds": {
    "verdict": "weaker",
-   "text": "The symmetric bilinear term exists for every positive heat time and satisfies Cτ⁻³⁄⁴‖u‖X‖v‖X. This gives the bilinear conclusion of Lemma 3.1 and the full inequality (3.7).",
+   "text": "The symmetric bilinear term exists for every positive heat time and satisfies $C\\tau^{-3/4}\\lVert u\\rVert_X\\lVert v\\rVert_X$. This gives the bilinear conclusion of Lemma 3.1 and the full inequality (3.7).",
    "because": [
     "pdf-item-theorem-3-1"
    ]
@@ -7334,7 +7334,7 @@
   },
   "Breakdown.Freq.dilation_holds": {
    "verdict": "same",
-   "text": "Positive dilations have norm factor μ¹⁄⁴, compose multiplicatively, and satisfy Dμe^{μtΔ}=e^{tΔ}Dμ, with D₁=I. These are the identities in (3.5) on the energy-space realization.",
+   "text": "Positive dilations have norm factor $\\mu^{1/4}$, compose multiplicatively, and satisfy $D_\\mu e^{\\mu t\\Delta}=e^{t\\Delta}D_\\mu$, with $D_1=I$. These are the identities in (3.5) on the energy-space realization.",
    "because": [
     "pdf-item-equation-3-5"
    ]
@@ -7348,7 +7348,7 @@
   },
   "Breakdown.Freq.gradSixDecay": {
    "verdict": "different",
-   "text": "The explicit Sobolev inequality is proved for smooth solenoidal fields with |u| ≤ C(1+|y|)⁻¹ and |∇u| ≤ C(1+|y|)⁻². Display (3.1) applies to all L⁶ fields with L² gradient; the bounded reconstruction of velocities extends the relevant inequality to X.",
+   "text": "The explicit Sobolev inequality is proved for smooth solenoidal fields with $|u| \\le C(1+|y|)^{-1}$ and $|\\nabla u| \\le C(1+|y|)^{-2}$. Display (3.1) applies to all $L^6$ fields with $L^2$ gradient; the bounded reconstruction of velocities extends the relevant inequality to $X$.",
    "because": [
     "pdf-item-equation-3-1"
    ]
@@ -7404,7 +7404,7 @@
   },
   "Breakdown.HeatBilinear": {
    "verdict": "weaker",
-   "text": "The heat operators form a strongly continuous contraction semigroup, and the symmetric bilinear kernel commutes with forward heat shifts. Its τ⁻³⁄⁴ bound is required only for 0<τ≤1, whereas (3.12) requires that bound for every τ>0.",
+   "text": "The heat operators form a strongly continuous contraction semigroup, and the symmetric bilinear kernel commutes with forward heat shifts. Its $\\tau^{-3/4}$ bound is required only for $0<\\tau\\le 1$, whereas (3.12) requires that bound for every $\\tau>0$.",
    "because": [
     "pdf-item-equation-3-12"
    ]
@@ -7425,14 +7425,14 @@
   },
   "Breakdown.IsDecayField": {
    "verdict": "different",
-   "text": "A smooth solenoidal spatial field has the bounds |u(y)| ≤ C(1+|y|)⁻¹ and |∇u(y)| ≤ C(1+|y|)⁻². Display (4.1) concerns the time-dependent velocity obtained by dilating such profile slices.",
+   "text": "A smooth solenoidal spatial field has the bounds $|u(y)| \\le C(1+|y|)^{-1}$ and $|\\nabla u(y)| \\le C(1+|y|)^{-2}$. Display (4.1) concerns the time-dependent velocity obtained by dilating such profile slices.",
    "because": [
     "pdf-item-equation-4-1"
    ]
   },
   "Breakdown.IsPerturbation": {
    "verdict": "different",
-   "text": "The perturbation is described by measurable periodic velocity, weak gradient and Hessian, and a square-integrable drift-time field; the Laplacian is its Hessian trace. This gives the distributional quantities in D_S with the prescribed symmetries, but equivalence with the whole printed domain is not asserted by the definition.",
+   "text": "The perturbation is described by measurable periodic velocity, weak gradient and Hessian, and a square-integrable drift-time field; the Laplacian is its Hessian trace. This gives the distributional quantities in $D_S$ with the prescribed symmetries, but equivalence with the whole printed domain is not asserted by the definition.",
    "because": [
     "pdf-item-equation-7-4"
    ]
@@ -7446,7 +7446,7 @@
   },
   "Breakdown.IsSimilarityProfile": {
    "verdict": "stronger",
-   "text": "The velocity and pressure solve the smooth similarity equation, with |∇ʲW| ≤ C(1+|y|)⁻¹⁻ʲ for j=0,1,2 and |∇q| ≤ C(1+|y|)⁻³. Periodicity and nonvanishing are separate assumptions when this local profile condition is used.",
+   "text": "The velocity and pressure solve the smooth similarity equation, with $|\\nabla^j W| \\le C(1+|y|)^{-1-j}$ for $j=0,1,2$ and $|\\nabla q| \\le C(1+|y|)^{-3}$. Periodicity and nonvanishing are separate assumptions when this local profile condition is used.",
    "because": [
     "pdf-item-equation-1-3"
    ]
@@ -7495,7 +7495,7 @@
   },
   "Breakdown.MildFramework.selfSimilar": {
    "verdict": "different",
-   "text": "The physical curve is D_{(1−t)⁻¹}W(s₀−log(1−t)), with final time fixed to one and arbitrary phase s₀. Display (1.4) allows any positive final time T.",
+   "text": "The physical curve is $D_{(1-t)^{-1}}W(s_0-\\log(1-t))$, with final time fixed to one and arbitrary phase $s_0$. Display (1.4) allows any positive final time $T$.",
    "because": [
     "pdf-item-equation-1-4"
    ]
@@ -7523,7 +7523,7 @@
   },
   "Breakdown.Periodic.AdvectShellBounds": {
    "verdict": "different",
-   "text": "For a compact smooth solenoidal field φ and local perturbation data ζ, the localized transport is supported in the chosen ball and has L³⁄² norm at most C‖φ‖X‖ζ‖. The time-dependent factor (1−t)⁻¹⁄⁴ in (6.8) comes from a separate bound on the profile.",
+   "text": "For a compact smooth solenoidal field $\\phi$ and local perturbation data $\\zeta$, the localized transport is supported in the chosen ball and has $L^{3/2}$ norm at most $C\\lVert\\phi\\rVert_X\\lVert\\zeta\\rVert$. The time-dependent factor $(1-t)^{-1/4}$ in (6.8) comes from a separate bound on the profile.",
    "because": [
     "pdf-item-equation-6-8"
    ]
@@ -7537,7 +7537,7 @@
   },
   "Breakdown.Periodic.ApproxResidualSmall": {
    "verdict": "different",
-   "text": "For the normalized nth approximate interval, the residual is bounded by θⁿKT¹⁄⁴, assuming the profile bounds and λ¹⁄⁴<θ. Lemma 6.2 instead states a global Cκ residual bound of order L⁻¹⁄² on the large torus.",
+   "text": "For the normalized $n$th approximate interval, the residual is bounded by $\\theta^n KT^{1/4}$, assuming the profile bounds and $\\lambda^{1/4}<\\theta$. Lemma 6.2 instead states a global $C^\\kappa$ residual bound of order $L^{-1/2}$ on the large torus.",
    "because": [
     "pdf-item-theorem-6-2"
    ]
@@ -7558,7 +7558,7 @@
   },
   "Breakdown.Periodic.FreeHeatComparison": {
    "verdict": "different",
-   "text": "For each compact smooth solenoidal datum, the rescaled torus and whole-space free heat flows converge uniformly on a bounded nonnegative time interval as the scale tends to zero. Display (6.3) gives the explicit all-positive-time error CL⁻⁵⁄²‖f‖L¹.",
+   "text": "For each compact smooth solenoidal datum, the rescaled torus and whole-space free heat flows converge uniformly on a bounded nonnegative time interval as the scale tends to zero. Display (6.3) gives the explicit all-positive-time error $CL^{-5/2}\\lVert f\\rVert_{L^1}$.",
    "because": [
     "pdf-item-equation-6-3"
    ]
@@ -7572,14 +7572,14 @@
   },
   "Breakdown.Periodic.HeatDivFreeComparison": {
    "verdict": "different",
-   "text": "Compactly supported L² forcing has arbitrarily small local projected-heat discrepancy, measured by δ times its L³⁄² norm, at sufficiently small scale and on a compact positive-time window. Lemma 6.1 gives an all-time CL⁻⁷⁄² estimate for the divergence of a W¹,¹ tensor, in terms of that tensor’s L¹ norm.",
+   "text": "Compactly supported $L^2$ forcing has arbitrarily small local projected-heat discrepancy, measured by $\\delta$ times its $L^{3/2}$ norm, at sufficiently small scale and on a compact positive-time window. Lemma 6.1 gives an all-time $CL^{-7/2}$ estimate for the divergence of a $W^{1,1}$ tensor, in terms of that tensor’s $L^1$ norm.",
    "because": [
     "pdf-item-theorem-6-1"
    ]
   },
   "Breakdown.Periodic.KernelSharpBound": {
    "verdict": "different",
-   "text": "The bilinear smoothing bound is Cτ⁻³⁄⁴ in the inhomogeneous unit-torus norm, for 0<τ≤1. Lemma 3.7 and (3.20) use mean-zero homogeneous spaces at every spatial period and all positive times.",
+   "text": "The bilinear smoothing bound is $C\\tau^{-3/4}$ in the inhomogeneous unit-torus norm, for $0<\\tau\\le 1$. Lemma 3.7 and (3.20) use mean-zero homogeneous spaces at every spatial period and all positive times.",
    "because": [
     "pdf-item-theorem-3-7"
    ]
@@ -7621,14 +7621,14 @@
   },
   "Breakdown.Periodic.SeqPerturbation": {
    "verdict": "different",
-   "text": "For normalized time intervals, a right inverse and 64‖R‖²C_K L¹⁄⁴(ρ+‖ξ‖)≤1 give exact mild intervals with matching endpoints. Both the datum correction and each normalized error are bounded by 2‖R‖(ρ+‖ξ‖), while Lemma 4.8 uses the Cκ norm of the combined forcing e^{tΔ}χ−Fᵃ.",
+   "text": "For normalized time intervals, a right inverse and $64\\lVert R\\rVert^2 C_K L^{1/4}(\\rho+\\lVert\\xi\\rVert)\\le 1$ give exact mild intervals with matching endpoints. Both the datum correction and each normalized error are bounded by $2\\lVert R\\rVert(\\rho+\\lVert\\xi\\rVert)$, while Lemma 4.8 uses the $C^\\kappa$ norm of the combined forcing $e^{t\\Delta}\\chi-F^a$.",
    "because": [
     "pdf-item-theorem-4-8"
    ]
   },
   "Breakdown.Periodic.ShellInverseTransfer": {
    "verdict": "different",
-   "text": "Two localized comparisons within δ and an explicit smallness inequality transfer a bounded whole-space right inverse to an exact periodic right inverse. Lemma 6.3 first constructs a particular approximate inverse with a defect of order L⁻¹⁄².",
+   "text": "Two localized comparisons within $\\delta$ and an explicit smallness inequality transfer a bounded whole-space right inverse to an exact periodic right inverse. Lemma 6.3 first constructs a particular approximate inverse with a defect of order $L^{-1/2}$.",
    "because": [
     "pdf-item-theorem-6-3"
    ]
@@ -7691,7 +7691,7 @@
   },
   "Breakdown.Periodic.approxResidualSmall": {
    "verdict": "different",
-   "text": "For the normalized nth approximate interval, the residual is bounded by θⁿKT¹⁄⁴, assuming the profile bounds and λ¹⁄⁴<θ. Lemma 6.2 instead states a global Cκ residual bound of order L⁻¹⁄² on the large torus.",
+   "text": "For the normalized $n$th approximate interval, the residual is bounded by $\\theta^n KT^{1/4}$, assuming the profile bounds and $\\lambda^{1/4}<\\theta$. Lemma 6.2 instead states a global $C^\\kappa$ residual bound of order $L^{-1/2}$ on the large torus.",
    "because": [
     "pdf-item-theorem-6-2"
    ]
@@ -7705,7 +7705,7 @@
   },
   "Breakdown.Periodic.breakdownOnTorus_of_profile": {
    "verdict": "different",
-   "text": "The paper constructs the periodic trajectory and estimates (1.7); the formal conclusion gives, for every positive viscosity, smooth periodic solenoidal data admitting no global smooth solution with periodic velocity, with no periodicity restriction on its pressure. The premise includes additional profile decay, while the rate and the local comparison on B₁/₁₆ are absent from this conclusion.",
+   "text": "The paper constructs the periodic trajectory and estimates (1.7); the formal conclusion gives, for every positive viscosity, smooth periodic solenoidal data admitting no global smooth solution with periodic velocity, with no periodicity restriction on its pressure. The premise includes additional profile decay, while the rate and the local comparison on $B_{1/16}$ are absent from this conclusion.",
    "because": [
     "pdf-item-theorem-1-1"
    ]
@@ -7747,14 +7747,14 @@
   },
   "Breakdown.Periodic.cutoffMassBound": {
    "verdict": "different",
-   "text": "The rescaled cutoff has squared L² mass at most K/√(T−t) for 0<T−t≤1. Reading this as the radius estimate in (5.2) requires undoing the spatial rescaling and taking a square root.",
+   "text": "The rescaled cutoff has squared $L^2$ mass at most $K/\\sqrt{T-t}$ for $0<T-t\\le 1$. Reading this as the radius estimate in (5.2) requires undoing the spatial rescaling and taking a square root.",
    "because": [
     "pdf-item-equation-5-2"
    ]
   },
   "Breakdown.Periodic.freeHeatComparison": {
    "verdict": "different",
-   "text": "For each compact smooth solenoidal datum, the rescaled torus and whole-space free heat flows converge uniformly on a bounded nonnegative time interval as the scale tends to zero. Display (6.3) gives the explicit all-positive-time error CL⁻⁵⁄²‖f‖L¹.",
+   "text": "For each compact smooth solenoidal datum, the rescaled torus and whole-space free heat flows converge uniformly on a bounded nonnegative time interval as the scale tends to zero. Display (6.3) gives the explicit all-positive-time error $CL^{-5/2}\\lVert f\\rVert_{L^1}$.",
    "because": [
     "pdf-item-equation-6-3"
    ]
@@ -7768,7 +7768,7 @@
   },
   "Breakdown.Periodic.heatDivFreeComparison": {
    "verdict": "different",
-   "text": "Compactly supported L² forcing has arbitrarily small local projected-heat discrepancy, measured by δ times its L³⁄² norm, at sufficiently small scale and on a compact positive-time window. Lemma 6.1 gives an all-time CL⁻⁷⁄² estimate for the divergence of a W¹,¹ tensor, in terms of that tensor’s L¹ norm.",
+   "text": "Compactly supported $L^2$ forcing has arbitrarily small local projected-heat discrepancy, measured by $\\delta$ times its $L^{3/2}$ norm, at sufficiently small scale and on a compact positive-time window. Lemma 6.1 gives an all-time $CL^{-7/2}$ estimate for the divergence of a $W^{1,1}$ tensor, in terms of that tensor’s $L^1$ norm.",
    "because": [
     "pdf-item-theorem-6-1"
    ]
@@ -7796,7 +7796,7 @@
   },
   "Breakdown.Periodic.kernelSharpBound": {
    "verdict": "different",
-   "text": "The bilinear smoothing bound is Cτ⁻³⁄⁴ in the inhomogeneous unit-torus norm, for 0<τ≤1. Lemma 3.7 and (3.20) use mean-zero homogeneous spaces at every spatial period and all positive times.",
+   "text": "The bilinear smoothing bound is $C\\tau^{-3/4}$ in the inhomogeneous unit-torus norm, for $0<\\tau\\le 1$. Lemma 3.7 and (3.20) use mean-zero homogeneous spaces at every spatial period and all positive times.",
    "because": [
     "pdf-item-theorem-3-7"
    ]
@@ -7838,14 +7838,14 @@
   },
   "Breakdown.Periodic.seqPerturbation": {
    "verdict": "different",
-   "text": "For normalized time intervals, a right inverse and 64‖R‖²C_K L¹⁄⁴(ρ+‖ξ‖)≤1 give exact mild intervals with matching endpoints. Both the datum correction and each normalized error are bounded by 2‖R‖(ρ+‖ξ‖), while Lemma 4.8 uses the Cκ norm of the combined forcing e^{tΔ}χ−Fᵃ.",
+   "text": "For normalized time intervals, a right inverse and $64\\lVert R\\rVert^2 C_K L^{1/4}(\\rho+\\lVert\\xi\\rVert)\\le 1$ give exact mild intervals with matching endpoints. Both the datum correction and each normalized error are bounded by $2\\lVert R\\rVert(\\rho+\\lVert\\xi\\rVert)$, while Lemma 4.8 uses the $C^\\kappa$ norm of the combined forcing $e^{t\\Delta}\\chi-F^a$.",
    "because": [
     "pdf-item-theorem-4-8"
    ]
   },
   "Breakdown.Periodic.shellInverseTransfer": {
    "verdict": "different",
-   "text": "Two localized comparisons within δ and an explicit smallness inequality transfer a bounded whole-space right inverse to an exact periodic right inverse. Lemma 6.3 first constructs a particular approximate inverse with a defect of order L⁻¹⁄².",
+   "text": "Two localized comparisons within $\\delta$ and an explicit smallness inequality transfer a bounded whole-space right inverse to an exact periodic right inverse. Lemma 6.3 first constructs a particular approximate inverse with a defect of order $L^{-1/2}$.",
    "because": [
     "pdf-item-theorem-6-3"
    ]
@@ -7908,7 +7908,7 @@
   },
   "Breakdown.PeriodicSimilarityProfileExists": {
    "verdict": "stronger",
-   "text": "A smooth nonzero profile has a positive period and an orthogonal twist, solves the similarity equation, and satisfies uniform bounds |∇ʲW| ≤ C(1+|y|)⁻¹⁻ʲ for j=0,1,2 and |∇q| ≤ C(1+|y|)⁻³. The second-derivative and pressure-gradient bounds are additional written hypotheses beyond (1.3).",
+   "text": "A smooth nonzero profile has a positive period and an orthogonal twist, solves the similarity equation, and satisfies uniform bounds $|\\nabla^j W| \\le C(1+|y|)^{-1-j}$ for $j=0,1,2$ and $|\\nabla q| \\le C(1+|y|)^{-3}$. The second-derivative and pressure-gradient bounds are additional written hypotheses beyond (1.3).",
    "because": [
     "pdf-item-equation-1-3"
    ]
@@ -7929,7 +7929,7 @@
   },
   "Breakdown.Piece": {
    "verdict": "different",
-   "text": "This is the space of continuous curves on one compact interval [0,T], with its supremum norm. The global time weight (1−t)¹⁄⁴⁻κ of (4.5) is imposed through a separate sequence rescaling.",
+   "text": "This is the space of continuous curves on one compact interval $[0,T]$, with its supremum norm. The global time weight $(1-t)^{1/4-\\kappa}$ of (4.5) is imposed through a separate sequence rescaling.",
    "because": [
     "pdf-item-equation-4-5"
    ]
@@ -8160,7 +8160,7 @@
   },
   "Breakdown.dilateField": {
    "verdict": "same",
-   "text": "The physical dilation is Dμu(x)=√μu(√μx), exactly as in (3.4).",
+   "text": "The physical dilation is $D_\\mu u(x)=\\sqrt{\\mu}u(\\sqrt{\\mu}x)$, exactly as in (3.4).",
    "because": [
     "pdf-item-equation-3-4"
    ]
@@ -8251,7 +8251,7 @@
   },
   "Breakdown.orbitSeq": {
    "verdict": "different",
-   "text": "The weighted recurrence is xₙ₊₁=θ⁻¹(Mxₙ+cₙ). Display (4.14) writes the corresponding unweighted recurrence and also identifies its continuous-time trajectory and forcing.",
+   "text": "The weighted recurrence is $x_{n+1}=\\theta^{-1}(Mx_n+c_n)$. Display (4.14) writes the corresponding unweighted recurrence and also identifies its continuous-time trajectory and forcing.",
    "because": [
     "pdf-item-theorem-4-6"
    ]
@@ -8272,7 +8272,7 @@
   },
   "Breakdown.physicalField": {
    "verdict": "different",
-   "text": "The physical curve is D_{(1−t)⁻¹}W(s₀−log(1−t)), with final time fixed to one and arbitrary phase s₀. Display (1.4) allows any positive final time T.",
+   "text": "The physical curve is $D_{(1-t)^{-1}}W(s_0-\\log(1-t))$, with final time fixed to one and arbitrary phase $s_0$. Display (1.4) allows any positive final time $T$.",
    "because": [
     "pdf-item-equation-1-4"
    ]
@@ -8314,7 +8314,7 @@
   },
   "Breakdown.pushForward": {
    "verdict": "same",
-   "text": "The orthogonal action is ρ_Ru(x)=Ru(R⁻¹x), exactly as in (3.4), including reflections.",
+   "text": "The orthogonal action is $\\rho_R u(x)=Ru(R^{-1}x)$, exactly as in (3.4), including reflections.",
    "because": [
     "pdf-item-equation-3-4"
    ]
@@ -8328,7 +8328,7 @@
   },
   "Breakdown.rowNorm": {
    "verdict": "different",
-   "text": "The weighted Euclidean norm of pairings with orthonormal fields represents the paper’s unweighted norm of pairings with orthogonal fields. Absorbing √τ_j into the jth field identifies the quantities, while the supplied field normalization differs.",
+   "text": "The weighted Euclidean norm of pairings with orthonormal fields represents the paper’s unweighted norm of pairings with orthogonal fields. Absorbing $\\sqrt{\\tau_j}$ into the $j$th field identifies the quantities, while the supplied field normalization differs.",
    "because": [
     "pdf-item-equation-7-17"
    ]
@@ -8342,7 +8342,7 @@
   },
   "Breakdown.sixthPowerGradientBound_four_thirds": {
    "verdict": "same",
-   "text": "The theorem states ‖u‖L⁶²≤(4/3)‖∇u‖L²² for an L⁶ field with L² weak gradient. Taking square roots gives (B.45) with constant 2/√3.",
+   "text": "The theorem states $\\lVert u\\rVert_{L^6}^2\\le(4/3)\\lVert\\nabla u\\rVert_{L^2}^2$ for an $L^6$ field with $L^2$ weak gradient. Taking square roots gives (B.45) with constant $2/\\sqrt{3}$.",
    "because": [
     "pdf-item-equation-B-45"
    ]
@@ -8377,7 +8377,7 @@
   },
   "Breakdown.supBoundFactor": {
    "verdict": "same",
-   "text": "The constant simplifies to (4π√w_*)⁻¹ᐟ², exactly c_w in (7.15), when w_* > 0.",
+   "text": "The constant simplifies to $(4\\pi\\sqrt{w_*})^{-1/2}$, exactly $c_w$ in (7.15), when $w_* > 0$.",
    "because": [
     "pdf-item-equation-7-15"
    ]
@@ -8398,7 +8398,7 @@
   },
   "Breakdown.weakDefectField": {
    "verdict": "different",
-   "text": "The expression includes T_SW, convection, forcing and a supplied pressure-gradient field, with the Laplacian given by a chosen weak Hessian. Setting the forcing to zero and identifying that Hessian and pressure gradient recovers the strong expression in (7.1).",
+   "text": "The expression includes $T_S W$, convection, forcing and a supplied pressure-gradient field, with the Laplacian given by a chosen weak Hessian. Setting the forcing to zero and identifying that Hessian and pressure gradient recovers the strong expression in (7.1).",
    "because": [
     "pdf-item-equation-7-1"
    ]
