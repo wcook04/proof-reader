@@ -83,6 +83,17 @@ passage names them, such as lemmas used only inside proofs, so that the index an
 inside a proof can open them. A project whose declaration report is too large to keep can
 commit `generated/lean.json.gz` in place of `generated/lean.json`.
 
+## Literature Links
+
+`paper.py build` also writes `literature-links.jsonl` beside the paper's data, with one
+[Literature Links](https://github.com/mathlib-initiative/literature-links) annotation
+for each passage in `links.json`. The passage is the subject and its Lean declarations
+are the object. A PDF passage is a quote on its page, and a quote that runs over a page
+break stops the build. A Markdown passage keeps its heading, block and quotation. The
+Lean is the project that `[lean] source` names, at the commit in that address, and a
+paper without a `[lean] source` gets no file. The workflow checks these files with the
+Literature Links checker.
+
 ## Comparator runs
 
 A page can show a [Comparator](https://github.com/leanprover/comparator) run. Name the

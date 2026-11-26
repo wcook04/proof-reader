@@ -30,6 +30,7 @@ from collections import Counter
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import literature_links  # noqa: E402
 import reading as reading_copy  # noqa: E402
 import physlib_map  # noqa: E402
 
@@ -1171,6 +1172,7 @@ def build(slugs: list[str]) -> None:
         folder = PAPERS / slug
         out = PUBLIC / slug
         out.mkdir(exist_ok=True)
+        literature_links.write(built, out)
         page = built.pop("reading_html")
         (out / "reading.html").unlink(missing_ok=True)
         if page:

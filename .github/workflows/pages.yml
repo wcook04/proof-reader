@@ -36,6 +36,11 @@ jobs:
             python tools/paper.py check "$(basename "$folder")"
           done
           python tools/paper.py build
+      # Each paper's links as Literature Links annotations, which the build writes.
+      - name: Check the Literature Links annotations
+        run: |
+          python -m pip install --quiet "literature-links @ git+https://github.com/mathlib-initiative/literature-links@e7eeafb823eb3bc64a8ab2077cd3569f572d459f"  # v1.0.2
+          literature-links scan web/public/papers --include '*/literature-links.jsonl'
       - run: npm run build
         working-directory: web
         env:
