@@ -57,6 +57,10 @@ axioms Lean reports for each. For a PDF paper, the original PDF is one click awa
 [What the checks show](docs/what-the-checks-show.md) says what the build programs test on
 each page. No program tests whether a sentence means the same as its Lean.
 
+In the Gauge theory guide, **Auto** follows the guide as you scroll and **Manual** holds the
+selected citation. Select a highlighted phrase to open the matching Lean declaration. The
+dependency map at the end shows how Gauge theory connects to other Physlib API maps.
+
 ## Run it locally
 
 You need Python 3.11 or later, Node 20.19 or later and

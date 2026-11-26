@@ -51,6 +51,10 @@ The `[reading.companions]` table maps relative Markdown paths to other pages on 
 for example `"../companion/paper.md" = "companion"`. A link in the text to that path opens
 the other page, and a heading fragment opens the matching section.
 
+For an explanatory reconstruction, set `[credit] original_url` to the original
+paper or project it explains. The header lists that source alongside the Lean
+artifact and the credit in `[credit] text`.
+
 ### Figures
 
 Put the image in the paper's folder, or a folder inside it, and refer to it with a

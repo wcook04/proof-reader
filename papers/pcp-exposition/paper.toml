@@ -7,6 +7,7 @@ markdown = "paper.md"
 noun = "paper"
 
 [credit]
+original_url = "https://arxiv.org/abs/2608.17429v2"
 text = "Original algebraic proof: Amireddy, Behera, Srinivasan, Sudan and Willumsgaard. Lean formalization: Troy Lee. Explanatory reconstruction prepared by Will Cook with AI assistance"
 
 [lean]

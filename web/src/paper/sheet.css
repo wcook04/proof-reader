@@ -3,7 +3,6 @@
 .sheetpage__main { max-width: 1180px; margin: 0 auto; padding: 28px 24px 64px; }
 .sheetpage__kicker { margin: 0; font-size: var(--fs-sm); font-weight: 600; color: var(--ink-2); text-transform: uppercase; letter-spacing: 0.06em; }
 .sheetpage__main h1 { margin: 4px 0 2px; font-family: var(--font-serif); font-size: var(--fs-h1); font-weight: 500; }
-.sheetpage__by { margin: 0 0 14px; color: var(--ink-2); }
 .sheetpage__about { max-width: 70ch; font-family: var(--font-serif); font-size: var(--fs-read); line-height: 1.5; }
 .sheetpage__prov { max-width: 80ch; font-size: var(--fs-sm); color: var(--ink-2); }
 .sheetpage__print { border: 0; background: none; cursor: pointer; font: inherit; }

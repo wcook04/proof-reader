@@ -471,7 +471,7 @@ if (apiMap) {
   // formula or an emphasis, but may not open or close one that started outside it.
   html = html.replace(new RegExp(`${PHRASE_OPEN}(\\d+)${PHRASE_MID}`, "g"), (_m, id) => {
     const phrase = apiPhrases[Number(id)];
-    return `<span class="api-map__phrase" data-phrase="${id}" data-phrase-citation="${phrase.citation}" data-tone="${phrase.tone}">`;
+    return `<span class="api-map__phrase" data-phrase="${id}" data-phrase-citation="${phrase.citation}" data-tone="${phrase.tone}" role="button" tabindex="0">`;
   }).replaceAll(PHRASE_CLOSE, "</span>");
   for (const phrase of apiPhrases) {
     const open = html.indexOf(`<span class="api-map__phrase" data-phrase="${phrase.id}"`);

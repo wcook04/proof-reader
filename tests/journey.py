@@ -156,6 +156,10 @@ def opening(page: Page, url: str) -> None:
     print("A first visit")
     page.goto(f"{url}#/{SLUG}", wait_until="load")
     page.wait_for_selector(".sheet__text .q", state="attached")
+    credit = page.get_by_role("complementary", name="Sources and credit")
+    check(credit.get_by_role("link", name="Original paper").get_attribute("href") == "https://doi.org/10.1145/3808269"
+          and "Samantha Frohlich" in credit.inner_text() and "Proof Reader added" in credit.inner_text(),
+          "the paper credits its authors and links to the published version above the reader")
     page.wait_for_timeout(700)
     check(not lean_mode(page) and page.locator(".fg").count() == 1, "with nothing saved the right page opens on the Graph view, with the Lean docked under it")
     tops = page.evaluate(
@@ -1489,6 +1493,10 @@ def companions(page: Page, url: str, shots: Path | None) -> None:
     full = f"{url}#/pcp-full-argument"
     page.goto(exposition, wait_until="load")
     page.locator(".sheet__text h1").wait_for()
+    credit = page.get_by_role("complementary", name="Sources and credit")
+    check(credit.get_by_role("link", name="Original paper").get_attribute("href") == "https://arxiv.org/abs/2608.17429v2"
+          and "Troy Lee" in credit.inner_text() and "Explanatory reconstruction" in credit.inner_text(),
+          "the reconstruction credits both sources and links to the original research")
     page.locator(".proof").get_by_role("button", name="Close", exact=True).click()
     page.locator(".proof").wait_for(state="hidden")
 
@@ -1656,62 +1664,71 @@ def coupled_spring(page: Page, url: str) -> None:
 def physlib_map(page: Page, url: str, shots: Path | None, mobile: bool) -> None:
     print(f"Physlib API map on {'phone' if mobile else 'desktop'}")
     address = f"{url}#/physlib-gauge-theory"
-    page.goto(address + ("/@lean-9" if mobile else "/@p-82"))
+    page.goto(address + "/@lean-6")
     article = page.locator(".api-map article")
     pane = page.locator(".api-map__aside")
+    paper = page.locator(".api-map .reading")
     cite = article.get_by_role("link", name="Lean citation 12", exact=True)
     structure = pane.locator('[data-lean-name="LocalGaugeData"]')
-    evidence = pane.locator(".api-map__evidence")
     annotation = pane.locator(".api-map__annotation")
-    windows = pane.locator(".api-map__windows")
-    pane_graph = pane.locator("#pane-dependency-map")
-    viewport = pane_graph.locator(".deps__figure--viewport")
-    modes = pane.get_by_role("navigation", name="What the right pane shows")
-    fitted = """(el) => {
-      const stage = el.querySelector('.deps__stage')?.getBoundingClientRect();
-      const view = el.getBoundingClientRect();
-      if (!stage || !stage.height || el.querySelectorAll('.deps__card').length !== 13) return false;
-      return stage.width <= view.width && stage.height <= view.height
-        && Math.abs((stage.left + stage.right - view.left - view.right) / 2) < 2
-        && Math.abs((stage.top + stage.bottom - view.top - view.bottom) / 2) < 2;
-    }"""
-    if not mobile:
-        annotation.get_by_role("heading", name="The product group and its central subgroup").wait_for()
-        page.evaluate("document.fonts.ready")
-        check(windows.evaluate("""(win) => {
-          const [lean, graph] = win.children;
-          const height = win.getBoundingClientRect().height;
-          return lean.scrollHeight <= lean.clientHeight + 1 && graph.getBoundingClientRect().height > height * 0.4 + 8;
-        }"""), "the dependency map takes the room left by the short reading note")
-        wait_until(page, lambda: viewport.evaluate(fitted), "the whole dependency map fits and centres beneath a short note")
-        page.goto(address + "/@lean-9")
-    wait_until(page, lambda: annotation.is_visible() and structure.count() == 1,
-               "a direct link opens the note for the Physlib structure")
-    check(pane_graph.is_visible() and modes.count() == 0 and pane.get_by_role("button", name="Minimise graph").is_visible(),
-          "the combined view opens both panes with one layout control")
-    check(not structure.is_visible() and evidence.get_attribute("open") is None, "Lean starts folded")
+    modes = pane.get_by_role("group", name="Reading mode")
+    auto = modes.get_by_role("button", name="Auto", exact=True)
+    manual = modes.get_by_role("button", name="Manual", exact=True)
+    annotation.wait_for()
     page.evaluate("document.fonts.ready")
-    evidence.locator(":scope > summary").click()
-    check(structure.is_visible(), "the fold opens the cited structure")
-    wait_until(page, lambda: viewport.evaluate(fitted), "the whole map fits and centres again after the opened proof resizes its window")
-    pane_graph.get_by_role("button", name="Inspect map").click()
-    check(viewport.evaluate("(el) => el.querySelector('.deps__stage').getBoundingClientRect().height >= 1000"),
-          "Inspect map shows the drawing at full size")
-    check(windows.evaluate("""(win) => {
-      const lean = win.children[0], graph = win.querySelector('.deps__figure--viewport');
-      const share = lean.getBoundingClientRect().height / win.getBoundingClientRect().height;
-      const leanTop = lean.scrollTop, graphTop = graph.scrollTop;
-      lean.scrollTop = leanTop + 100;
-      const leanMoved = lean.scrollTop > leanTop && graph.scrollTop === graphTop;
-      const leanAfter = lean.scrollTop;
-      graph.scrollTop = graphTop + 100;
-      const graphMoved = graph.scrollTop > graphTop && lean.scrollTop === leanAfter;
-      lean.scrollTop = leanTop;
-      graph.scrollTop = graphTop;
-      return Math.abs(share - 0.6) < 0.02 && leanMoved && graphMoved;
-    }"""), "a long open proof uses up to 60 percent and both windows scroll independently")
-    pane_graph.get_by_role("button", name="Fit map").click()
-    wait_until(page, lambda: viewport.evaluate(fitted), "Fit map restores the whole centred map after inspection")
+    check(annotation.is_visible() and auto.get_attribute("aria-pressed") == "true",
+          "the shared Gauge theory citation opens in Auto with its annotation")
+    credit = page.get_by_role("complementary", name="Sources and credit")
+    check(credit.get_by_role("link", name="Original Physlib page").get_attribute("href")
+          == "https://physlib.io/api-tracker#Physlib/ClassicalFieldTheory/GaugeTheory"
+          and "Physlib contributors wrote the map and Lean" in credit.inner_text()
+          and "Proof Reader added" in credit.inner_text()
+          and credit.bounding_box()["y"] < paper.bounding_box()["y"],
+          "the deep link credits Physlib and links to the original above the guide")
+    target_phrase = article.locator('[data-phrase-citation="lean-6"]').first
+    check(target_phrase.evaluate("""(el) => {
+      const phrase = el.getBoundingClientRect(), guide = el.closest('.reading').getBoundingClientRect();
+      return phrase.top >= guide.top && phrase.bottom <= guide.bottom;
+    }"""), "the shared link keeps the phrase quoted in the annotation on screen")
+    check(pane.locator(".api-map__declaration").first.is_visible(), "the cited Lean starts open")
+    check(pane.locator(".api-map__deps, .api-map__graph-window").count() == 0
+          and page.locator("#dependency-map").count() == 1, "the dependency map appears once, at the end of the guide")
+    if not mobile:
+        wait_until(page, lambda: page.locator(".api-map .threads path").evaluate("(el) => el.style.opacity === '1'"),
+                   "a gutter connector links the guide phrase to its annotation")
+    shot(page, shots, f"physlib-lean-6-{'phone' if mobile else 'desktop'}")
+    pane.get_by_role("button", name="Jump to Lean").click()
+    check(pane.locator(".api-map__declaration").first.evaluate("(el) => el === document.activeElement"),
+          "Jump to Lean focuses the first cited declaration")
+    shot(page, shots, f"physlib-lean-code-{'phone' if mobile else 'desktop'}")
+
+    def scroll_to_read(citation: int) -> None:
+        article.locator(f'[data-phrase-citation="lean-{citation}"]').first.evaluate("""(el) => {
+          const pane = el.closest('.reading');
+          pane.scrollTop += el.getBoundingClientRect().top - pane.getBoundingClientRect().top - pane.clientHeight * 0.34 + 12;
+        }""")
+
+    manual.click()
+    before = page.evaluate("history.length")
+    scroll_to_read(9)
+    page.wait_for_timeout(300)
+    check(page.url.endswith("/@lean-6") and manual.get_attribute("aria-pressed") == "true",
+          "Manual holds the selected citation while the guide scrolls")
+    auto.click()
+    wait_until(page, lambda: page.url.endswith("/@lean-9") and structure.is_visible(),
+               "returning to Auto reads the passage at the current position")
+    check(page.evaluate("history.length") == before, "changing modes and following the guide do not add history entries")
+    scroll_to_read(8)
+    wait_until(page, lambda: page.url.endswith("/@lean-8") and annotation.is_visible(),
+               "Auto follows successive citations within the same passage")
+    scroll_to_read(12)
+    wait_until(page, lambda: page.url.endswith("/@lean-12") and annotation.is_visible(),
+               "scrolling in Auto opens the Lean and annotation for the next linked passage")
+    check(page.evaluate("history.length") == before, "Auto scrolling replaces the shared address in place")
+    article.get_by_role("link", name="Lean citation 9", exact=True).click()
+    wait_until(page, lambda: page.url.endswith("/@lean-9") and structure.is_visible(),
+               "clicking a citation opens its exact declarations")
+    manual.click()
     check(article.get_by_role("link", name="Lean citation 9", exact=True).evaluate("""(link) => {
       const mark = link.getBoundingClientRect();
       const pane = link.closest(".reading").getBoundingClientRect();
@@ -1731,7 +1748,6 @@ def physlib_map(page: Page, url: str, shots: Path | None, mobile: bool) -> None:
     check(annotation.get_by_role("link").get_attribute("href").endswith("API-map.md#L58-L62"),
           "the note links to the exact upstream passage")
     shot(page, shots, f"physlib-annotation-{'phone' if mobile else 'desktop'}")
-    evidence.locator(":scope > summary").click()
     check(entries.first.get_by_role("heading").inner_text() == "Iterated formal derivative on Lie algebra jets"
           and entries.first.locator(".api-map__raw-name").inner_text() == "LocalGaugeData.iteratedDeriv",
           "the declaration leads with its glossary title and retains its exact Lean name")
@@ -1760,7 +1776,7 @@ def physlib_map(page: Page, url: str, shots: Path | None, mobile: bool) -> None:
     check(cite.get_attribute("aria-expanded") == "true", "the related mark is selected in the article")
     shot(page, shots, f"physlib-gauge-theory-{'phone' if mobile else 'desktop'}")
     check("μs.foldl" in entries.first.get_by_label("Lean declaration", exact=True).inner_text(),
-          "the folded source contains the exact Lean definition body")
+          "the cited declaration includes the exact Lean definition body")
     entries.first.get_by_role("button", name="View source at line 216").click()
     line = pane.locator('[data-line="216"].is-exact')
     wait_until(page, lambda: line.is_visible(), "the whole file opens at the indexed line")
@@ -1855,7 +1871,6 @@ def physlib_map(page: Page, url: str, shots: Path | None, mobile: bool) -> None:
     wait_until(page, lambda: pane.locator("[data-reference]").count() == 2,
                "Back restores the paragraph view")
     abelian.locator("xpath=following-sibling::p[1]").get_by_role("link", name="Open references for this paragraph").click()
-    evidence.locator(":scope > summary").click()
     wait_until(page, lambda: pane.locator('[data-reference="ref-1"] a').is_visible(),
                "the paragraph gutter opens a bibliography reference beside the Lean groups")
     check(pane.locator("[data-reference]").count() == 9,
@@ -1867,10 +1882,10 @@ def physlib_map(page: Page, url: str, shots: Path | None, mobile: bool) -> None:
     check(named == {f"lean-{n}" for n in range(1, 16)}, "every Lean citation has at least one matched phrase")
     trivial = article.locator('[data-phrase]').filter(has_text="the trivial shift is the identity")
     trivial.scroll_into_view_if_needed()
-    trivial.click()
+    trivial.press("Enter")
     picked = pane.locator('[data-lean-name="Electromagnetism.ElectromagneticPotential.gaugeTransform_zero"]')
     wait_until(page, lambda: page.url.endswith("/@lean-7") and picked.evaluate("(el) => el === document.activeElement"),
-               "clicking a phrase opens its citation at the declaration that states it")
+               "the keyboard opens the highlighted phrase at its exact Lean declaration")
     check("is-picked" in (pane.locator('[data-lean-name="Electromagnetism.ElectromagneticPotential.ofGradient_zero"]').get_attribute("class") or ""),
           "every declaration matched to the clicked phrase is marked")
     quote = picked.locator(".api-map__said-quote")
@@ -1885,37 +1900,23 @@ def physlib_map(page: Page, url: str, shots: Path | None, mobile: bool) -> None:
 
     unlinked = article.locator("#p-87").get_by_role("link", name="Open references for this paragraph")
     unlinked.click()
-    check(pane_graph.is_visible() and modes.count() == 0 and pane.get_by_role("button", name="Minimise graph").count() == 0,
-          "the API map fills the pane when the selected passage has no linked Lean")
+    check(pane.get_by_text("This passage has no linked Lean.").is_visible(),
+          "a prose-only passage shows its references")
     cite.click()
-    pane.get_by_role("button", name="Minimise graph").click()
-    check(annotation.is_visible() and pane_graph.count() == 0 and modes.get_by_role("button", name="Lean", exact=True).get_attribute("aria-pressed") == "true",
-          "Minimise graph keeps Lean visible and reveals the pane choices")
-    unlinked.click()
-    check(pane.get_by_text("This passage has no linked Lean.").is_visible() and pane_graph.count() == 0,
-          "explicit Lean stays selected for the same passage")
-    check(pane.get_by_role("button", name="Combine views").count() == 0, "an unlinked passage has no combine control")
-    cite.click()
-    check(annotation.is_visible() and modes.get_by_role("button", name="Lean", exact=True).get_attribute("aria-pressed") == "true",
-          "explicit Lean follows a linked selection")
-    modes.get_by_role("button", name="Graph", exact=True).click()
-    check(pane_graph.is_visible() and annotation.count() == 0, "explicit Graph stays selected on a linked passage")
-    unlinked.click()
-    check(pane_graph.is_visible() and modes.get_by_role("button", name="Graph", exact=True).get_attribute("aria-pressed") == "true",
-          "explicit Graph follows an unlinked selection")
-    page.go_back()
-    wait_until(page, lambda: page.url.endswith("/@lean-12") and pane_graph.is_visible(),
-               "Back restores the selected citation and its explicit tab")
-    modes.get_by_role("button", name="Auto", exact=True).click()
-    check(annotation.is_visible() and pane_graph.count() == 0, "tabbed Auto follows linked passages with the note")
-    pane.get_by_role("button", name="Combine views").click()
-    check(annotation.is_visible() and pane_graph.is_visible() and modes.count() == 0,
-          "Combine views restores the two windows and hides the pane choices")
+    wait_until(page, lambda: annotation.is_visible() and page.url.endswith("/@lean-12"),
+               "returning to a linked passage restores its annotation")
 
     deps = page.locator("#dependency-map")
     menu = open_site_menu(page)
     menu.get_by_role("button", name="Dependency map", exact=True).click()
-    check(not menu.is_visible(), "the site menu closes after opening the dependency map")
+    wait_until(page, lambda: page.url.endswith("/@dependency-map") and deps.get_by_role("heading", name="Dependency map", exact=True).is_visible(),
+               "the menu opens the shareable dependency appendix")
+    check(not menu.is_visible() and not pane.is_visible(), "the appendix uses the reading area")
+    page.go_back()
+    wait_until(page, lambda: annotation.is_visible() and manual.get_attribute("aria-pressed") == "true",
+               "Back restores the citation and Manual after visiting the appendix")
+    page.go_forward()
+    deps.get_by_role("heading", name="Dependency map", exact=True).wait_for()
     full_fit = """(el, count) => {
       const drawing = el.querySelector('.deps__world');
       const view = el.getBoundingClientRect(), world = drawing.getBoundingClientRect();
@@ -2344,7 +2345,7 @@ def physlib_cards(page: Page, url: str, shots: Path | None, size: tuple[int, int
     print(f"Gauge theory dependency map cards, {size[0]}x{size[1]}")
     page.goto(f"{url}#/physlib-gauge-theory", wait_until="load")
     deps = page.locator("#dependency-map")
-    deps.scroll_into_view_if_needed()
+    open_site_menu(page).get_by_role("button", name="Dependency map", exact=True).click()
     page.wait_for_timeout(800)
     cards_fit(page, f"Gauge theory dependency map at {size[0]}x{size[1]}")
     shot_to(page, shots, f"proofreader-physlib-deps-{size[0]}")

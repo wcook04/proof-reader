@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { fromLean, leanOrigin, loadSource, noun, passageLocation, type Edition, type SheetEntry } from "../app/edition";
-import { Lockup } from "../app/Family";
+import { Lockup, PaperSourceCredit } from "../app/Family";
 import { routeHref } from "../app/router";
 import { LeanCode, useFileLines, type LeanActions } from "../lean/code";
 import { sectionLabel } from "../model/fromEdition";
@@ -44,10 +44,10 @@ export function StatementSheet({ edition }: { edition: Edition }) {
           <button type="button" className="bar__link sheetpage__print" onClick={() => window.print()}>Print</button>
         </div>
       </header>
+      <PaperSourceCredit edition={edition} />
       <main className="sheetpage__main">
         <p className="sheetpage__kicker">Statement sheet</p>
         <h1>{edition.paper.title}</h1>
-        <p className="sheetpage__by">{edition.paper.authors.join(", ")}</p>
         <p className="sheetpage__about">
           {fromLean(edition) ? <>The main theorem, then every definition its statement depends on, simplest first, each with its exact Lean.
           Beside each is the {word}’s own explanation where it has one; otherwise a note added for this page, marked as such.

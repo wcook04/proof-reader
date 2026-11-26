@@ -3,6 +3,7 @@
 // lockup at the start of the header, and the other sites in the footer.
 
 import { useId, useRef, type ReactNode } from "react";
+import { hasComparisons, noun, paperFile, type Edition } from "./edition";
 import family from "./family.json";
 import { routeHref } from "./router";
 
@@ -23,7 +24,7 @@ export function Lockup({ here = false }: { here?: boolean }) {
 
 export function OwnerLink() {
   return (
-    <a className="fam-lockup__home" href={family.owner.home} rel="author" title="All of Will Cook's projects and videos">
+    <a className="fam-lockup__home" href={family.owner.home} title="All of Will Cook's projects and videos">
       <img src={`${import.meta.env.BASE_URL}plectis.svg`} alt="" width={26} height={26} />
       <span className="fam-lockup__owner" translate="no">Will Cook</span>
     </a>
@@ -57,6 +58,31 @@ export function ReaderHome() {
       <span className="bar__library-long">Reading library</span>
       <span className="bar__library-short">Library</span>
     </a>
+  );
+}
+
+export function SourceCredit({ children }: { children: ReactNode }) {
+  return <aside className="reader-source" aria-label="Sources and credit"><p>{children}</p></aside>;
+}
+
+export function PaperSourceCredit({ edition }: { edition: Edition }) {
+  const { paper, lean, source, credit } = edition;
+  const markdown = source?.kind === "markdown";
+  const original = credit?.original_url;
+  const textSource = paper.url || (paper.pdf ? paperFile(edition.slug, "paper.pdf") : undefined);
+  const additions = hasComparisons(edition) ? "links, plain titles, notes and comparisons" : "links, plain titles and notes";
+  return (
+    <SourceCredit>
+      {original && <><a href={original}>Original paper</a>{" · "}</>}
+      {textSource && textSource !== original && <><a href={textSource}>
+        {markdown ? "Source Markdown" : `Original ${noun(edition)}`}
+      </a>{" · "}</>}
+      <a href={lean.source}>Lean source</a>
+      {paper.licence_url && <>{" · "}<a href={paper.licence_url}>Licence</a></>}.
+      {" "}{markdown && credit?.text
+        ? `${credit.text}.`
+        : `By ${paper.authors.join(", ")}. Proof Reader added the ${additions} with AI assistance.`}
+    </SourceCredit>
   );
 }
 

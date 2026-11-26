@@ -12,10 +12,9 @@ interface Point {
   y: number;
 }
 
-interface Target {
-  passage: string | null;
-  line: number | null;
-}
+type Target =
+  | { passage: string | null; line: number | null }
+  | { from: string; to: string; within: string };
 
 function curve(a: Point, b: Point): string {
   const pull = Math.max(10, Math.abs(b.x - a.x) * 0.5);
@@ -27,7 +26,7 @@ function glide(was: Point | null, to: Point, reduced: boolean): Point {
   return { x: was.x + (to.x - was.x) * EASE, y: was.y + (to.y - was.y) * EASE };
 }
 
-export function Threads({ root, target }: { root: RefObject<HTMLElement | null>; target: Target }) {
+export function Threads({ root, target, tone }: { root: RefObject<HTMLElement | null>; target: Target; tone?: number }) {
   const svg = useRef<SVGSVGElement>(null);
   const latest = useRef(target);
   latest.current = target;
@@ -60,12 +59,15 @@ export function Threads({ root, target }: { root: RefObject<HTMLElement | null>;
 
     function draw() {
       frame = 0;
-      const { passage, line } = latest.current;
+      const target = latest.current;
       const paper = container.querySelector<HTMLElement>("[data-paper-pane]");
-      const tie = passage && paper ? paper.querySelector<HTMLElement>(`.tie[data-passage="${CSS.escape(passage)}"]`) : null;
       const proof = container.querySelector<HTMLElement>(".proof");
-      const leanBody = proof?.querySelector<HTMLElement>(".proof__lean:not([hidden]) .leaf__body");
-      const row = line && leanBody ? leanBody.querySelector<HTMLElement>(`.source__line[data-line="${line}"]:not(.cmp__code *)`) : null;
+      const tie = "from" in target
+        ? paper?.querySelector<HTMLElement>(target.from)
+        : target.passage && paper ? paper.querySelector<HTMLElement>(`.tie[data-passage="${CSS.escape(target.passage)}"]`) : null;
+      const leanBody = proof?.querySelector<HTMLElement>("within" in target ? target.within : ".proof__lean:not([hidden]) .leaf__body");
+      const row = "to" in target ? leanBody?.querySelector<HTMLElement>(target.to)
+        : target.line && leanBody ? leanBody.querySelector<HTMLElement>(`.source__line[data-line="${target.line}"]:not(.cmp__code *)`) : null;
       const canvas = proof?.querySelector<HTMLElement>(".proof__graph:not([hidden]) .fg__scroll");
       const world = canvas?.querySelector<HTMLElement>(".fg__world");
       const within = row && leanBody ? leanBody : canvas;
@@ -84,15 +86,16 @@ export function Threads({ root, target }: { root: RefObject<HTMLElement | null>;
 
       const t = tie?.getBoundingClientRect();
       const pane = paper?.getBoundingClientRect();
-      if (!t || !pane || t.height <= 0 || t.bottom <= pane.top || t.top >= pane.bottom || !proof || !mark || !within) {
+      const r = mark?.getBoundingClientRect();
+      const s = within?.getBoundingClientRect();
+      const rowOffscreen = "to" in target && r && s && (r.height <= 0 || r.bottom <= s.top || r.top >= s.bottom);
+      if (!t || !pane || t.height <= 0 || t.bottom <= pane.top || t.top >= pane.bottom || !proof || !r || !s || rowOffscreen) {
         if (start) for (const shape of [path, firstDot, lastDot]) shape.style.opacity = "";
         start = end = null;
         return;
       }
 
       const box = container.getBoundingClientRect();
-      const r = mark.getBoundingClientRect();
-      const s = within.getBoundingClientRect();
       const startAt = {
         x: pane.right - box.left,
         y: Math.max(pane.top + 6, Math.min(pane.bottom - 6, t.top + t.height / 2)) - box.top,
@@ -137,11 +140,13 @@ export function Threads({ root, target }: { root: RefObject<HTMLElement | null>;
     };
   }, [root]);
 
-  const { passage, line } = target;
-  useEffect(() => wake.current?.(), [passage, line]);
+  const from = "from" in target ? target.from : target.passage;
+  const to = "to" in target ? target.to : target.line;
+  const within = "within" in target ? target.within : null;
+  useEffect(() => wake.current?.(), [from, to, within]);
 
   return (
-    <svg ref={svg} className="threads" aria-hidden="true">
+    <svg ref={svg} className="threads" data-tone={tone} aria-hidden="true">
       <path />
       <circle r="2.75" />
       <circle r="2.75" />

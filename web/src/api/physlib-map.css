@@ -42,9 +42,8 @@
 .api-map__bar { position: relative; }
 .api-map__bar .bar__right { margin-left: auto; }
 .api-map__copy-status { position: absolute; z-index: 45; right: 12px; top: calc(100% + 8px); padding: 6px 12px; border: 1px solid var(--rule-strong); border-radius: var(--radius-s); background: var(--sheet); font-size: var(--fs-sm); }
-.api-map__credit { padding-top: 22px; font-size: var(--fs-sm); color: var(--ink-2); }
-.api-map__credit a, .api-map__file a { color: inherit; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
-.api-map__credit a:hover, .api-map__file a:hover { color: var(--lit); }
+.api-map__file a { color: inherit; text-decoration-color: var(--rule-strong); text-underline-offset: 3px; }
+.api-map__file a:hover { color: var(--lit); }
 .api-map .sheet__text { padding-top: 10px; padding-bottom: 20px; }
 .api-map .sheet__text h1 { font-size: clamp(2rem, 6cqi, 2.65rem); }
 .api-map .sheet__text h2 { font-size: clamp(1.65rem, 4.9cqi, 2rem); }
@@ -147,46 +146,8 @@
 .api-map__evidence { max-width: 75ch; border-block-start: 1px solid var(--rule); }
 .api-map__evidence > summary { padding: 8px 0; font-size: var(--fs-sm); font-weight: 600; cursor: pointer; }
 .api-map__evidence[open] > summary { margin-bottom: 10px; }
-.api-map__windows { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-/* A height-limited map keeps its space. A width-limited map gives unused height to the note. */
-.api-map__windows.is-combined {
-  --map-min-height: min(40%, var(--api-graph-height, 40%));
-  display: grid;
-  grid-template-rows: fit-content(calc(100% - var(--map-min-height))) minmax(var(--map-min-height), 1fr);
-}
-.api-map__windows.is-combined > * { overscroll-behavior: contain; }
-.api-map__windows.is-combined > .api-map__reference-body::after { height: 16px; }
-.api-map__graph-window {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  min-width: 0;
-  padding-inline: 20px;
-  overflow: hidden;
-}
-.api-map__windows.is-combined > .api-map__graph-window { border-top: 1px solid var(--rule-strong); }
-.api-map__graph-window > .api-map__deps {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-.api-map__graph-window .api-map__graph-heading {
-  flex: none;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding-block: 8px;
-}
-.api-map__graph-window .api-map__graph-heading h2 {
-  margin: 0;
-  font: 600 var(--pane)/1.3 var(--font-serif);
-}
+.api-map .threads[data-tone] { --thread: var(--tone); }
+.api-map__spread--appendix > .left { width: 100%; max-width: none; }
 .api-map__graph-tools { flex: none; display: flex; gap: 8px; justify-content: space-between; }
 .api-map .api-map__graph-action {
   min-height: 26px;
@@ -200,7 +161,7 @@
 .api-map .api-map__graph-tools > :first-child { margin-left: 0; }
 
 @media (max-width: 1279px) {
-  .api-map__spread .papersplit { display: none; }
+  .api-map__spread :is(.papersplit, .threads) { display: none; }
 }
 @media (max-width: 900px) {
   .api-map__spread.has-right { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); }
@@ -211,8 +172,10 @@
 @media (max-width: 560px) {
   .api-map__bar .bar__right { gap: 2px; }
   .api-map .sheet__text { font-size: 1.0625rem; }
-  .api-map__reference-body, .api-map__graph-window { padding-inline: 10px; }
-  .api-map__graph-window .api-map__graph-heading { padding-block: 3px; }
+  .api-map__reference-body { padding-inline: 10px; }
+  .api-map__aside .proof__caption { gap: 4px; }
+  .api-map__aside .leaf__tabs > button { padding-inline: 6px; }
+  .api-map__step button { min-width: 28px; padding-inline: 4px; }
 }
 
 /* Dependency map: wider than the text column, drawn by the reader's map engine. */
@@ -235,6 +198,9 @@
   width: var(--deps);
   height: clamp(320px, 70dvh, 820px);
   margin-left: calc(50% - var(--deps) / 2);
+}
+.api-map__spread--appendix .api-map__deps > .deps__figure--viewport {
+  height: clamp(280px, calc(100dvh - 290px), 820px);
 }
 .api-map__deps-wrap > .api-map__deps > .api-map__graph-tools { margin: 6px 0 12px; }
 .deps__figure--viewport.is-inspecting { overflow: auto; }
@@ -321,7 +287,7 @@
   -webkit-box-decoration-break: clone; box-decoration-break: clone;
   transition: background-color 140ms, background-size 140ms;
 }
-.api-map__phrase:hover, .api-map__phrase.is-lit, .api-map__phrase.is-active {
+.api-map__phrase:hover, .api-map__phrase:focus-visible, .api-map__phrase.is-lit, .api-map__phrase.is-active {
   background-image: linear-gradient(var(--tone), var(--tone)); background-size: 100% 2px;
   background-color: color-mix(in oklab, var(--tone) 14%, transparent);
 }

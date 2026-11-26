@@ -40,7 +40,6 @@ interface Props {
   onPoint(pointed: Pointed): void;
   onReady(): void;
   /** Above the sheet: what to do on this page. */
-  hint?: ReactNode;
   /** Below the sheet: whose words these are. */
   foot?: ReactNode;
 }
@@ -74,7 +73,7 @@ const goalOf = (link: Element | null, slug: string) => {
 };
 
 export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(props, ref) {
-  const { html, hidden, pin, lit, hint, foot } = props;
+  const { html, hidden, pin, lit, foot } = props;
   const latest = useRef(props);
   latest.current = props;
 
@@ -743,7 +742,6 @@ export const ReadingPane = forwardRef<PaperHandle, Props>(function ReadingPane(p
         onFocus={(event) => point(event.target as Element)}
         onBlur={stopPointing}
       >
-        {hint}
         <Sheet html={html} />
         <div className="sheet__ties" aria-hidden="true">
           {bars.map((bar) => (

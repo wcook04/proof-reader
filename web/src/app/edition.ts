@@ -168,7 +168,7 @@ export interface Edition {
   schema: 1;
   slug: string;
   source?: { kind: "pdf" | "markdown"; file: string; sha256: string };
-  credit?: { text?: string };
+  credit?: { text?: string; original_url?: string };
   paper: {
     title: string;
     short_title: string;

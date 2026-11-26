@@ -11,7 +11,7 @@ licence = "Apache-2.0"
 licence_url = "https://github.com/troyjlee/tcs-formalizations/blob/a0ce13ed0fa264f051c1278e039596ce65557fa4/LICENSE"
 
 [credit]
-text = "Text: Troy Lee, tcs-formalizations at a0ce13e, Apache-2.0"
+text = "Guide and Lean formalization by Troy Lee. Proof Reader added the links and annotations with AI assistance"
 
 [lean]
 project = "lean"

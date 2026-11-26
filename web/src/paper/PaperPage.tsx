@@ -11,7 +11,7 @@
 import { lazy, Suspense, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { blankEntry, newEntryId, pushEntry, readEntry, replaceEntry, returning, type Copy, type Entry, type Pin, type Tab } from "../app/history";
 import { declEvidence, hasComparisons, leanOrigin, loadSource, noun, paperFile, passageLocation, type Edition, type Passage } from "../app/edition";
-import { LIBRARY_HOME, OwnerLink, ReaderHome, ReaderMark, ReaderMenu, SisterSites } from "../app/Family";
+import { LIBRARY_HOME, OwnerLink, PaperSourceCredit, ReaderHome, ReaderMark, ReaderMenu, SisterSites } from "../app/Family";
 import { readRoute, routeHref } from "../app/router";
 import { setScheme, useScheme } from "../app/theme";
 import type { LeanActions } from "../lean/code";
@@ -886,6 +886,7 @@ export function PaperPage({ edition }: { edition: Edition }) {
         </div>
       </header>
       {copy === "pdf" && <div className="bar__pdf-controls">{readingControls}</div>}
+      <PaperSourceCredit edition={edition} />
       {entry.bad !== null && (
         <p className="badline" role="alert">
           This address does not name anything in this paper: <code>{entry.bad}</code>. <a href={routeHref({ paper: slug })} onClick={(event) => {
@@ -937,11 +938,6 @@ export function PaperPage({ edition }: { edition: Edition }) {
               onInsetClosed={saveNow}
               onPoint={onPoint}
               onReady={() => setTick((t) => t + 1)}
-              hint={markdown ? null : (
-                <p className="firstline firstline--status">{hasComparisons(edition)
-                  ? `The links from this ${noun(edition)} to its proof in Lean, the notes and the comparisons were made with AI`
-                  : `The links from this ${noun(edition)} to its proof in Lean, and the notes, were made with AI`} and have not been reviewed by the authors.</p>
-              )}
               foot={<footer className="foot">{credit}<SisterSites /></footer>}
             />
           ) : (

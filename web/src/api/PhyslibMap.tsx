@@ -1,12 +1,14 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { selecting } from "../paper/clickIntent";
 import type { OutlineEntry } from "../app/edition";
-import { Lockup, OwnerLink, ReaderHome, ReaderMark, ReaderMenu } from "../app/Family";
+import { Lockup, OwnerLink, ReaderHome, ReaderMark, ReaderMenu, SourceCredit } from "../app/Family";
 import { PHYSLIB_MAP, readRoute, routeHref } from "../app/router";
 import { setScheme, useScheme } from "../app/theme";
 import { LeanCode, useFileLines } from "../lean/code";
 import { Contents } from "../paper/Contents";
 import { PaperSplit } from "../paper/PaperSplit";
+import { FOLLOW_MS, READING_LINE } from "../paper/reading-line";
+import { Threads } from "../paper/Threads";
 import { Doc } from "../proof/Fidelity";
 import { NoteCredit } from "../proof/Note";
 import { DependencyMap, type MapNode } from "./DependencyMap";
@@ -47,13 +49,9 @@ interface PassageNote {
   endLine: number;
   html: string;
 }
-const panes = ["auto", "graph", "lean"] as const;
-type Pane = typeof panes[number];
-const savedPane = (): Pane => {
-  const mode = history.state?.apiMapPane;
-  return panes.includes(mode) ? mode : "auto";
-};
-const savedMinimised = () => history.state?.apiMapGraphMinimised === true;
+type ReadingMode = "auto" | "manual";
+const savedMode = (): ReadingMode => history.state?.apiReadingMode === "manual" ? "manual" : "auto";
+
 interface Edition {
   title: string;
   repo: string;
@@ -110,9 +108,7 @@ const sourceOf = (edition: Edition, file: string, line?: number) =>
 
 function MapReader({ edition }: { edition: Edition }) {
   const [record, setRecord] = useState(selectedRecord);
-  const [mode, setMode] = useState(savedPane);
-  const [graphFitHeight, setGraphFitHeight] = useState(0);
-  const [graphMinimised, setGraphMinimised] = useState(savedMinimised);
+  const [mode, setMode] = useState(savedMode);
   const [section, setSection] = useState<string | null>(null);
   const [rail, setRail] = useState(false);
   const [sourceLine, setSourceLine] = useState<number | null>(null);
@@ -123,13 +119,17 @@ function MapReader({ edition }: { edition: Edition }) {
   const [lit, setLit] = useState<string[] | null>(null);
   const [pickedPhrase, setPickedPhrase] = useState<number | null>(null);
   const scheme = useScheme();
+  const spread = useRef<HTMLElement>(null);
   const paper = useRef<HTMLDivElement>(null);
   const article = useRef<HTMLElement>(null);
   const right = useRef<HTMLDivElement>(null);
   const focusBack = useRef<HTMLAnchorElement | null>(null);
-  const scrollTarget = useRef<"address" | number | null>("address");
+  const scrollTarget = useRef<"address" | number | { phrase: number } | null>("address");
   const scrollSource = useRef(false);
   const scrollDeclaration = useRef<string | null>(null);
+  const followTimer = useRef<number | undefined>(undefined);
+  const readingCitation = useRef<string | null>(null);
+  const lastTop = useRef<number | undefined>(undefined);
   const citation = record?.startsWith("@") ? record.slice(1) : "";
   const group = edition.leanReferences.find((item) => citeKey(item) === citation);
   const ref = edition.references.find((item) => `ref-${item.index}` === citation);
@@ -137,9 +137,15 @@ function MapReader({ edition }: { edition: Edition }) {
   const paragraphId = paragraph ? citation : Object.keys(edition.paragraphs).find((id) => edition.paragraphs[id].includes(citation));
   const annotation = paragraphId && edition.passageNotes?.[paragraphId];
   const hasLean = !!group || paragraph?.some((id) => id.startsWith("lean-")) === true;
-  const combined = hasLean && !graphMinimised;
-  const activeMode = graphMinimised ? mode : "auto";
-  const showGraph = record !== "@index" && (activeMode === "graph" || (activeMode === "auto" && !hasLean && !ref));
+  const sourceDeclaration = sourceLine === null ? undefined : group?.declarations.find(({ line }) => line === sourceLine);
+  const phrase = (pickedPhrase === null ? undefined : edition.phrases[pickedPhrase])
+    ?? (group ? edition.phrases.find((item) => item.citation === citation) : undefined)
+    ?? (annotation ? edition.phrases[annotation.anchor] : undefined);
+  const threadPhrase = sourceDeclaration
+    ? edition.phrases.find((item) => item.citation === citation && item.names.includes(sourceDeclaration.fullName))
+    : phrase;
+  const appendix = record === "@dependency-map";
+  const showLean = !!group || !!ref || !!paragraph || record === "@index";
   const picked = new Set(paragraph ?? [citation]);
   const paragraphReferences = paragraph?.flatMap((id) => {
     const lean = edition.leanReferences.find((item) => citeKey(item) === id);
@@ -149,6 +155,10 @@ function MapReader({ edition }: { edition: Edition }) {
   const outline = useMemo(() => [...edition.outline, { id: "dependency-map", number: "", title: "Dependency map", level: 2 }]
     .map((item) => ({ ...item, ties: 0, page: null })), [edition]);
   const order = useMemo(() => [...new Set(Array.from(edition.html.matchAll(/data-api-citation="(lean-\d+)"/g), (match) => match[1]))], [edition]);
+  const linkedPassages = useMemo(() => Object.entries(edition.paragraphs).flatMap(([id, references]) => {
+    const lean = references.find((reference) => reference.startsWith("lean-"));
+    return lean ? [{ id, lean }] : [];
+  }), [edition]);
   const position = order.indexOf(paragraph?.find((id) => id.startsWith("lean-")) ?? citation);
   const phrasesOf = useMemo(() => {
     const byName = new Map<string, Phrase[]>();
@@ -159,30 +169,54 @@ function MapReader({ edition }: { edition: Edition }) {
     id: d.fullName, plain: edition.glossary[d.fullName], file: item.file, line: d.line, end_line: d.line,
   }))), [edition]);
 
-  const find = (id: string) => article.current?.querySelector<HTMLElement>(`[id="${CSS.escape(id)}"]`);
+  const find = (id: string) => paper.current?.querySelector<HTMLElement>(`[id="${CSS.escape(id)}"]`);
+  const findPhrase = (id: number) => article.current?.querySelector<HTMLElement>(`[data-phrase="${id}"]`);
   const findCitation = (id: string) => article.current?.querySelector<HTMLAnchorElement>(`[data-api-citation="${CSS.escape(id)}"]`);
+  const citationAtLine = () => {
+    const pane = paper.current?.getBoundingClientRect();
+    if (!pane) return null;
+    const line = pane.top + pane.height * READING_LINE;
+    if ((find("dependency-map")?.getBoundingClientRect().top ?? Infinity) <= line) return null;
+    const passage = linkedPassages.findLast(({ id }) => (find(id)?.getBoundingClientRect().top ?? Infinity) <= line);
+    if (!passage) return null;
+    // A paragraph can cite several declarations as the guide introduces new operations.
+    const phrases = find(passage.id)?.querySelectorAll<HTMLElement>("[data-phrase-citation]");
+    const atLine = Array.from(phrases ?? []).findLast((mark) => mark.getBoundingClientRect().top <= line);
+    return atLine?.dataset.phraseCitation ?? passage.lean;
+  };
+  const holdReadingPosition = () => {
+    lastTop.current = paper.current?.scrollTop;
+    readingCitation.current = citationAtLine();
+  };
   const locate = (element?: Element | null, center = false) => {
     const pane = paper.current;
     if (!pane || !element) return;
+    window.clearTimeout(followTimer.current);
     const top = element.getBoundingClientRect().top - pane.getBoundingClientRect().top + pane.scrollTop;
     pane.scrollTop = top - (center ? pane.clientHeight * 0.23 : 20);
+    holdReadingPosition();
   };
-  const navigate = (next: string | null, jump = false, nextMode = mode) => {
+  const changeRecord = (next: string | null) => {
+    scrollDeclaration.current = null;
+    setSourceLine(null);
+    setRecord(next);
+    setPickedPhrase(null);
+  };
+  const navigate = (next: string | null, jump = false) => {
+    window.clearTimeout(followTimer.current);
     if (selectedRecord() !== next) {
       const top = paper.current?.scrollTop ?? 0;
-      history.replaceState({ ...history.state, apiMapPane: mode, apiMapGraphMinimised: graphMinimised, apiMapTop: top }, "");
-      history.pushState({ apiMapPane: nextMode, apiMapGraphMinimised: graphMinimised, apiMapTop: jump ? undefined : top }, "", indexRoute(next ?? undefined));
+      history.replaceState({ ...history.state, apiReadingMode: mode, apiMapTop: top }, "");
+      history.pushState({ apiReadingMode: mode, apiMapTop: jump ? undefined : top }, "", indexRoute(next ?? undefined));
     }
     if (jump && next === record) {
       const id = next?.slice(1);
       if (id) locate(findCitation(id) ?? find(id), !!findCitation(id));
       else if (paper.current) paper.current.scrollTop = 0;
     } else if (jump) scrollTarget.current = "address";
-    scrollDeclaration.current = null;
-    setSourceLine(null);
-    setRecord(next);
+    holdReadingPosition();
+    changeRecord(next);
     setRail(false);
-    setPickedPhrase(null);
   };
 
   const focusDeclaration = (name: string) => {
@@ -206,14 +240,17 @@ function MapReader({ edition }: { edition: Edition }) {
   useEffect(() => {
     const onAddress = () => {
       const next = selectedRecord();
-      setMode(savedPane());
-      setGraphMinimised(savedMinimised());
-      if (next === record) return;
+      window.clearTimeout(followTimer.current);
+      setMode(savedMode());
+      if (next === record) {
+        if (paper.current && typeof history.state?.apiMapTop === "number") {
+          paper.current.scrollTop = history.state.apiMapTop;
+          holdReadingPosition();
+        }
+        return;
+      }
       scrollTarget.current = typeof history.state?.apiMapTop === "number" ? history.state.apiMapTop : "address";
-      scrollDeclaration.current = null;
-      setSourceLine(null);
-      setRecord(next);
-      setPickedPhrase(null);
+      changeRecord(next);
     };
     window.addEventListener("hashchange", onAddress);
     window.addEventListener("popstate", onAddress);
@@ -222,6 +259,8 @@ function MapReader({ edition }: { edition: Edition }) {
       window.removeEventListener("popstate", onAddress);
     };
   }, [record]);
+
+  useEffect(() => () => window.clearTimeout(followTimer.current), []);
 
   useEffect(() => {
     let current = true;
@@ -244,15 +283,18 @@ function MapReader({ edition }: { edition: Edition }) {
       link.setAttribute("aria-expanded", String(active));
     });
     article.current?.querySelectorAll<HTMLElement>("[data-api-paragraph]").forEach((block) => {
-      const isOpen = block.dataset.apiParagraph === citation;
+      const isOpen = block.dataset.apiParagraph === paragraphId;
       block.classList.toggle("is-inspected", isOpen);
       block.querySelector(".api-map__passage")?.setAttribute("aria-expanded", String(isOpen || !!block.querySelector(".api-map__cite.is-active")));
     });
     if (scrollTarget.current === "address") {
       const mark = citation ? findCitation(citation) : null;
-      const target = mark ?? (citation ? find(citation) : null);
-      locate(target, !!mark);
       const pane = paper.current;
+      const excerpt = group && phrase && findPhrase(phrase.id);
+      const fitsTogether = mark && pane && excerpt
+        && mark.getBoundingClientRect().bottom - excerpt.getBoundingClientRect().top < pane.clientHeight * 0.7;
+      const target = fitsTogether ? excerpt : mark ?? (citation ? find(citation) : null);
+      locate(target, !!mark);
       if (target && pane && document.fonts.status === "loading") {
         const top = pane.scrollTop;
         void document.fonts.ready.then(() => {
@@ -262,16 +304,19 @@ function MapReader({ edition }: { edition: Edition }) {
         });
       }
       if (!citation && paper.current) paper.current.scrollTop = 0;
-    } else if (scrollTarget.current !== null && paper.current) {
-      paper.current.scrollTop = scrollTarget.current;
+    } else if (typeof scrollTarget.current === "number") {
+      if (paper.current) paper.current.scrollTop = scrollTarget.current;
+    } else if (scrollTarget.current) {
+      locate(findPhrase(scrollTarget.current.phrase), true);
     }
     scrollTarget.current = null;
+    holdReadingPosition();
     if (right.current) right.current.scrollTop = 0;
   }, [citation]);
 
   useLayoutEffect(() => {
-    if (!showGraph && sourceLine === null && scrollDeclaration.current) focusDeclaration(scrollDeclaration.current);
-  }, [citation, sourceLine, showGraph]);
+    if (sourceLine === null && scrollDeclaration.current) focusDeclaration(scrollDeclaration.current);
+  }, [citation, sourceLine]);
 
   const useFiles = () => {
     if (files || sourceFailed) return;
@@ -290,7 +335,7 @@ function MapReader({ edition }: { edition: Edition }) {
   }, [sourceLine, files]);
 
   const showPhrase = (id: number) => {
-    const element = article.current?.querySelector<HTMLElement>(`[data-phrase="${id}"]`);
+    const element = findPhrase(id);
     if (!element) return;
     locate(element, true);
     element.classList.remove("is-flash");
@@ -300,6 +345,7 @@ function MapReader({ edition }: { edition: Edition }) {
   const openPhrase = (id: number) => {
     const phrase = edition.phrases[id];
     navigate(`@${phrase.citation}`);
+    if (!showLean && window.matchMedia("(max-width: 900px)").matches) scrollTarget.current = { phrase: id };
     scrollDeclaration.current = phrase.names[0];
     setPickedPhrase(id);
     if (citation === phrase.citation && sourceLine === null) focusDeclaration(phrase.names[0]);
@@ -338,17 +384,24 @@ function MapReader({ edition }: { edition: Edition }) {
         openSource(d.line);
       }} />
   ));
-  const selectMode = (next: Pane) => {
-    if (record === "@index") navigate(null, false, next);
-    else if (mode !== next) history.replaceState({ ...history.state, apiMapPane: next }, "");
-    setMode(next);
-    if (right.current) right.current.scrollTop = 0;
+  const followPassage = () => {
+    const atLine = citationAtLine();
+    if (!atLine || atLine === readingCitation.current) return;
+    readingCitation.current = atLine;
+    const next = `@${atLine}`;
+    if (next === selectedRecord()) return;
+    history.replaceState({ ...history.state, apiMapTop: paper.current?.scrollTop }, "", indexRoute(next));
+    changeRecord(next);
   };
-  const changeLayout = (minimised: boolean) => {
-    const next = minimised ? "lean" : "auto";
-    history.replaceState({ ...history.state, apiMapPane: next, apiMapGraphMinimised: minimised }, "");
+  const selectMode = (next: ReadingMode) => {
+    if (mode === next) return;
+    window.clearTimeout(followTimer.current);
+    history.replaceState({ ...history.state, apiReadingMode: next, apiMapTop: paper.current?.scrollTop }, "");
     setMode(next);
-    setGraphMinimised(minimised);
+    if (next === "auto") {
+      readingCitation.current = group ? citation : null;
+      followPassage();
+    }
   };
   const copy = async (read: () => string | Promise<string>, success: string) => {
     try {
@@ -363,15 +416,25 @@ function MapReader({ edition }: { edition: Edition }) {
     const top = paper.current?.getBoundingClientRect().top ?? 0;
     const current = [...outline].reverse().find((item) => (find(item.id)?.getBoundingClientRect().top ?? Infinity) < top + 36);
     setSection(current?.id ?? null);
+    if (lastTop.current === paper.current?.scrollTop) return;
+    lastTop.current = paper.current?.scrollTop;
+    window.clearTimeout(followTimer.current);
+    if (mode === "auto") followTimer.current = window.setTimeout(followPassage, FOLLOW_MS);
+  };
+  const onPhraseKey = (event: KeyboardEvent<HTMLElement>) => {
+    const id = (event.target as HTMLElement).dataset.phrase;
+    if (id === undefined || (event.key !== "Enter" && event.key !== " ")) return;
+    event.preventDefault();
+    openPhrase(Number(id));
   };
 
   return (
     <div className="page api-map" onKeyDown={(event) => {
       if (event.defaultPrevented) return;
       if (event.key === "Escape") {
-        if (document.querySelector(".reader-menu:popover-open")) return;
+        if (document.querySelector(".reader-menu:popover-open, .deps__dialog[open]")) return;
         if (rail) setRail(false);
-        else if (citation) close();
+        else if (showLean) close();
       }
       if (event.metaKey || event.ctrlKey || event.altKey || (event.target as HTMLElement).closest("input, textarea, [contenteditable]")) return;
       if (event.key === "j" || event.key === "k") {
@@ -379,7 +442,7 @@ function MapReader({ edition }: { edition: Edition }) {
         event.preventDefault();
       }
     }}>
-      <a className="skip" href="#map-text" onClick={(event) => { event.preventDefault(); paper.current?.focus(); }}>Skip to the map</a>
+      <a className="skip" href="#map-text" onClick={(event) => { event.preventDefault(); paper.current?.focus(); }}>Skip to the guide</a>
       <header className="bar bar--reader api-map__bar">
         <div className="bar__left"><ReaderHome /></div>
         <div className="bar__title"><ReaderMark paper={PHYSLIB_MAP} /><p className="bar__paper">{edition.title}</p></div>
@@ -390,7 +453,7 @@ function MapReader({ edition }: { edition: Edition }) {
               requestAnimationFrame(() => document.querySelector<HTMLElement>(".rail__search input")?.focus());
             }}>Search the map</button>
             <button type="button" className="reader-menu__contents" onClick={() => setRail(true)}>Contents</button>
-            <button type="button" onClick={() => document.querySelector<HTMLElement>("#dependency-map")?.scrollIntoView({ block: "start" })}>Dependency map</button>
+            <button type="button" onClick={() => navigate("@dependency-map", true)}>Dependency map</button>
             <button type="button" onClick={() => navigate("@index")}>Glossary</button>
             <a href={routeHref({})}>All editions</a>
             <a href={sourceOf(edition, edition.file)}>Source Markdown</a>
@@ -401,7 +464,13 @@ function MapReader({ edition }: { edition: Edition }) {
         </div>
         <div className="api-map__copy-status" role="status" hidden={!message}>{message}</div>
       </header>
-      <main className={`spread spread--reading has-right api-map__spread${group || ref || paragraph || record === "@index" ? " is-open" : ""}`}>
+      <SourceCredit>
+        <a href={`${tracker}#${edition.path}`}>Original Physlib page</a>
+        {" · "}<a href={`https://github.com/${edition.repo}/tree/${edition.commit}`}>Lean source</a>
+        {" · "}<a href={base + "LICENSE"}>Apache 2.0</a>.
+        {" "}Physlib contributors wrote the map and Lean. Proof Reader added the highlighting, passage links and AI-assisted annotations.
+      </SourceCredit>
+      <main ref={spread} className={`spread spread--reading api-map__spread${appendix ? " api-map__spread--appendix" : " has-right"}${showLean ? " is-open" : ""}`}>
         <Contents
           noun="map" outline={outline} current={section} open={rail} declarations={declarations} files={files ?? {}} html={edition.html} copy="reading"
           topLabel="Start of map"
@@ -421,10 +490,9 @@ function MapReader({ edition }: { edition: Edition }) {
           onIndex={() => navigate("@index")} onPage={() => undefined} onSearch={useFiles} onClose={() => setRail(false)}
         />
         <div className="left">
-          <div className="reading" id="map-text" tabIndex={0} ref={paper} onScroll={nextSection} aria-label="Gauge theory API map">
+          <div className="reading" data-paper-pane id="map-text" tabIndex={0} ref={paper} onScroll={nextSection} aria-label="Gauge theory API map">
             <div className="sheet">
-              <p className="firstline api-map__credit"><a href={`${tracker}#${edition.path}`}>Physlib API tracker</a> <span aria-hidden="true">/</span> Classical field theory</p>
-              <article className="sheet__text" ref={article} dangerouslySetInnerHTML={{ __html: edition.html }} onClick={(event) => {
+              <article className="sheet__text" ref={article} dangerouslySetInnerHTML={{ __html: edition.html }} onKeyDown={onPhraseKey} onClick={(event) => {
                 if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
                 const target = event.target as Element;
                 const mark = target.closest<HTMLAnchorElement>("[data-api-citation]");
@@ -443,13 +511,16 @@ function MapReader({ edition }: { edition: Edition }) {
                 if (selecting(event)) return;
                 focusBack.current = link;
                 const record = link.hash.split("/").at(-1) ?? null;
-                const isClosedOnMobile = !group && !ref && !paragraph && citation !== "index" && window.matchMedia("(max-width: 900px)").matches;
+                const isClosedOnMobile = !showLean && window.matchMedia("(max-width: 900px)").matches;
                 navigate(record, isClosedOnMobile);
               }} onMouseOver={(event) => {
                 const phrase = (event.target as Element).closest<HTMLElement>("[data-phrase]");
                 const names = phrase ? edition.phrases[Number(phrase.dataset.phrase)].names : null;
                 if (names?.join() !== lit?.join()) setLit(names);
-              }} onMouseLeave={() => setLit(null)} />
+              }} onMouseLeave={() => setLit(null)} onFocus={(event) => {
+                const id = (event.target as HTMLElement).dataset.phrase;
+                if (id !== undefined) setLit(edition.phrases[Number(id)].names);
+              }} onBlur={() => setLit(null)} />
               <div className="sheet__text api-map__deps-wrap">
                 <DependencyMap maps={edition.maps} current={edition.path} tracker={tracker} home={indexRoute()} />
               </div>
@@ -459,22 +530,29 @@ function MapReader({ edition }: { edition: Edition }) {
             </div>
           </div>
         </div>
-        <PaperSplit />
-        <aside className="proof api-map__aside" id="api-map-references" aria-label="Map references">
+        {!appendix && <PaperSplit />}
+        <aside hidden={appendix} className="proof api-map__aside" id="api-map-references" aria-label="Map references">
           <div className="proof__caption">
-            <div className="proof__says"><p><b>{showGraph ? "Dependency graph" : group ? `Lean citation [${group.index}]` : ref ? `Reference {${ref.index}}` : paragraph ? "References in this paragraph" : "Lean glossary"}</b>{!showGraph && group && `, ${group.declarations.length} ${group.declarations.length === 1 ? "declaration" : "declarations"}`}</p></div>
-            {citation && <button type="button" className="proof__close" onClick={close}>Close</button>}
+            <div className="proof__says"><p><b>{group ? `Lean citation [${group.index}]` : ref ? `Reference {${ref.index}}` : paragraph ? "References in this paragraph" : "Lean glossary"}</b>{group && `, ${group.declarations.length} ${group.declarations.length === 1 ? "declaration" : "declarations"}`}</p></div>
+            <div className="switch" role="group" aria-label="Reading mode">
+              <button type="button" aria-pressed={mode === "auto"} title="Follow the guide as you scroll" onClick={() => selectMode("auto")}>Auto</button>
+              <button type="button" aria-pressed={mode === "manual"} title="Keep the selected Lean while you scroll" onClick={() => selectMode("manual")}>Manual</button>
+            </div>
+            {showLean && <button type="button" className="proof__close" onClick={close}>Close</button>}
           </div>
           <div className="leaf">
-            {graphMinimised && <nav className="leaf__tabs api-map__modes" aria-label="What the right pane shows">
-              {panes.map((pane) => (
-                <button key={pane} type="button" aria-pressed={record !== "@index" && mode === pane}
-                  onClick={() => selectMode(pane)}>{pane === "auto" ? "Auto" : pane === "graph" ? "Graph" : "Lean"}</button>
-              ))}
-              {hasLean && <button type="button" className="api-map__graph-action" onClick={() => changeLayout(false)}>Combine views</button>}
-            </nav>}
-            {!showGraph && group && <nav className="leaf__tabs" aria-label="Citation view">
-              <button type="button" aria-pressed={sourceLine === null} onClick={() => { setSourceLine(null); if (right.current) right.current.scrollTop = 0; }}>This citation</button>
+            {group && <nav className="leaf__tabs" aria-label="Citation view">
+              <button type="button" aria-pressed={sourceLine === null} onClick={() => {
+                setSourceLine(null);
+                setPickedPhrase(null);
+                if (right.current) right.current.scrollTop = 0;
+              }}>This citation</button>
+              {sourceLine === null && <button type="button" onClick={() => {
+                const name = group.declarations[0].fullName;
+                const match = phrasesOf.get(name)?.find((item) => item.citation === citation && item.names[0] === name);
+                if (match) setPickedPhrase(match.id);
+                focusDeclaration(name);
+              }}>Jump to Lean</button>}
               <button type="button" aria-pressed={sourceLine !== null} onClick={() => openSource(group.declarations[0].line)}>Whole file</button>
               <button type="button" onClick={() => navigate("@index")}>Glossary</button>
               <div className="api-map__step">
@@ -482,93 +560,87 @@ function MapReader({ edition }: { edition: Edition }) {
                 <button type="button" aria-label="Next citation" title="Next citation (j)" onClick={() => step(1)} disabled={position === order.length - 1}>→</button>
               </div>
             </nav>}
-            <div className={`api-map__windows${combined ? " is-combined" : ""}`}
-              style={graphFitHeight > 0 ? { "--api-graph-height": `${graphFitHeight}px` } as CSSProperties : undefined}>
-              {!showGraph && <div className="leaf__body api-map__reference-body" ref={right} tabIndex={0} aria-label="Lean and reading notes">
-                {(group || paragraph) && sourceLine === null && annotation && paragraphId && (
-                  <PassageAnnotation note={annotation} paragraphId={paragraphId} edition={edition}
-                    phrase={(pickedPhrase === null ? undefined : edition.phrases[pickedPhrase])
-                      ?? (group ? edition.phrases.find((item) => item.citation === citation) : undefined)
-                      ?? edition.phrases[annotation.anchor]}
-                    onPhrase={showPhrase} />
-                )}
-                {group ? (
-                  <>
-                    <div className="api-map__file">
-                      <a href={sourceOf(edition, group.file)}>{group.file}</a>
-                      <button type="button" onClick={() => void copy(() => location.href, "Citation link copied")}>Copy link</button>
+            <div className="leaf__body leaf__body--supplementary api-map__reference-body" ref={right} tabIndex={0} aria-label="Lean and reading notes">
+              {(group || paragraph) && sourceLine === null && annotation && paragraphId && phrase && (
+                <PassageAnnotation note={annotation} paragraphId={paragraphId} edition={edition}
+                  phrase={phrase} onPhrase={showPhrase} />
+              )}
+              {group ? (
+                <>
+                  <div className="api-map__file">
+                    <a href={sourceOf(edition, group.file)}>{group.file}</a>
+                    <button type="button" onClick={() => void copy(() => location.href, "Citation link copied")}>Copy link</button>
+                  </div>
+                  {sourceLine === null ? (
+                    <details className="api-map__evidence" key={citation} open>
+                      <summary>Lean declarations</summary>
+                      {declarationsFor(group)}
+                      <NoteCredit>Proof Reader used AI to draft the reading titles and match phrases to Lean.</NoteCredit>
+                    </details>
+                  ) : files ? (
+                    <div className="decl__code api-map__whole-file">
+                      <Code source={files[group.file]} active={sourceLine} />
                     </div>
-                    {sourceLine === null ? (
-                      <details className="api-map__evidence" key={citation}>
-                        <summary>Lean declarations</summary>
-                        {declarationsFor(group)}
-                        <NoteCredit>Proof Reader used AI to draft the reading titles and match phrases to Lean.</NoteCredit>
-                      </details>
-                    ) : files ? (
-                      <div className="decl__code api-map__whole-file">
-                        <Code source={files[group.file]} active={sourceLine} />
-                      </div>
-                    ) : <p className="api-map__aside-note" role="status">{sourceFailed ? "Could not load the local file. Open its source link above." : "Opening the Lean source…"}</p>}
-                  </>
-                ) : ref ? (
-                  <BibliographyReference reference={ref} />
-                ) : paragraphReferences ? (
-                  <details className="api-map__evidence" key={citation} open={!hasLean || undefined}>
-                    <summary>{hasLean ? "Lean declarations and references" : "References"}</summary>
-                    {!hasLean && <p className="api-map__aside-note">This passage has no linked Lean.</p>}
-                    <div className="api-map__file">
-                      <nav className="api-map__paragraph-jumps" aria-label="References in this paragraph">
-                        {paragraphReferences.map(({ id, lean, general }) => (
-                          <button key={id} type="button" data-tone={lean ? edition.tones[id] : undefined} aria-label={lean ? `Jump to Lean citation ${lean.index}` : `Jump to reference ${general?.index}`}
-                            onClick={() => right.current?.querySelector(`[data-reference="${id}"]`)?.scrollIntoView({ block: "start" })}>
-                            {lean ? `[${lean.index}]` : `{${general?.index}}`}
+                  ) : <p className="api-map__aside-note" role="status">{sourceFailed ? "Could not load the local file. Open its source link above." : "Opening the Lean source…"}</p>}
+                </>
+              ) : ref ? (
+                <BibliographyReference reference={ref} />
+              ) : paragraphReferences ? (
+                <details className="api-map__evidence" key={citation} open>
+                  <summary>{hasLean ? "Lean declarations and references" : "References"}</summary>
+                  {!hasLean && <p className="api-map__aside-note">This passage has no linked Lean.</p>}
+                  <div className="api-map__file">
+                    <nav className="api-map__paragraph-jumps" aria-label="References in this paragraph">
+                      {paragraphReferences.map(({ id, lean, general }) => (
+                        <button key={id} type="button" data-tone={lean ? edition.tones[id] : undefined} aria-label={lean ? `Jump to Lean citation ${lean.index}` : `Jump to reference ${general?.index}`}
+                          onClick={() => right.current?.querySelector(`[data-reference="${id}"]`)?.scrollIntoView({ block: "start" })}>
+                          {lean ? `[${lean.index}]` : `{${general?.index}}`}
+                        </button>
+                      ))}
+                    </nav>
+                    <button type="button" onClick={() => void copy(() => location.href, "Paragraph link copied")}>Copy link</button>
+                  </div>
+                  {paragraphReferences.map(({ id, lean, general }) => (
+                    <section className="api-map__paragraph-group" key={id} data-reference={id} data-tone={lean ? edition.tones[id] : undefined}>
+                      <button type="button" className="api-map__paragraph-name" onClick={() => navigate(`@${id}`)}>{lean ? `Lean citation [${lean.index}], ${lean.declarations.length} ${lean.declarations.length === 1 ? "declaration" : "declarations"}` : `Reference {${general?.index}}`}</button>
+                      {lean && declarationsFor(lean)}
+                      {general && <BibliographyReference reference={general} />}
+                    </section>
+                  ))}
+                  {paragraphReferences.some((item) => item.lean) && <NoteCredit>Proof Reader used AI to draft the reading titles and match phrases to Lean.</NoteCredit>}
+                </details>
+              ) : (
+                <>
+                  <p className="api-map__aside-note api-map__lede">The map cites {edition.leanReferences.reduce((n, item) => n + item.declarations.length, 0)} Lean declarations in {edition.leanReferences.length} numbered citations, listed here under {edition.concepts.length} topics. In the map, the phrases a declaration states are underlined in its topic’s colour. Point at a title to highlight its phrase in the map.</p>
+                  {edition.concepts.map((concept, topic) => <section key={concept.name} className="api-map__topic-group">
+                  <h3 className="api-map__topic-name" data-tone={topic * 2}><span className="api-map__topic">{concept.name}</span></h3>
+                  <ol className="api-map__references">
+                    {edition.leanReferences.filter((item) => concept.citations.includes(item.index)).map((item) => <li key={item.index} data-tone={edition.tones[citeKey(item)]}>
+                      <h2><button type="button" aria-label={`Open Lean citation ${item.index}`} onClick={() => navigate(`@${citeKey(item)}`)}>[{item.index}]</button></h2>
+                      <ul>
+                        {item.declarations.map((d) => <li key={d.fullName} data-glossary-name={d.fullName}
+                          onMouseEnter={() => setLit([d.fullName])} onMouseLeave={() => setLit(null)}>
+                          <button type="button" onClick={() => openDeclaration(d.fullName)}>
+                            <span>{edition.glossary[d.fullName]}</span><code>{d.fullName}</code>
                           </button>
-                        ))}
-                      </nav>
-                      <button type="button" onClick={() => void copy(() => location.href, "Paragraph link copied")}>Copy link</button>
-                    </div>
-                    {paragraphReferences.map(({ id, lean, general }) => (
-                      <section className="api-map__paragraph-group" key={id} data-reference={id} data-tone={lean ? edition.tones[id] : undefined}>
-                        <button type="button" className="api-map__paragraph-name" onClick={() => navigate(`@${id}`)}>{lean ? `Lean citation [${lean.index}], ${lean.declarations.length} ${lean.declarations.length === 1 ? "declaration" : "declarations"}` : `Reference {${general?.index}}`}</button>
-                        {lean && declarationsFor(lean)}
-                        {general && <BibliographyReference reference={general} />}
-                      </section>
-                    ))}
-                    {paragraphReferences.some((item) => item.lean) && <NoteCredit>Proof Reader used AI to draft the reading titles and match phrases to Lean.</NoteCredit>}
-                  </details>
-                ) : (
-                  <>
-                    <p className="api-map__aside-note api-map__lede">The map cites {edition.leanReferences.reduce((n, item) => n + item.declarations.length, 0)} Lean declarations in {edition.leanReferences.length} numbered citations, listed here under {edition.concepts.length} topics. In the map, the phrases a declaration states are underlined in its topic’s colour. Point at a title to highlight its phrase in the map.</p>
-                    {edition.concepts.map((concept, topic) => <section key={concept.name} className="api-map__topic-group">
-                    <h3 className="api-map__topic-name" data-tone={topic * 2}><span className="api-map__topic">{concept.name}</span></h3>
-                    <ol className="api-map__references">
-                      {edition.leanReferences.filter((item) => concept.citations.includes(item.index)).map((item) => <li key={item.index} data-tone={edition.tones[citeKey(item)]}>
-                        <h2><button type="button" aria-label={`Open Lean citation ${item.index}`} onClick={() => navigate(`@${citeKey(item)}`)}>[{item.index}]</button></h2>
-                        <ul>
-                          {item.declarations.map((d) => <li key={d.fullName} data-glossary-name={d.fullName}
-                            onMouseEnter={() => setLit([d.fullName])} onMouseLeave={() => setLit(null)}>
-                            <button type="button" onClick={() => openDeclaration(d.fullName)}>
-                              <span>{edition.glossary[d.fullName]}</span><code>{d.fullName}</code>
-                            </button>
-                          </li>)}
-                        </ul>
-                      </li>)}
-                    </ol>
-                    </section>)}
-                    <NoteCredit>Lean names and signatures are from Physlib. Proof Reader used AI to draft the reading titles, match phrases and assign topics.</NoteCredit>
-                  </>
-                )}
-              </div>}
-              {(showGraph || combined) && (
-                <div className="api-map__graph-window">
-                  <DependencyMap maps={edition.maps} current={edition.path} tracker={tracker} home={indexRoute()}
-                    id="pane-dependency-map" compact onFitHeight={combined ? setGraphFitHeight : undefined}
-                    onMinimise={combined ? () => changeLayout(true) : undefined} />
-                </div>
+                        </li>)}
+                      </ul>
+                    </li>)}
+                  </ol>
+                  </section>)}
+                  <NoteCredit>Lean names and signatures are from Physlib. Proof Reader used AI to draft the reading titles, match phrases and assign topics.</NoteCredit>
+                </>
               )}
             </div>
           </div>
         </aside>
+        {threadPhrase && showLean && <Threads root={spread} tone={threadPhrase.tone} target={{
+          from: `[data-phrase="${threadPhrase.id}"]`,
+          to: sourceLine !== null ? ".api-map__whole-file .is-exact"
+            : pickedPhrase !== null ? `[data-lean-name="${CSS.escape(threadPhrase.names[0])}"] h2`
+              : "#api-map-annotation-title",
+          within: ".api-map__reference-body",
+        }} />}
       </main>
     </div>
   );
@@ -632,6 +704,12 @@ function DeclarationCard({ decl, title, tone, phrases, note, onPhrase, onLight, 
       <h2>{title}</h2>
       <p className="api-map__raw-name"><code>{decl.fullName}</code></p>
       <PhraseQuotes phrases={phrases} onPhrase={onPhrase} />
+      {(decl.source || decl.signature) && (
+        <div className="decl__code api-map__signature" tabIndex={0} aria-label={decl.source ? "Lean declaration" : "Lean signature"}>
+          {!decl.source && decl.signature.includes("…") && <p className="api-map__excerpt">Signature excerpt</p>}
+          <Code source={decl.source ?? decl.signature} />
+        </div>
+      )}
       {note && <div className="api-map__note">
         <p dangerouslySetInnerHTML={{ __html: note }} />
         <NoteCredit>AI drafted this note for Proof Reader.</NoteCredit>
@@ -640,12 +718,6 @@ function DeclarationCard({ decl, title, tone, phrases, note, onPhrase, onLight, 
         <p className="api-map__said-label">Docstring in Physlib</p>
         <p className="api-map__doc"><Doc text={decl.doc} /></p>
       </div>}
-      {(decl.source || decl.signature) && (
-        <div className="decl__code api-map__signature" tabIndex={0} aria-label={decl.source ? "Lean declaration" : "Lean signature"}>
-          {!decl.source && decl.signature.includes("…") && <p className="api-map__excerpt">Signature excerpt</p>}
-          <Code source={decl.source ?? decl.signature} />
-        </div>
-      )}
       <div className="step-proof__meta">
         <button type="button" className="decl__copy" onClick={onSource}>View source at line {decl.line}</button>
         <a href={sourceUrl}>GitHub</a>
