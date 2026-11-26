@@ -27,16 +27,18 @@
         var stored = localStorage.getItem("proof-reader-theme");
         if (stored === "light" || stored === "dark") document.documentElement.setAttribute("data-theme", stored);
       } catch (error) {}
-      // A paper's data starts with its page, not after the code has arrived.
+      // Start loading the selected reader's data while its app loads.
       (function () {
         var slug = /^#\/([^/]+)/.exec(location.hash);
         if (!slug) return;
-        ["edition.json", "reading.html"].forEach(function (name) {
+        var folder = slug[1] === "physlib-gauge-theory" ? "api-maps" : "papers";
+        var files = folder === "api-maps" ? ["edition.json"] : ["edition.json", "reading.html"];
+        files.forEach(function (name) {
           var link = document.createElement("link");
           link.rel = "preload";
           link.as = "fetch";
           link.crossOrigin = "anonymous";
-          link.href = "%BASE_URL%papers/" + slug[1] + "/" + name;
+          link.href = "%BASE_URL%" + folder + "/" + slug[1] + "/" + name;
           document.head.appendChild(link);
         });
       })();
