@@ -32,7 +32,9 @@
     "NavierStokes.main_of_certificate",
     "NavierStokes.main_of_cell_conditions",
     "NavierStokes.physical_error_bound",
-    "NavierStokes.spacePhysicalBlowup_of_spaceBlowup"
+    "NavierStokes.spacePhysicalBlowup_of_spaceBlowup",
+    "ProfileDecay.paperPressureContract",
+    "ProfileDecay.velocityDecay_supplies_pressure"
   ],
   "permitted_axioms": [
     "propext",

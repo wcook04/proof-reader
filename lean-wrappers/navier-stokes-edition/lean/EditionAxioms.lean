@@ -33,3 +33,5 @@ import EditionStatements
 #print axioms NavierStokes.main_of_cell_conditions
 #print axioms NavierStokes.physical_error_bound
 #print axioms NavierStokes.spacePhysicalBlowup_of_spaceBlowup
+#print axioms ProfileDecay.paperPressureContract
+#print axioms ProfileDecay.velocityDecay_supplies_pressure

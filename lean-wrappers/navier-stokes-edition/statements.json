@@ -9,7 +9,7 @@
       "Breakdown.mildRegular_realization",
       "Breakdown.eq_of_isSolutionOn"
     ],
-    "differs_from_edition": "Whole-space conclusion (1.6) is retained in physical variables, with arbitrary initial approximation, uniqueness and no finite-energy smooth continuation. The formal hypotheses explicitly add second-derivative and pressure-gradient decay. The quantitative torus part (1.7) and deduction of the extra decay from the printed profile assumptions remain open. Revised N1–N6 edition wording was not supplied.",
+    "differs_from_edition": "Whole-space conclusion (1.6) is retained in physical variables, with arbitrary initial approximation, uniqueness and no finite-energy smooth continuation. The formal hypotheses explicitly add second-derivative and pressure-gradient decay. ProfileDecay.velocityDecay_supplies_pressure derives the pressure bound from the velocity hypotheses with a common enlarged coefficient. The Hessian estimate from the printed assumptions and the quantitative torus part (1.7) remain open. Revised N1–N6 edition wording was not supplied.",
     "note": "For each specified smooth recurrent profile satisfying all displayed decay assumptions and each ε>0, the same smooth compactly supported datum and solution on [0,1) satisfy the two-sided gradient rate and the physical profile-error estimate. The physical error conversion is proved without a decay assumption on that solution.",
     "support_uses": [
       "Theorem11.theorem11SpaceBlowup",

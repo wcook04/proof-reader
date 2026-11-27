@@ -2,6 +2,7 @@ import MainTheorems
 import SectionsTwoSix
 import SectionSeven
 import AppendixB
+import ContractCheck
 
 /-!
 # The numbered results of the adapted edition

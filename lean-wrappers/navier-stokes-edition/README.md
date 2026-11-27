@@ -7,7 +7,7 @@
 Workflow `.github/workflows/navier-stokes-edition.yml`, on public Actions:
 
 - Every module compiles against the authors' package at `ad53419` with Lean 4.33.1. The installer checked all 2,282 pinned files of the authors' package; the only change to it is an appended, delimited Lake section.
-- Axioms: the 28 proved numbered results and five supporting statements (33 declarations, listed in `lean/EditionAxioms.lean`) depend only on `propext`, `Classical.choice` and `Quot.sound`.
+- Axioms: the 28 proved numbered results and five supporting statements (33 declarations, in the published Actions run) depend only on `propext`, `Classical.choice` and `Quot.sound`.
 - Comparator (exports written by lean4export under Lean 4.33.1, judged under Lean 4.36.0) accepts `NavierStokes.theorem_1_1_space` and `NavierStokes.conditional_main` against the fixed statements in `comparison/EditionChallenge.lean.in`. Lean's paranoid kernel, con-leche, con-ron (77,722 declarations), nanoda and Lean's default kernel all accept the solution.
 - The control `comparison/WeakenedMain.lean`, which gives the same names weaker conclusions (local solutions only; the whole-space half of the main conclusion only), is rejected for a statement mismatch, both together and for each name separately.
 
@@ -23,6 +23,32 @@ The first build found compile errors in `SectionAnalysisDefinitions.lean` (λ us
 | `NavierStokes.conditional_main` | Either such a profile with pressure decay, **or** data satisfying every formal extended-certificate condition | The authors’ whole-space and torus nonexistence conclusions, for every positive viscosity |
 
 The second conclusion does not itself state a quantitative torus trajectory. The whole-space excluded class has uniformly bounded energy. The torus excluded class has periodic velocity and allows every smooth pressure. The datum may depend on viscosity. The certificate assumption is a mathematical condition on data; no numerical certificate is included.
+
+## Pressure decay for Theorem 1.1
+
+For a specified profile satisfying `Theorem11.IsPaperProfile`, a uniform bound
+`‖D²W(s,y)‖ ≤ B / (1 + ‖y‖)³` implies `‖Dq(s,y)‖ ≤ D / (1 + ‖y‖)³`
+for some constant D. The Hessian estimate remains an additional assumption.
+Deriving the Hessian estimate from the printed velocity and first-derivative
+bounds remains open.
+
+The proof integrates the momentum equation over a finite interval in similarity
+time. The gradient of the integrated pressure decays at least as inverse distance.
+The integral of its squared norm over a radius-r ball therefore grows at most
+linearly in r. This bound suffices for the harmonic interior estimate as r
+tends to infinity and removes the need to assume finite global pressure-gradient
+energy. Harmonic uniqueness then identifies this gradient with the negative
+time integral of the Newton gradient of the quadratic velocity source.
+The existing near- and far-field estimates give cubic decay for the Newton
+gradient. Differentiating the interval bound gives the pointwise conclusion.
+The public statement is `ProfileDecay.paperPressureContract` in
+[`ContractCheck.lean`](lean/ContractCheck.lean). The component proofs are in
+[`support/theorem11/pressure/`](support/theorem11/pressure/). After running
+the installer, use `lake build ContractCheck` to check these results.
+
+`ProfileDecay.velocityDecay_supplies_pressure` packages the velocity and pressure
+bounds with one enlarged coefficient, as `theorem_1_1_space` requires. Both
+pressure declarations are included in `lean/EditionAxioms.lean`.
 
 ## Install and build
 
@@ -63,7 +89,7 @@ Every row has one primary declaration. Supporting ingredients and supplementary 
 
 | Numbered result | Primary Lean declaration | Status | Authors’ declarations used | Difference from the printed statement |
 |---|---|---|---|---|
-| Theorem 1.1 | `NavierStokes.theorem_1_1_space` | reduced | `Breakdown.transferHolds_of_dichotomy`<br>`Breakdown.dichotomyHolds`<br>`Breakdown.profileOrbit_holds`<br>`Breakdown.mildRegular_realization`<br>`Breakdown.eq_of_isSolutionOn` | Whole-space conclusion (1.6) is retained in physical variables, with arbitrary initial approximation, uniqueness and no finite-energy smooth continuation. The formal hypotheses explicitly add second-derivative and pressure-gradient decay. The quantitative torus part (1.7) and deduction of the extra decay from the printed profile assumptions remain open. |
+| Theorem 1.1 | `NavierStokes.theorem_1_1_space` | reduced | `Breakdown.transferHolds_of_dichotomy`<br>`Breakdown.dichotomyHolds`<br>`Breakdown.profileOrbit_holds`<br>`Breakdown.mildRegular_realization`<br>`Breakdown.eq_of_isSolutionOn` | Whole-space conclusion (1.6) is retained in physical variables, with arbitrary initial approximation, uniqueness and no finite-energy smooth continuation. The formal hypotheses explicitly add second-derivative and pressure-gradient decay. A supporting theorem derives pressure decay from the velocity hypotheses through order two. The velocity Hessian estimate from the printed assumptions and the quantitative torus part (1.7) remain open. |
 | Proposition 2.1 | `NavierStokes.proposition_2_1_target` | open | `Breakdown.transferHolds_of_dichotomy`<br>`Breakdown.dichotomyHolds` | The target preserves the printed statement. The available transfer theorem chooses a close datum instead of correcting every nearby prescribed datum in one fixed finite-dimensional space. |
 | Proposition 2.2 | `NavierStokes.proposition_2_2_target` | open | `Breakdown.Periodic.TorusBlowup`<br>`Breakdown.Periodic.torusBlowup_of_parts` | The target uses a mean-zero unit-torus Fourier realization and retains T≤1, both rates and the local physical error. The existing TorusBlowup assertion only retains unboundedness. |
 | Lemma 2.3 | `NavierStokes.lemma_2_3_target` | open | `Breakdown.mildRegular_realization`<br>`Breakdown.MildRegular` | The target includes both domains, one representative on the whole half-open interval, and energy nonincrease. The authors’ linked result is on each closed whole-space interval. |
@@ -121,4 +147,4 @@ Every row has one primary declaration. Supporting ingredients and supplementary 
 - `comparison/` contains the fixed challenge template, the weaker solution and individual negative-control configurations.
 - `upstream-pins.json` pins the bytes of every file of the authors' package that the installer checks.
 
-Credit: adapted statements and additional bridge proofs prepared by Will Cook with AI assistance, using the mathematics and Lean proofs of Levent Alpöge and Tristan Buckmaster and the proof-reader wrappers. The authors have not reviewed these changes. See `CREDIT.md`.
+Credit: original edition statements and bridge proofs prepared by Will Cook with AI assistance, using the mathematics and Lean proofs of Levent Alpöge and Tristan Buckmaster and the proof-reader wrappers. The authors have not reviewed these changes. See `CREDIT.md`.
