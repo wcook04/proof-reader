@@ -334,25 +334,6 @@ def lemma_4_6_target : Prop :=
           ‖Analysis.recurrenceForcing F ρ u lam g n‖ ≤
             C * (lam ^ κ) ^ n * Analysis.weightedNorm κ g
 
-/-- Lemma 4.7: the two weighted bilinear estimates and the free heat estimate
-on [0,1). Open: the local integral theorem has to be integrated against the
-singular endpoint weights; a short-time supremum bound is not this claim. -/
-def lemma_4_7_target : Prop :=
-  ∀ κ CK : ℝ, 0 < κ → κ < (1 / 4 : ℝ) →
-    ∃ C : ℝ, 0 ≤ C ∧
-      ∀ (X : Type) [NormedAddCommGroup X] [NormedSpace ℝ X] [CompleteSpace X]
-        (H : Breakdown.HeatBilinear X), H.CK = CK →
-      (∀ v v' : ℝ → X, Analysis.WeightedCurve κ v → Analysis.WeightedCurve κ v' →
-        Analysis.WeightedCurve κ (Analysis.duhamel H v v') ∧
-        Analysis.weightedNorm κ (Analysis.duhamel H v v') ≤
-          C * Analysis.weightedNorm κ v * Analysis.weightedNorm κ v') ∧
-      (∀ χ : X, Analysis.WeightedCurve κ (fun t => H.G t χ) ∧
-        Analysis.weightedNorm κ (fun t => H.G t χ) ≤ ‖χ‖) ∧
-      ∀ f g : ℝ → X, ContinuousOn f (Ico 0 1) → BddAbove ((fun t => ‖f t‖) '' Ico 0 1) →
-        Analysis.WeightedCurve 0 g → Analysis.WeightedCurve κ (Analysis.duhamel H f g) ∧
-        Analysis.weightedNorm κ (Analysis.duhamel H f g) ≤
-          C * sSup ((fun t => ‖f t‖) '' Ico 0 1) * Analysis.weightedNorm 0 g
-
 /-- Lemma 4.8: a bounded right inverse corrects an approximate trajectory
 whose weighted residual is sufficiently small. The correction, its norm and
 its initial value are all retained. Open: the authors prove the contraction

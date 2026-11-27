@@ -5,6 +5,7 @@ import EditionStatements
 #print axioms NavierStokes.lemma_3_3
 #print axioms NavierStokes.lemma_3_5
 #print axioms NavierStokes.lemma_4_5
+#print axioms NavierStokes.Lemma47.weightedEstimates
 #print axioms NavierStokes.theorem_7_1
 #print axioms NavierStokes.corollary_7_2
 #print axioms NavierStokes.lemma_7_4

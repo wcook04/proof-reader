@@ -1,5 +1,6 @@
 import MainTheorems
 import SectionsTwoSix
+import Lemma47
 import SectionSeven
 import AppendixB
 

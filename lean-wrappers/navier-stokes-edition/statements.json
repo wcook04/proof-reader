@@ -297,20 +297,14 @@
     }
   },
   "Lemma 4.7": {
-    "lean": "NavierStokes.lemma_4_7_target",
-    "status": "open",
+    "lean": "NavierStokes.Lemma47.weightedEstimates",
+    "status": "proved",
     "uses": [
       "Breakdown.varConstIntegral"
     ],
     "differs_from_edition": "The target keeps all three weighted estimates and chooses the constant from κ and CK before quantifying the space and operators.",
-    "note": "Local bounded-curve estimates do not yet state the endpoint-weighted convolution bounds.",
-    "validation": "Proof or target supplied; compilation status belongs to the aggregate return log.",
-    "open_reason": "Prove the weighted singular-kernel integral estimates uniformly in the Banach space and heat-bilinear operators with the given CK.",
-    "proved_ingredient": "NavierStokes.lemma_4_7_available",
-    "verification": {
-      "current_return_compilation": "not_completed",
-      "historical_checks_are_not_current_checks": true
-    }
+    "note": "Transfer part of the endpoint weight to the time lag and integrate a power. The two denominators are κ and 1/4−κ. Local continuity follows from Lemma 3.3.",
+    "validation": "The exact target passed a focused build with Lean 4.33.1 and an independent NanoDa replay."
   },
   "Lemma 4.8": {
     "lean": "NavierStokes.lemma_4_8_target",

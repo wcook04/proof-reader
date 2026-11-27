@@ -1,15 +1,17 @@
 # Lean statements for the adapted Navier–Stokes edition
 
-**The 47 numbered results of Alpöge and Buckmaster's paper, each mapped to one Lean declaration: 28 proved, in the stated formal form, and 19 stated as open propositions.** The modules are added to the authors' package at commit `ad53419` without editing any of their Lean files. `statements.json` is the machine-readable index; the table below gives every row with its difference from the printed statement.
+**The 47 numbered results of Alpöge and Buckmaster's paper, each mapped to one Lean declaration: 29 proved, in the stated formal form, and 18 stated as open propositions.** The modules are added to the authors' package at commit `ad53419` without editing any of their Lean files. `statements.json` is the machine-readable index; the table below gives every row with its difference from the printed statement.
 
 ## Verification status
 
-Workflow `.github/workflows/navier-stokes-edition.yml`, on public Actions:
+The original edition workflow (`.github/workflows/navier-stokes-edition.yml`) recorded the following checks before the addition of Lemma 4.7:
 
 - Every module compiles against the authors' package at `ad53419` with Lean 4.33.1. The installer checked all 2,282 pinned files of the authors' package; the only change to it is an appended, delimited Lake section.
 - Axioms: the 28 proved numbered results and five supporting statements (33 declarations, listed in `lean/EditionAxioms.lean`) depend only on `propext`, `Classical.choice` and `Quot.sound`.
 - Comparator (exports written by lean4export under Lean 4.33.1, judged under Lean 4.36.0) accepts `NavierStokes.theorem_1_1_space` and `NavierStokes.conditional_main` against the fixed statements in `comparison/EditionChallenge.lean.in`. Lean's paranoid kernel, con-leche, con-ron (77,722 declarations), nanoda and Lean's default kernel all accept the solution.
 - The control `comparison/WeakenedMain.lean`, which gives the same names weaker conclusions (local solutions only; the whole-space half of the main conclusion only), is rejected for a statement mismatch, both together and for each name separately.
+
+For Lemma 4.7, set a = 1/4−κ. When 0 ≤ s < t < 1, the inequalities 1−t ≤ 1−s and t−s ≤ 1−s give (1−t)^a (1−s)^(−a−d) ≤ (t−s)^(−d). The remaining kernel integrates to t^(1/4−d)/(1/4−d). Choosing d = a for (4.19) and d = κ for (4.21) gives the constants in the table. Lemma 3.3 gives continuity on each compact time interval. A focused Lean 4.33.1 build of the submitted modules and NanoDa replay of the 42,420-declaration theorem closure passed with the same three axioms.
 
 A row marked "reduced" proves its displayed formal statement, including any narrowing or reformulation recorded in the last column; it does not claim the printed statement unchanged. "Open" means a proposition in `lean/OpenTargets.lean` with no proof attached; it does not mean the assertion is false.
 
@@ -80,7 +82,7 @@ Every row has one primary declaration. Supporting ingredients and supplementary 
 | Lemma 4.4 | `NavierStokes.lemma_4_4_target` | open | `Breakdown.monodromy` | The target uses the paper’s single-period Volterra monodromy. The authors’ proof uses a product of sufficiently short steps. |
 | Lemma 4.5 | `NavierStokes.lemma_4_5` | reduced | `Breakdown.dichotomyHolds` | States the authors’ quantitative geometric spectral bounds for T₀+C. The printed formulation chooses an intermediate Θ and writes the two resulting convergent series for the paper’s monodromy. |
 | Lemma 4.6 | `NavierStokes.lemma_4_6_target` | open | `Breakdown.discreteDichotomy`<br>`Breakdown.periodicInverse` | The target is formulated for an abstract recurrent MildFramework orbit and keeps the continuous-to-discrete formulas, forcing linearity and the uniform weighted estimate. |
-| Lemma 4.7 | `NavierStokes.lemma_4_7_target` | open | `Breakdown.varConstIntegral` | The target keeps all three weighted estimates and chooses the constant from κ and CK before quantifying the space and operators. |
+| Lemma 4.7 | `NavierStokes.Lemma47.weightedEstimates` | proved | `Breakdown.varConstIntegral` | An elementary power integral gives constants CK/κ and CK/(1/4−κ) for (4.19) and (4.21). The contraction gives (4.20) with constant one. |
 | Lemma 4.8 | `NavierStokes.lemma_4_8_target` | open | `Breakdown.contraction` | The target keeps the arbitrary weighted residual and chooses ε₁ from κ and CK. The available contraction is stated for a sequence of short pieces. |
 | Lemma 5.1 | `NavierStokes.lemma_5_1_target` | open | `Breakdown.Periodic.approxFieldProperties_holds`<br>`Breakdown.Periodic.cutoffGradientClose`<br>`Breakdown.Periodic.cutoffMassBound` | The target keeps all r>0 and constants independent of r,t. The existing cutoff is centred at (1/2,1/2,1/2) with fixed inner/outer radii. |
 | Lemma 6.1 | `NavierStokes.lemma_6_1_target` | open | `Breakdown.Periodic.heatDivFreeComparison`<br>`Breakdown.Periodic.HeatDivFreeComparison` | The target retains every L≥1,t>0, compactly supported W^(1,1) tensor forcing, and the explicit CL^(-7/2) rate. The available comparison is local, has lag bounded away from zero, and supplies no explicit rate. |
